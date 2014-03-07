@@ -8,14 +8,19 @@ SHARE=2;
 RESHARE=3;
 CACHE=4;
 
-s = RandStream('mt19937ar','Seed', par.seed);
-RandStream.setDefaultStream(s);
+% Dependendt on Matlab Version
+%s = RandStream(par.rand_stream, 'Seed', par.seed);
+%RandStream.setDefaultStream(s);
+
+rand('twister', par.seed)
+
 
 GF = par.GF; % graph with friend relations
 nnodes = size(GF,1);
 GV = zeros(par.nvids); % graph with video interest
-H  = NaN(par.historysize, nnodes); % videos watched
-wall = NaN(par.wallsize, nnodes); % videos displayed on wall (based on friends shares and video interest)
+H  = NaN(nnodes, par.historysize); % videos watched
+wall = NaN(nnodes, par.wallsize); % videos displayed on wall (based on friends shares and video interest)
+cache = NaN(nnodes, par.cachesize);
 
 preshare = par.preshare;
 pshare = par.pshare;
@@ -35,10 +40,7 @@ events.user=[];
 events.id=[];
 
 for i=1:maxID
-    events.t = [events.t 0];
-    events.type = [events.type WATCH];
-    events.user = [events.user i];
-    events.id = [events.id i];
+    events = addEvent(events, 0, WATCH, i, i);
 end
 
 % queue.active = [];
@@ -66,37 +68,29 @@ while events.t(1) < par.tmax
             stats.uid(id) = uid;
             stats.vid(id) = vid;
 
-            updateGV(vid);
+            GV = updateGV(GV, vid);
 
-            events.t = [events.t(1:(index-1)) t events.t(index:end)];
-            events.type = [events.type(1:(index-1)) CACHE events.type(index:end)];
-            events.user = [events.user(1:(index-1)) user events.user(index:end)];
-            events.id = [events.id(1:(index-1)) id events.id(index:end)];
+            % Event necessary?
+            events = addEvent(events, t, CACHE, user, id);
             
             r = rand();
-            reshare = any(wall(:,uid)==vid);
+            reshare = any(wall(uid,:)==vid);
             if ((~reshare && r < pshare) || (reshare && r < preshare))
                 % add (re)share event
-                index = find(events.t > t, 1, 'first'); if (isempty(index)) index = length(events.t)+1; end
                 
-                timelag = floor(gprnd(par.betatimelag,1,0));
+                dt = random(par.ia_share_rnd, ...
+                    par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
                 
-                events.t = [events.t(1:(index-1)) t+timelag events.t(index:end)];
-                
-                events.type = [events.type(1:(index-1)) SHARE events.type(index:end)];
-
-                events.user = [events.user(1:(index-1)) user events.user(index:end)];
-                events.id = [events.id(1:(index-1)) id events.id(index:end)];
+                events = addEvent(events, t+dt, SHARE, user, id);
             end
 
             % add watch event
-            T = t+1;
+            dt = random(par.ia_demand_rnd, ...
+                    par.ia_demand_par(1));
+                
             maxID = maxID+1;
-            index = find(events.t > T, 1, 'first'); if (isempty(index)) index = length(events.t)+1; end
-            events.t = [events.t(1:(index-1)) T events.t(index:end)];
-            events.type = [events.type(1:(index-1)) WATCH events.type(index:end)];
-            events.user = [events.user(1:(index-1)) user events.user(index:end)];
-            events.id = [events.id(1:(index-1)) maxID+1 events.id(index:end)];    
+            
+            events = addEvent(events, t+dt, WATCH, user, maxID);
         
         case SHARE
             % update wall of friends
@@ -114,7 +108,7 @@ while events.t(1) < par.tmax
             stats.share(id) = stats.vid(id);
             
         case CACHE
-            cache = updateCache(cache, stats.AS, stats.uid(id), stats.vid(id), '');
+            cache = updateCache(cache, stats.AS, stats.uid(id), stats.vid(id), 'lru');
             
     end  
 end

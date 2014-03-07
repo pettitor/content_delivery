@@ -5,4 +5,4 @@ plot(sort(n, 'descend'));
 xlabel('video rank');
 ylabel('views');
 
-printfig(gcf, 'views')
+%printfig(gcf, 'views')
