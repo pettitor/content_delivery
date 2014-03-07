@@ -1,4 +1,4 @@
-function [stats] = content_placement_sim(par)
+function [stats] = sim(par)
 
 disp(par)
 
