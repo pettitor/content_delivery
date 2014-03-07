@@ -83,4 +83,4 @@ par.seed = 13;
 
 %%%%%% Run simulation
 
-stats = content_placement_sim(par);
+stats = sim(par);
