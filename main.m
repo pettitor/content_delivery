@@ -14,7 +14,8 @@ par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
 par.nvids = 10000;
 
-par.cachesize = [10]; % videos
+par.AScachesize = 0.1; % proportional to AS size
+par.cachesize = [5]; % videos
 
 %%% Video bitrate / chunk-size distribution
 
@@ -48,7 +49,7 @@ par.wallsize = 100;
 % n = max([CG{1}' CG{2}'])+1;
 % par.GF = sparse(CG{1}'+1, CG{2}'+1, ones(1,length(CG{1})), n, n);
 
-par.GF = rand(1000,1000)<0.4;
+par.GF = rand(1000,1000)<0.3;
 
 par.historysize = 100;
 

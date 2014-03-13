@@ -27,6 +27,10 @@ pshare = par.pshare;
 
 % draw ASnumbers according to probability in par.ASp
 stats.AS = sum(~(ones(par.ASn,1)*rand(1,nnodes)<cumsum(par.ASp)'*ones(1,nnodes)))+1;
+AScache = NaN(nnodes, par.cachesize);
+
+stats.cacheaccess = zeros(nnodes,1);
+stats.cachehit = zeros(nnodes,1);
 
 % progress bar
 %wait = waitbar(0,'Simulating... 0%');
@@ -108,7 +112,9 @@ while events.t(1) < par.tmax
             stats.share(id) = stats.vid(id);
             
         case CACHE
-            cache = updateCache(cache, stats.AS, stats.uid(id), stats.vid(id), 'lru');
+            stats.cacheaccess(stats.uid(id)) = stats.cacheaccess(stats.uid(id)) + 1;
+            [cache hit] = updateCache(cache, stats.AS, stats.uid(id), stats.vid(id), 'lru');
+            stats.cachehit(stats.uid(id)) = stats.cachehit(stats.uid(id)) + hit;
             
     end  
 end
