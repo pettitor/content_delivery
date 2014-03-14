@@ -14,8 +14,8 @@ par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
 par.nvids = 10000;
 
-par.AScachesize = 0.1; % proportional to AS size
-par.cachesize = [5]; % videos
+par.cachesizeAS = 0.1; % proportional to AS size
+par.cachesizeUSER = [5]; % videos
 
 %%% Video bitrate / chunk-size distribution
 
@@ -24,6 +24,8 @@ par.cachesize = [5]; % videos
 %%% Caching strategy
 
 par.cachingstrategy = 'lru';
+
+par.ISPcachingstrategy = 'lru';
 
 % Thresholds: prefetching, rarest/demanded, popular/niche
 
@@ -43,13 +45,13 @@ par.resourceselection = 'local';
 
 par.wallsize = 100;
 
-% fG = fopen('data/graph10000.txt');
-% CG = textscan(fG,'%f %f','CommentStyle','#');
-% fclose(fG);
-% n = max([CG{1}' CG{2}'])+1;
-% par.GF = sparse(CG{1}'+1, CG{2}'+1, ones(1,length(CG{1})), n, n);
+fG = fopen('data/graph10000.txt');
+CG = textscan(fG,'%f %f','CommentStyle','#');
+fclose(fG);
+n = max([CG{1}' CG{2}'])+1;
+par.GF = sparse(CG{1}'+1, CG{2}'+1, ones(1,length(CG{1})), n, n);
 
-par.GF = rand(1000,1000)<0.3;
+% par.GF = rand(1000,1000)<0.3;
 
 par.historysize = 100;
 
@@ -77,11 +79,11 @@ par.ia_share_par = [1/1.5070 1 0];
 
 %%% Simulation Parameters
 
-par.tmax = 1e3;
+par.tmax = 1e2;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;
 
 %%%%%% Run simulation
 
-stats = sim(par);
+stats = cdsim(par);

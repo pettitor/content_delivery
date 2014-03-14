@@ -1,4 +1,4 @@
-function [stats] = sim(par)
+function [stats] = cdsim(par)
 
 disp(par)
 
@@ -9,28 +9,40 @@ RESHARE=3;
 CACHE=4;
 
 % Dependendt on Matlab Version
-%s = RandStream(par.rand_stream, 'Seed', par.seed);
-%RandStream.setDefaultStream(s);
+s = RandStream(par.rand_stream, 'Seed', par.seed);
+RandStream.setDefaultStream(s);
 
-rand('twister', par.seed)
+%rand('twister', par.seed)
 
 
 GF = par.GF; % graph with friend relations
 nnodes = size(GF,1);
-GV = zeros(par.nvids); % graph with video interest
+GV = sparse(par.nvids); % graph with video interest
+nvids = par.nvids;
 H  = NaN(nnodes, par.historysize); % videos watched
 wall = NaN(nnodes, par.wallsize); % videos displayed on wall (based on friends shares and video interest)
-cache = NaN(nnodes, par.cachesize);
 
 preshare = par.preshare;
 pshare = par.pshare;
 
-% draw ASnumbers according to probability in par.ASp
-stats.AS = sum(~(ones(par.ASn,1)*rand(1,nnodes)<cumsum(par.ASp)'*ones(1,nnodes)))+1;
-AScache = NaN(nnodes, par.cachesize);
+% draw ASnumbers of end user according to probability in par.ASp
+AS = sum(~(ones(par.ASn,1)*rand(1,nnodes)<cumsum(par.ASp)'*ones(1,nnodes)))+1;
 
-stats.cacheaccess = zeros(nnodes,1);
-stats.cachehit = zeros(nnodes,1);
+% number of users in each AS
+nASuser = histc(AS, 1:par.ASn);
+
+% one cache per isp and end user
+cache.AS = [1:par.ASn AS]';
+
+cache.type = [ones(1,par.ASn) 2*ones(1,nnodes)]';
+
+cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*ones(1,nnodes)]';
+
+cache.items = sparse(length(cache.capacity), max(cache.capacity));
+
+stats.cache_access = zeros(length(cache.capacity),1);
+stats.cache_hit = stats.cache_access;
+stats.cache_serve = stats.cache_access;
 
 % progress bar
 %wait = waitbar(0,'Simulating... 0%');
@@ -54,12 +66,18 @@ stats.uid = nan(1,60000);
 stats.vid = nan(1,60000);
 stats.share = nan(1,60000);
 
-%while events.user(1) <= par.k*par.n %events.t(1)<par.tmax
+t2 = 0;
 while events.t(1) < par.tmax
     t = events.t(1); events.t(1)=[];
     type = events.type(1); events.type(1)=[];
     user = events.user(1); events.user(1)=[];
     id = events.id(1); events.id(1)=[];
+    
+    t1 = floor(t);
+    if (t1>t2 && mod(t1, round(par.tmax/100))==0)
+        t2 = t1;
+        disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
+    end
     
     switch type
         case WATCH
@@ -67,15 +85,23 @@ while events.t(1) < par.tmax
 
             %uid = getUserID(GF);
             uid = user;
-            vid = getVid(uid, GV, H, wall);
+            vid = getVid(uid, nvids, H, wall); % consider GV
 
             stats.uid(id) = uid;
             stats.vid(id) = vid;
 
+            %TODO
             GV = updateGV(GV, vid);
 
+            [cid, cache, stats] = selectRessource(cache, stats, AS, uid, vid, par.resourceselection);
+                        
             % Event necessary?
-            events = addEvent(events, t, CACHE, user, id);
+            %events = addEvent(events, t, CACHE, user, id);
+            
+            % update user cache
+            cache = updateCache(cache, uid, vid, par.cachingstrategy);
+            % update local isp cache if video is popular
+            cache = updateCache(cache, AS(uid), vid, par.ISPcachingstrategy);
             
             r = rand();
             reshare = any(wall(uid,:)==vid);
@@ -111,12 +137,14 @@ while events.t(1) < par.tmax
             wall = updateWall(GF, wall, stats.uid(id), stats.vid(id));
             stats.share(id) = stats.vid(id);
             
-        case CACHE
-            stats.cacheaccess(stats.uid(id)) = stats.cacheaccess(stats.uid(id)) + 1;
-            [cache hit] = updateCache(cache, stats.AS, stats.uid(id), stats.vid(id), 'lru');
-            stats.cachehit(stats.uid(id)) = stats.cachehit(stats.uid(id)) + hit;
-            
+        %case CACHE
+
     end  
 end
+stats.AS = AS;
+stats.cache = cache;
+
+disp('Finished.')
+
 %fclose(qfid);
 end

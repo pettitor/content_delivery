@@ -1,16 +1,16 @@
-function [cache hit] = updateCache(cache, AS, uid, vid, strategy, param)
-hit = 0;
+function cache = updateCache(cache, id, vid, strategy, param)
+
 switch lower(strategy)
     case {'lru'}
-        i = cache(uid,:) == vid;
-        if any(i)
-            cache(uid,2:end) = cache(uid,~i);
-            cache(uid,1) = vid;
-            hit = 1;
+        i = cache.items(id,:) == vid;
+        if any(i) && cache.items(id,1) ~= vid
+            cache.items(id,2:cache.capacity(id)) = cache.items(setdiff(1:cache.capacity(id),i));
+            cache.items(id,1) = vid;
         else
-            cache(uid,2:end) = cache(uid,1:end-1);
-            cache(uid,1) = vid;
+            cache.items(id,2:cache.capacity(id)) = cache.items(id,1:cache.capacity(id)-1);
+            cache.items(id,1) = vid;
         end
+
     case {'lfu'}
         %TBD
     case {'sl_wnd'}
