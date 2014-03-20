@@ -9,10 +9,10 @@ RESHARE=3;
 CACHE=4;
 
 % Dependendt on Matlab Version
-%s = RandStream(par.rand_stream, 'Seed', par.seed);
-%RandStream.setDefaultStream(s);
+s = RandStream(par.rand_stream, 'Seed', par.seed);
+RandStream.setDefaultStream(s);
 
-rand('twister', par.seed)
+%rand('twister', par.seed)
 
 
 GF = par.GF; % graph with friend relations
@@ -105,7 +105,7 @@ while events.t(1) < par.tmax
             % update user cache
             cache = updateCache(cache, stats, uid, vid, par.cachingstrategy);
             % update local isp cache if video is popular
-            cache = updateCache(cache, stats, AS(uid), vid, par.ISPcachingstrategy);
+            cache = updateCache(cache, stats, 1:par.ASn, vid, par.ISPcachingstrategy);
             
             r = rand();
             reshare = any(wall(uid,:)==vid);

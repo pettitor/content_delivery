@@ -24,7 +24,7 @@ cid = -1; % if no local cache can serve the request
             
             % if not available look in isp cache
            else
-               stats.cache_access(local & hit & ~user) = stats.cache_access(local & hit & ~user) + 1;
+               stats.cache_access(local & ~user) = stats.cache_access(local & ~user) + 1;
                if any(local & hit & ~user)
                 cid = find(local & hit & ~user);
                 %cid = cid(randi(length(cid)));
