@@ -30,7 +30,7 @@ par.cachesizeUSER = [5]; % videos
 
 par.cachingstrategy = 'lru';
 
-par.ISPcachingstrategy = 'lfu';
+par.ISPcachingstrategy = 'lru';
 
 % Thresholds: prefetching, rarest/demanded, popular/niche
 

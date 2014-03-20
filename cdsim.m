@@ -103,7 +103,7 @@ while events.t(1) < par.tmax
             %events = addEvent(events, t, CACHE, user, id);
             
             % update user cache
-            cache = updateCache(cache, stats, uid, vid, par.cachingstrategy);
+            cache = updateCache(cache, stats, par.ASn+uid, vid, par.cachingstrategy);
             % update local isp cache if video is popular
             cache = updateCache(cache, stats, 1:par.ASn, vid, par.ISPcachingstrategy);
             
