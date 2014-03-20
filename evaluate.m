@@ -1,10 +1,10 @@
-[n,bin] = histc(stats.vid(~isnan(stats.vid)),1:par.nvids);
+[n,bin] = histc(stats.watch(~isnan(stats.watch)),1:par.nvids);
 
 figure(1);clf;box on;hold all;
-plot(sort(n, 'descend'));
+plot(sort(n/sum(n), 'descend'));
 
 xlabel('video rank');
-ylabel('views');
+ylabel('percentage');
 set(gca,'xscale','log','yscale','log');
 %printfig(gcf, 'views')
 

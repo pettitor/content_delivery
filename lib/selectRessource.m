@@ -17,7 +17,8 @@ cid = -1; % if no local cache can serve the request
             
             % pic random cache to serve
             cid = find(local & hit & user);
-            cid = cid(randi(length(cid)));
+            %cid = cid(randi(length(cid)));
+            cid = cid(random('unid',1,length(cid)));
             stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
             % alternative share load on caches with hit
             
@@ -26,7 +27,8 @@ cid = -1; % if no local cache can serve the request
                stats.cache_access(local & hit & ~user) = stats.cache_access(local & hit & ~user) + 1;
                if any(local & hit & ~user)
                 cid = find(local & hit & ~user);
-                cid = cid(randi(length(cid)));
+                %cid = cid(randi(length(cid)));
+                cid = cid(random('unid',1,length(cid)));
             
                 stats.cache_hit(cid) = stats.cache_hit(cid) + 1;
                 stats.cache_serve(cid) = stats.cache_serve(cid) + 1;

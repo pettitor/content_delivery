@@ -23,9 +23,14 @@ par.cachesizeUSER = [5]; % videos
 
 %%% Caching strategy
 
+%%% literature
+% temporal locality Traverso CCR 2013
+% cf. Valentina Martina Infocom 2014
+% Sbihi ITC'25 cache cooperation
+
 par.cachingstrategy = 'lru';
 
-par.ISPcachingstrategy = 'lru';
+par.ISPcachingstrategy = 'lfu';
 
 % Thresholds: prefetching, rarest/demanded, popular/niche
 
@@ -56,6 +61,8 @@ par.GF = sparse(CG{1}'+1, CG{2}'+1, ones(1,length(CG{1})), n, n);
 par.historysize = 100;
 
 %%% Item specific content demand (temporal, spatial)
+
+par.alpha = 1; % global Zipf law popularity, consider a<1, a>1
 
 % timelag between demands
 par.ia_demand_rnd = 'exp';
