@@ -1,4 +1,4 @@
-function vid=getVid(uid, nvids, par, H, wall)
+function vid=getVid(uid, nvids, par, t, H, wall)
 
 ZIPF = 1;
 WALL = 2;

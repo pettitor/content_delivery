@@ -103,7 +103,7 @@ while events.t(1) < par.tmax
             %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVid(uid, nvids, par, H, wall); % consider GV
+                vid = getVid(uid, nvids, par, t, H, wall); % consider GV
             end
             
             stats.t(id) = t;
