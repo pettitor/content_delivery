@@ -8,6 +8,9 @@ SHARE=2;
 RESHARE=3;
 CACHE=4;
 
+LRU = 1;
+LFU = 2;
+
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
 RandStream.setDefaultStream(s);
@@ -31,14 +34,27 @@ AS = sum(~(ones(par.ASn,1)*rand(1,nnodes)<cumsum(par.ASp)'*ones(1,nnodes)))+1;
 % number of users in each AS
 nASuser = histc(AS, 1:par.ASn);
 
+iAScacheUSER = rand(1, length(AS)) < par.pcacheUSER;
+nAScacheUSER = sum(iAScacheUSER);
+
 % one cache per isp and end user
-cache.AS = [1:par.ASn AS]';
+cache.AS = [1:par.ASn AS(iAScacheUSER)]';
 
-cache.type = [ones(1,par.ASn) 2*ones(1,nnodes)]';
+cache.type = [ones(1,par.ASn) 2*ones(1,nAScacheUSER)]';
 
-cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*ones(1,nnodes)]';
+% cache.strategy = NaN(size(cache.type));
+% for i=1:length(par.cachingstrategy);
+%     cache.strategy(cache.type == i) = par.cachingstrategy(i);
+% end
 
-cache.items = sparse(length(cache.capacity), max(cache.capacity));
+cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*ones(1,nAScacheUSER)]';
+
+cache.items = cell(length(cache.capacity),1);
+nitems = max(cache.capacity);
+% for i=1:length(cache.capacity)
+%     cache.items{i} = NaN(1,nitems);
+% end
+cache.items = sparse(length(cache.capacity), nitems);
 
 stats.cache_access = zeros(length(cache.capacity),1);
 stats.cache_hit = stats.cache_access;
@@ -87,7 +103,7 @@ while events.t(1) < par.tmax
             %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVid(uid, nvids, H, wall); % consider GV
+                vid = getVid(uid, nvids, par, H, wall); % consider GV
             end
             
             stats.t(id) = t;
@@ -97,15 +113,16 @@ while events.t(1) < par.tmax
             %TODO
             GV = updateGV(GV, vid);
 
-            [cid, cache, stats] = selectRessource(cache, stats, AS, uid, vid, par.resourceselection);
+            [cid, access, stats] = selectRessource(cache, stats, AS, uid, vid, par.resourceselection);
                         
             % Event necessary?
             %events = addEvent(events, t, CACHE, user, id);
-            
+
+            %TODO update only caches which were accessed
             % update user cache
-            cache = updateCache(cache, stats, par.ASn+uid, vid, par.cachingstrategy);
+            cache = updateCache(cache, stats, access, vid, par);
             % update local isp cache if video is popular
-            cache = updateCache(cache, stats, 1:par.ASn, vid, par.ISPcachingstrategy);
+            %cache = updateCache(cache, stats, 1:par.ASn, vid, par.ISPcachingstrategy, par);
             
             r = rand();
             reshare = any(wall(uid,:)==vid);

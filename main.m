@@ -1,6 +1,11 @@
+% clear
+
+clear par stats
+
 % add library
 
 addpath('lib');
+addpath('lib/randraw')
 
 %%%%% Parameters
 
@@ -15,7 +20,9 @@ par.ASp(end) = 1-sum(par.ASp(1:end-1));
 par.nvids = 10000;
 
 par.cachesizeAS = 0.1; % proportional to AS size
-par.cachesizeUSER = [5]; % videos
+par.cachesizeUSER = [2]; % videos
+
+par.pcacheUSER = 0.1;
 
 %%% Video bitrate / chunk-size distribution
 
@@ -28,15 +35,21 @@ par.cachesizeUSER = [5]; % videos
 % cf. Valentina Martina Infocom 2014
 % Sbihi ITC'25 cache cooperation
 
-par.cachingstrategy = 'lru';
+% descending by tier, i.e. tier 1, tier 2, ...
 
-par.ISPcachingstrategy = 'lru';
+LRU = 1;
+LFU = 2;
+
+par.cachingstrategy = [LRU LRU];
 
 % Thresholds: prefetching, rarest/demanded, popular/niche
 
 %%% Resource selection strategy
 
-par.resourceselection = 'local';
+LOCAL = 1;
+RANDOM = 1;
+
+par.resourceselection = LOCAL;
 
 %%% AS-Topology
 
@@ -62,7 +75,13 @@ par.historysize = 100;
 
 %%% Item specific content demand (temporal, spatial)
 
-par.alpha = 1; % global Zipf law popularity, consider a<1, a>1
+ZIPF = 1;
+WALL = 2;
+YTSTATS = 3;
+
+par.demand_model = ZIPF;
+
+par.alpha = 1+1; % global Zipf law popularity, consider a<1, a>1
 
 % timelag between demands
 par.ia_demand_rnd = 'exp';
@@ -93,4 +112,9 @@ par.seed = 13;
 
 %%%%%% Run simulation
 
+%profile on
+%matlabpool open 8
+tic
 stats = cdsim(par);
+toc
+%matlabpool close

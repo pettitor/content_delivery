@@ -1,15 +1,26 @@
-function [cid, cache, stats] = selectRessource(cache, stats, AS, uid, vid, strategy, params)
+function [cid, access, stats] = selectRessource(cache, stats, AS, uid, vid, strategy, params)
 
-cid = -1; % if no local cache can serve the request
+LOCAL = 1;
+RANDOM = 1;
 
-    switch lower(strategy)
-        case {'local'}
+cid = []; % if no local cache can serve the request
+access = [];
+
+    switch strategy
+        case LOCAL
             local = cache.AS == AS(uid);
             user = cache.type == 2;
+%            items = cell2mat(cache.items);
             hit = any(cache.items == vid, 2);
+%             hit = false(size(cache.items,1),1);
+%             parfor i=1:length(hit)
+%                 hit(i) = any(cache.items{i} == vid);
+%             end
+
+%            hit = cellfun(@(x)any(x == vid), cache.items,'UniformOutput',true);
             
             stats.cache_access(local & user) = stats.cache_access(local & user) + 1;
-           
+           access = find(local & user);
             % choose ressource in same AS if available
            if any(local & hit & user)
                
@@ -24,6 +35,7 @@ cid = -1; % if no local cache can serve the request
             
             % if not available look in isp cache
            else
+               access = union(access, find(local & ~user));
                stats.cache_access(local & ~user) = stats.cache_access(local & ~user) + 1;
                if any(local & hit & ~user)
                 cid = find(local & hit & ~user);
@@ -35,8 +47,8 @@ cid = -1; % if no local cache can serve the request
                end
             % else no cache hit
             end
-            cid = -1;
-        case {'random'}
+            cid = [];
+        case RANDOM
             % choose random ressource
             %TBD
     end
