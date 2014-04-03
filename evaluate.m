@@ -26,7 +26,7 @@ xlabel('cache rank');
 ylabel('hit rate');
 %set(gca,'yscale','log');
 figure(3);clf;box on;hold all;
-plot(sort(stats.cache_hit(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'))
+plot(sort(stats.cache_hit(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'.')
 legend({'UNaDa'})
 xlabel('cache rank');
 ylabel('hit rate');
@@ -45,3 +45,63 @@ plot(assize, asaccess,'.');
 plot(assize, stats.cache_hit(stats.cache.type == 1),'.');
 xlabel('AS size');
 ylabel('cache access rate');
+
+%% parameter study 1
+
+figure(4);clf;box on;hold all;
+xlabel('cache size');
+ylabel('hit rate');
+
+figure(3);clf;box on;hold all;
+xlabel('cache rank');
+ylabel('hit rate');
+ylim([0 1]) 
+
+simdate1 = '02-Apr-2014';
+
+cachestrat1 = '1_1';
+cachestrat2 = '1_3';
+
+
+cachesizeAS = [0 0.05 0.1 0.2];
+cachesizeAS = [0.1];
+cachesizeUSER = [1 2 3 4 5];
+cachesizeUSER = [1 5];
+
+color = copper(length(cachesizeUSER)+1);
+
+for i=1:length(cachesizeAS)
+par.cachesizeAS = cachesizeAS(i); % proportional to AS size
+for j=1:length(cachesizeUSER)
+par.cachesizeUSER = cachesizeUSER(j);  % videos
+
+load(['results/cdsim_' simdate1 '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER) cachestrat1 '.mat'])
+
+% ISP cache size, hitrate
+figure(4);
+plot(histc(stats.AS, 1:50)*par.cachesizeAS, stats.cache_hit(stats.cache.type == 1)./stats.cache_access(stats.cache.type == 1), '.',...
+    'Color', color(j,:))
+
+figure(3);
+plot(sort(stats.cache_hit(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'.',...
+        'Color', color(j,:))
+
+figure(4);
+load(['results/cdsim_' simdate1 '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER) cachestrat2 '.mat'])
+
+plot(histc(stats.AS, 1:50)*par.cachesizeAS, stats.cache_hit(stats.cache.type == 1)./stats.cache_access(stats.cache.type == 1), 'x',...
+    'Color', color(j,:))
+
+figure(3);
+plot(sort(stats.cache_hit(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'x',...
+        'Color', color(j,:))
+
+
+end
+end
+figure(3);
+%legend({num2str(cachesizeUSER')})
+legend({'m_u = 1, LRU', 'm_u = 1, LRUAS', 'm_u = 5, LRU', 'm_u = 5, LRUAS'})
+figure(4);
+%legend({num2str(cachesizeUSER')})
+legend({'m_u = 1, LRU', 'm_u = 1, LRUAS', 'm_u = 5, LRU', 'm_u = 5, LRUAS'})

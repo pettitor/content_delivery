@@ -8,8 +8,11 @@ SHARE=2;
 RESHARE=3;
 CACHE=4;
 
+% caching strategies
 LRU = 1;
 LFU = 2;
+
+SLWND = 5;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
@@ -55,6 +58,12 @@ nitems = max(cache.capacity);
 %     cache.items{i} = NaN(1,nitems);
 % end
 cache.items = sparse(length(cache.capacity), nitems);
+
+cache.score = sparse(length(cache.capacity), nitems);
+
+if (any(par.cachingstrategy == SLWND))
+    cache.wnd = sparse(length(cache.capacity), par.k);
+end
 
 stats.cache_access = zeros(length(cache.capacity),1);
 stats.cache_hit = stats.cache_access;
@@ -120,7 +129,7 @@ while events.t(1) < par.tmax
 
             %TODO update only caches which were accessed
             % update user cache
-            cache = updateCache(cache, stats, access, vid, par);
+            cache = updateCache(cache, stats, t, access, vid, par);
             % update local isp cache if video is popular
             %cache = updateCache(cache, stats, 1:par.ASn, vid, par.ISPcachingstrategy, par);
             

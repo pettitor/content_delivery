@@ -19,8 +19,14 @@ par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
 par.nvids = 10000;
 
-par.cachesizeAS = 0.1; % proportional to AS size
-par.cachesizeUSER = [2]; % videos
+cachesizeAS = [0 0.05 0.1 0.2];
+cachesizeUSER = [1 2 3 4 5];
+
+for k=[1 3]
+for i=1:length(cachesizeAS)
+par.cachesizeAS = cachesizeAS(i); % proportional to AS size
+for j=1:length(cachesizeUSER)
+par.cachesizeUSER = cachesizeUSER(j);  % videos
 
 par.pcacheUSER = 0.1;
 
@@ -39,15 +45,20 @@ par.pcacheUSER = 0.1;
 
 LRU = 1;
 LFU = 2;
+LRUAS = 3;
+RANDOM = 4;
+SLWND = 5;
 
-par.cachingstrategy = [LRU LRU];
+par.cachingstrategy = [LRU k];
+
+par.k = 10;
 
 % Thresholds: prefetching, rarest/demanded, popular/niche
 
 %%% Resource selection strategy
 
 LOCAL = 1;
-RANDOM = 1;
+RANDOM = 2;
 
 par.resourceselection = LOCAL;
 
@@ -118,3 +129,12 @@ tic
 stats = cdsim(par);
 toc
 %matlabpool close
+
+%%% Save Results
+
+save(['results/cdsim_' date '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER)...
+    '_' num2str(par.cachingstrategy(1)) '_' num2str(par.cachingstrategy(2)) '.mat'], 'par', 'stats')
+
+end
+end
+end

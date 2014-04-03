@@ -3,6 +3,7 @@ function vid=getVid(uid, nvids, par, t, H, wall)
 ZIPF = 1;
 WALL = 2;
 YTSTATS = 3;
+SNM = 4;
 
     % TODO
     % niche - popular
@@ -24,6 +25,8 @@ YTSTATS = 3;
             end
         case YTSTATS
             % George you can implement your model here
+        case SNM
+            %http://www.sigcomm.org/sites/default/files/ccr/papers/2013/October/2541468-2541470.pdf
     end
     
 end

@@ -19,7 +19,7 @@ access = [];
 
 %            hit = cellfun(@(x)any(x == vid), cache.items,'UniformOutput',true);
             
-            stats.cache_access(local & user) = stats.cache_access(local & user) + 1;
+           stats.cache_access(local & user) = stats.cache_access(local & user) + 1;
            access = find(local & user);
             % choose ressource in same AS if available
            if any(local & hit & user)
