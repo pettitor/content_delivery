@@ -51,7 +51,11 @@ SLWND = 5;
 
 par.cachingstrategy = [LRU k];
 
+% SLWND sliding window parameter
 par.k = 10;
+
+% LRUAS parameter, cache only if #items in AS < maxitemsAS
+par.maxitemsAS = 5;
 
 % Thresholds: prefetching, rarest/demanded, popular/niche
 
@@ -83,6 +87,9 @@ par.GF = sparse(CG{1}'+1, CG{2}'+1, ones(1,length(CG{1})), n, n);
 % par.GF = rand(1000,1000)<0.3;
 
 par.historysize = 100;
+
+par.ncategories = 17;
+par.categorysize = 4;
 
 %%% Item specific content demand (temporal, spatial)
 

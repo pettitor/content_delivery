@@ -1,7 +1,7 @@
-function [cid, access, stats] = selectRessource(cache, stats, AS, uid, vid, strategy, params)
+function [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, strategy, params)
 
 LOCAL = 1;
-RANDOM = 1;
+RANDOM = 2;
 
 cid = []; % if no local cache can serve the request
 access = [];

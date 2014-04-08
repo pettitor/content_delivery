@@ -28,6 +28,10 @@ nvids = par.nvids;
 H  = NaN(nnodes, par.historysize); % videos watched
 wall = NaN(nnodes, par.wallsize); % videos displayed on wall (based on friends shares and video interest)
 
+par.ncategories
+categories = NaN(nnodes, par.categorysize);
+%TODO draw random categories accodring to distribution
+
 preshare = par.preshare;
 pshare = par.pshare;
 
@@ -112,7 +116,7 @@ while events.t(1) < par.tmax
             %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVid(uid, nvids, par, t, H, wall); % consider GV
+                vid = getVideo(uid, nvids, par, t, H, wall, categories); % consider GV
             end
             
             stats.t(id) = t;
@@ -122,7 +126,7 @@ while events.t(1) < par.tmax
             %TODO
             GV = updateGV(GV, vid);
 
-            [cid, access, stats] = selectRessource(cache, stats, AS, uid, vid, par.resourceselection);
+            [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par.resourceselection);
                         
             % Event necessary?
             %events = addEvent(events, t, CACHE, user, id);
@@ -156,7 +160,7 @@ while events.t(1) < par.tmax
             % update wall of friends
             % share random video according to interest
             if (isnan(vid))
-                vid = getVid(uid, GV, H, wall);
+                vid = getVideo(uid, GV, H, wall);
             end
             wall = updateWall(GF, wall, uid, vid);
             stats.share(id) = vid;
