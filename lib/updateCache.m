@@ -43,7 +43,6 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
             
         case LRUAS
             % cache to optimize availability in AS
-            %TODO cache anyhow if there is space
             i = cache.items(id,:) == vid;
             if any(i)
                 cache.score(id,i) = t;
@@ -52,9 +51,8 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 user = cache.type == 2;
                 hit = any(cache.items == vid, 2);
                 hitlocal = local & user & hit;
-                if any(hitlocal)
-                    cache.score(hitlocal,cache.items(hitlocal) == vid) = t;
-                else
+                % cache, if less than par.maxitemsAS are local
+                if sum(hitlocal) < par.maxitemsAS
                     [~, last] = find(cache.items(id,:),1,'last');
                     if isempty(last); last = 0; end
                     repl = last + 1;

@@ -22,14 +22,13 @@ RandStream.setDefaultStream(s);
 
 
 GF = par.GF; % graph with friend relations
-nnodes = size(GF,1);
+nnodes = par.nuser;
 GV = sparse(par.nvids); % graph with video interest
 nvids = par.nvids;
 H  = NaN(nnodes, par.historysize); % videos watched
 wall = NaN(nnodes, par.wallsize); % videos displayed on wall (based on friends shares and video interest)
 
-par.ncategories
-categories = NaN(nnodes, par.categorysize);
+%categories = NaN(nnodes, par.ncategories);
 %TODO draw random categories accodring to distribution
 
 preshare = par.preshare;

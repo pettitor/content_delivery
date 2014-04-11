@@ -105,3 +105,53 @@ legend({'m_u = 1, LRU', 'm_u = 1, LRUAS', 'm_u = 5, LRU', 'm_u = 5, LRUAS'})
 figure(4);
 %legend({num2str(cachesizeUSER')})
 legend({'m_u = 1, LRU', 'm_u = 1, LRUAS', 'm_u = 5, LRU', 'm_u = 5, LRUAS'})
+
+%% parameter study 2
+
+figure(4);clf;box on;hold all;
+xlabel('cache size');
+ylabel('hit rate');
+
+figure(3);clf;box on;hold all;
+xlabel('cache rank');
+ylabel('hit rate');
+ylim([0 1]) 
+
+simdate1 = '10-Apr-2014';
+
+%cachestrat1 = '1_1';
+cachestrat2 = '1_3';
+
+cachesizeAS = [0.2];
+
+cachesizeUSER = [5];
+
+maxitemsAS = [1:5 10 20 40 80];
+
+color = copper(9);
+
+for l=1:length(maxitemsAS)
+for i=1:length(cachesizeAS)
+par.cachesizeAS = cachesizeAS(i); % proportional to AS size
+for j=1:length(cachesizeUSER)
+par.cachesizeUSER = cachesizeUSER(j);  % videos
+
+% ISP cache size, hitrate
+
+figure(4);
+load(['results/cdsim_' simdate1 '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER) '_' cachestrat2 ...
+    '_maxitemsAS' num2str(maxitemsAS(l)) '.mat'])
+
+plot(sort(stats.cache_hit(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'x',...
+        'Color', color(l,:))
+
+
+end
+end
+end
+%figure(3);
+%legend({num2str(cachesizeUSER')})
+%legend({'m_u = 1, LRU', 'm_u = 1, LRUAS', 'm_u = 5, LRU', 'm_u = 5, LRUAS'})
+figure(4);
+%legend({num2str(cachesizeUSER')})
+legend({num2str(maxitemsAS')})
