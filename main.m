@@ -6,6 +6,7 @@ clear par stats
 
 addpath('lib');
 addpath('lib/randraw')
+addpath('lib/snm');
 
 %%%%% Parameters
 

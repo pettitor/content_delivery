@@ -78,6 +78,9 @@ stats.cache_serve = stats.cache_access;
 maxID=nnodes;
 % qfid = fopen('q.txt', 'wt');
 
+%snm specific data
+snm = prepareSNM(par);
+
 events.t = [];
 events.type=[];
 events.user=[];
