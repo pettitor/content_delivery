@@ -14,6 +14,12 @@ LFU = 2;
 
 SLWND = 5;
 
+%sim models
+ZIPF = 1;
+WALL = 2;
+YTSTATS = 3;
+SNM = 4;
+
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
 RandStream.setDefaultStream(s);
@@ -79,7 +85,9 @@ maxID=nnodes;
 % qfid = fopen('q.txt', 'wt');
 
 %snm specific data
-snm = prepareSNM(par);
+if (par.demand_model == SNM)
+    snm = prepareSNM(par);
+end
 
 events.t = [];
 events.type=[];
@@ -118,7 +126,10 @@ while events.t(1) < par.tmax
             %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVideo(uid, nvids, par, t, H, wall, categories); % consider GV
+                vid = getVideo(uid, nvids, par, t, H, wall, categories, snm); % consider GV
+                if (par.demand_model == SNM)
+                    snm = updateSNM(vid, snm);
+                end
             end
             
             stats.t(id) = t;

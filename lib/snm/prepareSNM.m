@@ -5,21 +5,28 @@ function snm=prepareSNM(par)
 %par.snm.classes.requests
 %par.nvids
 
-maxVal = sum(par.snm.classes.perc);
-cumSum = cumsum(par.snm.classes.perc);
+percSum = cumsum(par.snm.classes.perc);
 
-snm.videos = NaN(par.nvids,1);
-snm.seen = [];
-snm.timeStamps = zeros(par.nvids,1);
+snm.videoClass = NaN(par.nvids,1);
+snm.videoLifeSpan = NaN(par.nvids,1);
+snm.videoRequestProb = NaN(par.nvids,1);
+snm.active = [];
+snm.endOfLife = zeros(par.nvids,1);
 
 for i=1:par.nvids
-    rnd = rand() * maxVal;
+    rnd = rand() * percSum(length(percSum));
     
-    snm.videos(i) = find(rnd <= cumSum, 1, 'first'); %find the category for random number
+    class = find(rnd <= percSum, 1, 'first');
+    snm.videoClass(i) = class;
+    
+    %TODO randomize around par.snm.classes value
+    snm.videoLifeSpan(i) = par.snm.classes.lifeSpan(class);
+    snm.videoRequestProb(i) = par.snm.classes.requests(class);
 end
 
-%TODO object:
-%snm.vids = videoID -> Class
-%snm.seen = [videoID] -> snm.vids[snm.seen] -> array mit nur gesehen
-%snm.timeStamp = videoID -> timeStamp (initialWatched)
+%snm.videoClass(videoID) = class
+%snm.videoLifeSpan(videoID) = lifeSpan
+%snm.videoRequestProb(videoID) = Request probability
+%snm.active = [videoID] -> snm.videoClass(snm.active) -> aktuell aktive
+%snm.endOfLife(videoID) = timeStamp (t+lifeSpan)
 end

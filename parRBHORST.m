@@ -79,7 +79,6 @@ par.historysize = 100;
 par.ncategories = 4;
 
 %%% Item specific content demand (temporal, spatial)
-
 ZIPF = 1;
 WALL = 2;
 YTSTATS = 3;
@@ -110,10 +109,9 @@ par.ia_share_par = [1/1.5070 1 0];
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 % SNM parameters
-par.snm.newVideoProb = 0.3;
-par.snm.classes.perc = [3.6 5.3 3.3 5.3 82.4];
-par.snm.classes.lifeSpan = [1.1 3.4 6.4 10.7 24.2];
-par.snm.classes.requests = [78.2 46 57 38.5 26.2];
+if (par.demand_model == SNM)
+    par = addSNMParams(par);
+end
 
 %%% Simulation Parameters
 
