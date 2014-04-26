@@ -11,6 +11,7 @@ snm.videoClass = NaN(par.nvids,1);
 snm.videoLifeSpan = NaN(par.nvids,1);
 snm.videoRequestProb = NaN(par.nvids,1);
 snm.active = [];
+snm.unseen = 1:1:par.nvids;
 snm.endOfLife = zeros(par.nvids,1);
 
 for i=1:par.nvids

@@ -128,7 +128,7 @@ while events.t(1) < par.tmax
             if isnan(vid)
                 vid = getVideo(uid, nvids, par, t, H, wall, categories, snm); % consider GV
                 if (par.demand_model == SNM)
-                    snm = updateSNM(vid, snm);
+                    snm = updateSNM(vid, snm, t);
                 end
             end
             

@@ -1,8 +1,21 @@
-function [ output_args ] = updateSNM( input_args )
+function snm = updateSNM(vid, snm, time)
 
-%TODO check all active videos (lifeSpan), put vid in active list (if not
-%present)
-
-
+%if vid in unseen
+% - put in active
+% - remove from unseen
+% - setEndOfLife (time + snm.videoLifeSpan)
+%for all vids in active
+% - check life time (if exceeded remove from active)
+if any(snm.unseen == vid)
+    snm.unseen = snm.unseen(snm.unseen~=vid);
+    snm.active = [snm.active vid];
+    snm.endOfLife(vid) = time + snm.videoLifeSpan;
 end
 
+for e = snm.active
+   if snm.endOfLife(vid) > time
+       snm.active = snm.active(snm.active~=vid);
+   end
+end
+
+end

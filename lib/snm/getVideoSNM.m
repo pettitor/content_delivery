@@ -8,6 +8,7 @@ function vid = getVideoSNM(par, snm, time)
 %snm.videoLifeSpan(videoID) = lifeSpan
 %snm.videoRequestProb(videoID) = Request probability
 %snm.active = [videoID] -> snm.videoClass(snm.active) -> aktuell aktive
+%snm.unseen
 %snm.endOfLife(videoID) = timeStamp (t+lifeSpan)
 
 rnd = rand();
@@ -18,18 +19,28 @@ if (rnd > par.snm.newVideoProb && ~isempty(snm.active))
     % - check lifeSpan of content
     cumRequests = cumsum(snm.videoRequestProb(snm.active));
     
-    rnd = rand() * cumRequests(length(cumRequests));
+    fit = false;
+
+    while ~fit
+        rnd = rand() * cumRequests(length(cumRequests));
     
-    %TODO problem: how to get the idx of the video (not from the active only list!)
-    vidID = find(rnd <= cumRequests, 1, 'first');
-    
-    
+        tmpID = find(rnd <= cumRequests, 1, 'first');
+
+        vid = snm.active(tmpID);
+        
+        fit = snm.endOfLife(vid) <= time;
+    end
 else
     %unseen video
     % - sum up all requestProbs of all active videos
     % - draw randomly out of this pool
-    % - set snm.endOfLife to t+snm.videoLifeSpan
+    cumRequests = cumsum(snm.videoRequestProb(snm.unseen));
     
+    rnd = rand() * cumRequests(length(cumRequests));
+    
+    tmpID = find(rnd <= cumRequests, 1, 'first');
+
+    vid = snm.unseen(tmpID);        
 end
 
 end
