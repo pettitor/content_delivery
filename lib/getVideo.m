@@ -1,9 +1,10 @@
-function vid=getVideo(uid, nvids, par, t, H, wall, categories, snm)
+function vid=getVideo(uid, nvids, par, t, H, wall, categories, snm, li13)
 
 ZIPF = 1;
 WALL = 2;
 YTSTATS = 3;
 SNM = 4;
+LI13 = 5;
 
     % TODO
     % niche - popular
@@ -31,6 +32,8 @@ SNM = 4;
                         
             % note: don't try to model popularity cascades (observed in
             % geographically distributed user base)
+        case LI13
+            vid = getVideoLI13(li13);
     end
     
 end

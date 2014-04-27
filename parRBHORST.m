@@ -83,8 +83,9 @@ ZIPF = 1;
 WALL = 2;
 YTSTATS = 3;
 SNM = 4;
+LI13 = 5;
 
-par.demand_model = ZIPF;
+par.demand_model = SNM;
 
 par.alpha = 1+1; % global Zipf law popularity, consider a<1, a>1
 
@@ -111,6 +112,8 @@ par.ia_share_par = [1/1.5070 1 0];
 % SNM parameters
 if (par.demand_model == SNM)
     par = addSNMParams(par);
+elseif (par.demand_model == LI13)
+    par = addLI13Params(par);
 end
 
 %%% Simulation Parameters

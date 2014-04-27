@@ -19,6 +19,7 @@ ZIPF = 1;
 WALL = 2;
 YTSTATS = 3;
 SNM = 4;
+LI13 = 5;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
@@ -85,8 +86,12 @@ maxID=nnodes;
 % qfid = fopen('q.txt', 'wt');
 
 %snm specific data
+snm = struct;
+li13 = struct;
 if (par.demand_model == SNM)
     snm = prepareSNM(par);
+elseif (par.demand_model == LI13)
+    li13 = prepareLI13(par);
 end
 
 events.t = [];
@@ -126,9 +131,11 @@ while events.t(1) < par.tmax
             %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVideo(uid, nvids, par, t, H, wall, categories, snm); % consider GV
+                vid = getVideo(uid, nvids, par, t, H, wall, categories, snm, li13); % consider GV
                 if (par.demand_model == SNM)
                     snm = updateSNM(vid, snm, t);
+                elseif (par.demand_model == LI13)
+                    li13 = updateLI13(vid, WATCH, par, li13);
                 end
             end
             
@@ -176,11 +183,21 @@ while events.t(1) < par.tmax
                 vid = getVideo(uid, GV, H, wall);
             end
             wall = updateWall(GF, wall, uid, vid);
+            
+            if (par.demand_model == LI13)
+                li13 = updateLI13(vid, SHARE, par, li13, find(GF(uid,:)));
+            end
+            
             stats.share(id) = vid;
             stats.t(id) = t;
         case RESHARE % currently not used
             % update wall of friends
             wall = updateWall(GF, wall, stats.uid(id), stats.vid(id));
+            
+            if (par.demand_model == LI13)
+                li13 = updateLI13(vid, SHARE, par, li13, find(GF(uid,:)));
+            end
+            
             stats.share(id) = stats.vid(id);
             stats.t(id) = t;
             
