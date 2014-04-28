@@ -23,7 +23,8 @@ LI13 = 5;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
-RandStream.setDefaultStream(s);
+RandStream.setGlobalStream(s);
+%RandStream.setDefaultStream(s);
 
 %rand('twister', par.seed)
 
@@ -131,7 +132,7 @@ while events.t(1) < par.tmax
             %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVideo(uid, nvids, par, t, H, wall, categories, snm, li13); % consider GV
+                vid = getVideo(uid, nvids, par, t, H, wall, snm, li13); %, categories); % consider GV
                 if (par.demand_model == SNM)
                     snm = updateSNM(vid, snm, t);
                 elseif (par.demand_model == LI13)

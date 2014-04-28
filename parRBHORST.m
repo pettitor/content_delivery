@@ -85,7 +85,7 @@ YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
 
-par.demand_model = SNM;
+par.demand_model = LI13;
 
 par.alpha = 1+1; % global Zipf law popularity, consider a<1, a>1
 
