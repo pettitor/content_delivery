@@ -109,8 +109,12 @@ legend({'m_u = 1, LRU', 'm_u = 1, LRUAS', 'm_u = 5, LRU', 'm_u = 5, LRUAS'})
 %% parameter study 2
 
 figure(4);clf;box on;hold all;
-xlabel('cache size');
+xlabel('cache rank');
 ylabel('hit rate');
+
+figure(5);clf;box on;hold all;
+xlabel('cache rank');
+ylabel('serve rate');
 
 figure(3);clf;box on;hold all;
 xlabel('cache rank');
@@ -145,6 +149,10 @@ load(['results/cdsim_' simdate1 '_csAS' num2str(par.cachesizeAS) '_csUSR' num2st
 plot(sort(stats.cache_hit(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'x',...
         'Color', color(l,:))
 
+figure(5);
+plot(sort(stats.cache_serve(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'x',...
+        'Color', color(l,:))
+    
 
 end
 end
@@ -154,4 +162,16 @@ end
 %legend({'m_u = 1, LRU', 'm_u = 1, LRUAS', 'm_u = 5, LRU', 'm_u = 5, LRUAS'})
 figure(4);
 %legend({num2str(cachesizeUSER')})
-legend({num2str(maxitemsAS')})
+%%legend({num2str(maxitemsAS')})
+
+load(['results/cdsim_' '02-Apr-2014' '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER) '1_1' ...
+    '.mat'])
+
+plot(sort(stats.cache_hit(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'x',...
+        'Color', 'red')
+
+legend('LRU-AS 1','LRU-AS 2','LRU-AS 3','LRU-AS 4','LRU-AS 5','LRU-AS 10','LRU-AS 20','LRU-AS 40','LRU-AS 80','LRU')
+
+figure(5);
+plot(sort(stats.cache_serve(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'x',...
+        'Color', 'red')

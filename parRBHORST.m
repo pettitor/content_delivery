@@ -76,6 +76,7 @@ par.nuser = size(par.GF,1);
 
 par.historysize = 100;
 
+par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.016 0.011 0.010 0.008 0.005 0.005 0.003 0.002 0.002];
 par.ncategories = 4;
 
 %%% Item specific content demand (temporal, spatial)
@@ -85,6 +86,7 @@ WALL = 2;
 YTSTATS = 3;
 
 par.demand_model = ZIPF;
+par.sharing_model = WALL;
 
 par.alpha = 1+1; % global Zipf law popularity, consider a<1, a>1
 

@@ -45,6 +45,10 @@ par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.01
 
 %number of interests per user
 par.ncategories = 4;
+
+% with probability par.share a user reshares, otherwise he uploads a new
+% vid
+par.preshare = 0.118;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%viewers categorization thresholds

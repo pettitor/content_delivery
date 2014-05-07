@@ -14,6 +14,10 @@ addpath('lib/randraw')
 parRBHORST;
 %parSECD;
 
+YTSTATS = 3;
+par.demand_model = YTSTATS;
+par.sharing_model = YTSTATS;
+
 %%% specify Parameter Study
 
 cachesizeAS = [0 0.05 0.1 0.2];

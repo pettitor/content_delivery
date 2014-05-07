@@ -14,6 +14,10 @@ LFU = 2;
 
 SLWND = 5;
 
+ZIPF = 1;
+WALL = 2;
+YTSTATS = 3;
+
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
 RandStream.setDefaultStream(s);
@@ -22,20 +26,29 @@ RandStream.setDefaultStream(s);
 
 
 GF = par.GF; % graph with friend relations
-nnodes = par.nuser;
+nusers = par.nuser;
 GV = sparse(par.nvids); % graph with video interest
 nvids = par.nvids;
-H  = NaN(nnodes, par.historysize); % videos watched
-wall = NaN(nnodes, par.wallsize); % videos displayed on wall (based on friends shares and video interest)
+H  = NaN(nusers, par.historysize); % videos watched
+wall = NaN(nusers, par.wallsize); % videos displayed on wall (based on friends shares and video interest)
 
-%categories = NaN(nnodes, par.ncategories);
-%TODO draw random categories accodring to distribution
+stats.views = zeros(nvids,1);
+
+% draw video categories according to probability in par.category
+category.video = randsample(length(par.categories),nvids,true,par.categories);
+
+category.user = NaN(nusers, par.ncategories);
+%TODO remove dublicate categories / use randsample?
+for i=1:par.ncategories
+    category.user(:,i) = sum(~(ones(length(par.categories),1)*rand(1,nusers)...
+    <cumsum(par.categories)'*ones(1,nusers)))+1;
+end
 
 preshare = par.preshare;
 pshare = par.pshare;
 
 % draw ASnumbers of end user according to probability in par.ASp
-AS = sum(~(ones(par.ASn,1)*rand(1,nnodes)<cumsum(par.ASp)'*ones(1,nnodes)))+1;
+AS = sum(~(ones(par.ASn,1)*rand(1,nusers)<cumsum(par.ASp)'*ones(1,nusers)))+1;
 
 % number of users in each AS
 nASuser = histc(AS, 1:par.ASn);
@@ -75,7 +88,7 @@ stats.cache_serve = stats.cache_access;
 % progress bar
 %wait = waitbar(0,'Simulating... 0%');
 
-maxID=nnodes;
+maxID=nusers;
 % qfid = fopen('q.txt', 'wt');
 
 events.t = [];
@@ -115,13 +128,14 @@ while events.t(1) < par.tmax
             %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVideo(uid, nvids, par, t, H, wall, categories); % consider GV
+                vid = getVideo(uid, stats.views, par, t, H, wall, category); % consider GV
             end
+            stats.views(vid) = stats.views(vid) + 1;
             
             stats.t(id) = t;
             stats.watch(id) = vid;
             stats.uid(id) = uid;
-
+       
             %TODO
             GV = updateGV(GV, vid);
 
@@ -136,15 +150,34 @@ while events.t(1) < par.tmax
             % update local isp cache if video is popular
             %cache = updateCache(cache, stats, 1:par.ASn, vid, par.ISPcachingstrategy, par);
             
-            r = rand();
-            reshare = any(wall(uid,:)==vid);
-            if ((~reshare && r < pshare) || (reshare && r < preshare))
-                % add (re)share event
-                
-                dt = random(par.ia_share_rnd, ...
-                    par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
-                
-                events = addEvent(events, t+dt, SHARE, user, id, vid);
+            switch par.sharing_model
+                case WALL
+                    r = rand();
+                    reshare = any(wall(uid,:)==vid);
+                    if ((~reshare && r < pshare) || (reshare && r < preshare))
+                        % add (re)share event
+
+                        dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+                        
+                        maxID = maxID+1;
+                        events = addEvent(events, t+dt, SHARE, user, maxID, vid);
+                    end
+                case YTSTATS
+                    r = rand();
+                    if (r < pshare)
+                        h = getHistory(uid, stats);
+                    else
+                        h = NaN;
+                    end
+                    vid = getVideo(uid, stats.views, par, t, h, wall, category);
+                    
+                    dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+                    
+                    maxID = maxID+1;
+                    events = addEvent(events, t+0, SHARE, user, maxID, vid);
+                    %TODO after lunch
             end
 
             % add watch event
@@ -152,25 +185,23 @@ while events.t(1) < par.tmax
                     par.ia_demand_par(1));
                 
             maxID = maxID+1;
-            
             events = addEvent(events, t+dt, WATCH, user, maxID, NaN);
         
         case SHARE
             % update wall of friends
             % share random video according to interest
             if (isnan(vid))
-                vid = getVideo(uid, GV, H, wall);
+                vid = getVideo(uid, nvids, par, t, H, wall, category);
             end
             wall = updateWall(GF, wall, uid, vid);
             stats.share(id) = vid;
             stats.t(id) = t;
+            
         case RESHARE % currently not used
             % update wall of friends
             wall = updateWall(GF, wall, stats.uid(id), stats.vid(id));
             stats.share(id) = stats.vid(id);
             stats.t(id) = t;
-            
-        %case CACHE
 
     end  
 end
