@@ -80,10 +80,11 @@ par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.01
 par.ncategories = 4;
 
 %%% Item specific content demand (temporal, spatial)
-
 ZIPF = 1;
 WALL = 2;
 YTSTATS = 3;
+SNM = 4;
+LI13 = 5;
 
 par.demand_model = ZIPF;
 par.sharing_model = WALL;
@@ -109,6 +110,13 @@ par.ia_share_rnd = 'gp';
 par.ia_share_par = [1/1.5070 1 0];
 
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
+
+% SNM parameters
+if (par.demand_model == SNM)
+    par = addSNMParams(par);
+elseif (par.demand_model == LI13)
+    par = addLI13Params(par);
+end
 
 %%% Simulation Parameters
 
