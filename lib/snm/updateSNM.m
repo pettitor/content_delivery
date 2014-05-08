@@ -13,8 +13,8 @@ if any(snm.unseen == vid)
 end
 
 for e = snm.active
-   if snm.endOfLife(vid) > time
-       snm.active = snm.active(snm.active~=vid);
+   if snm.endOfLife(e) > time
+       snm.active = snm.active(snm.active~=e);
    end
 end
 
