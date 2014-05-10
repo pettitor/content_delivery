@@ -12,7 +12,19 @@ function vid = getVideoSNM(par, snm, time)
 %snm.endOfLife(videoID) = timeStamp (t+lifeSpan)
 
 rnd = rand();
-if (rnd > par.snm.newVideoProb && ~isempty(snm.active))
+newOne = true;
+
+if (isempty(snm.active) && ~isempty(snm.unseen))
+    newOne = true;
+elseif (~isempty(snm.active) && isempty(snm.unseen))
+    newOne = false;
+elseif (~isempty(snm.active) && ~isempty(snm.unseen))
+    newOne = rnd < par.snm.newVideoProb;
+else
+    error('No more active or unseen videos.')
+end
+
+if (~newOne)
     %currently active video
     % - sum up all requestProbs of all active videos
     % - draw randomly out of this pool
@@ -40,7 +52,7 @@ else
     
     tmpID = find(rnd <= cumRequests, 1, 'first');
 
-    vid = snm.unseen(tmpID);        
+    vid = snm.unseen(tmpID);
 end
 
 end
