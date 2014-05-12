@@ -23,12 +23,9 @@ LI13 = 5;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
-<<<<<<< HEAD
 %RandStream.setGlobalStream(s);
 RandStream.setDefaultStream(s);
-=======
-RandStream.setGlobalStream(s);
->>>>>>> ff50d12cff3673d3fb0cfeda447bfe3b2adb8ddc
+
 
 %rand('twister', par.seed)
 
