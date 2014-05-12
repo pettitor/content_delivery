@@ -16,9 +16,9 @@ addpath('lib/li13');
 parRBHORST;
 %parSECD;
 
-YTSTATS = 3;
-par.demand_model = YTSTATS;
-par.sharing_model = YTSTATS;
+% YTSTATS = 3;
+% par.demand_model = YTSTATS;
+% par.sharing_model = YTSTATS;
 
 %%% specify Parameter Study
 
