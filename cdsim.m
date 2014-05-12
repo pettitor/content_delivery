@@ -23,8 +23,8 @@ LI13 = 5;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
-%RandStream.setGlobalStream(s);
-RandStream.setDefaultStream(s);
+RandStream.setGlobalStream(s);
+%RandStream.setDefaultStream(s);
 
 
 %rand('twister', par.seed)
@@ -111,9 +111,9 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
-for i=1:maxID
+%for i=1:maxID
     events = addEvent(events, 0, WATCH, i, i, NaN);
-end
+%end
 
 % queue.active = [];
 
@@ -197,7 +197,7 @@ while events.t(1) < par.tmax
                             par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
                     
                     maxID = maxID+1;
-                    events = addEvent(events, t+0, SHARE, user, maxID, vid);
+                    events = addEvent(events, t+dt, SHARE, user, maxID, vid);
                     %TODO after lunch
             end
 

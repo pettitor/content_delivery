@@ -11,14 +11,12 @@ function vid = getVideoSNM(par, snm, time)
 %snm.unseen
 %snm.endOfLife(videoID) = timeStamp (t+lifeSpan)
 
-rnd = rand();
-newOne = true;
-
 if (isempty(snm.active) && ~isempty(snm.unseen))
     newOne = true;
 elseif (~isempty(snm.active) && isempty(snm.unseen))
     newOne = false;
 elseif (~isempty(snm.active) && ~isempty(snm.unseen))
+    rnd = rand();
     newOne = rnd < par.snm.newVideoProb;
 else
     error('No more active or unseen videos.')
@@ -31,17 +29,11 @@ if (~newOne)
     % - check lifeSpan of content
     cumRequests = cumsum(snm.videoRequestProb(snm.active));
     
-    fit = false;
+    rnd = rand() * cumRequests(length(cumRequests));
 
-    while ~fit
-        rnd = rand() * cumRequests(length(cumRequests));
-    
-        tmpID = find(rnd <= cumRequests, 1, 'first');
+    tmpID = find(rnd <= cumRequests, 1, 'first');
 
-        vid = snm.active(tmpID);
-        
-        fit = snm.endOfLife(vid) <= time;
-    end
+    vid = snm.active(tmpID);
 else
     %unseen video
     % - sum up all requestProbs of all active videos

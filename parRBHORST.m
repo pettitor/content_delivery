@@ -86,7 +86,7 @@ YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
 
-par.demand_model = ZIPF;
+par.demand_model = SNM;
 par.sharing_model = WALL;
 
 par.alpha = 1+1; % global Zipf law popularity, consider a<1, a>1
@@ -114,7 +114,7 @@ par.ia_share_par = [1/1.5070 1 0];
 %%% Simulation Parameters
 %currently: one tick of t = 1/4 day
 par.ticksPerDay = 4;
-par.tmax = 1e2;
+par.tmax = 1e4;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;
