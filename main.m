@@ -50,8 +50,27 @@ toc
 %matlabpool close
 
 %%% Save Results
+ZIPF = 1;
+WALL = 2;
+YTSTATS = 3;
+SNM = 4;
+LI13 = 5;
+demandModel =  '';
+switch par.demand_model
+    case ZIPF
+        demandModel = 'ZIPF';
+    case WALL
+        demandModel = 'WALL';
+    case YTSTATS
+        demandModel = 'YTSTATS';
+    case SNM
+        demandModel = 'SNM';
+    case LI13
+        demandModel = 'LI13';
+end
 
-save(['results/cdsim_' date '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER)...
+
+save(['results/cdsim_demandModel_' par.demand_model '_' date '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER)...
     '_' num2str(par.cachingstrategy(1)) '_' num2str(par.cachingstrategy(2)) ...
     '_maxitemsAS' num2str(par.maxitemsAS) '.mat'], 'par', 'stats')
 

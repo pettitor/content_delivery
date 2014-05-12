@@ -111,17 +111,17 @@ par.ia_share_par = [1/1.5070 1 0];
 
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
-% SNM parameters
+%%% Simulation Parameters
+%currently: one tick of t = 1/4 day
+par.ticksPerDay = 4;
+par.tmax = 1e2;
+
+par.rand_stream = 'mt19937ar';
+par.seed = 13;
+
+% demand model parameters
 if (par.demand_model == SNM)
     par = addSNMParams(par);
 elseif (par.demand_model == LI13)
     par = addLI13Params(par);
 end
-
-%%% Simulation Parameters
-
-par.tmax = 1e2;
-
-par.rand_stream = 'mt19937ar';
-par.seed = 13;
-%%
