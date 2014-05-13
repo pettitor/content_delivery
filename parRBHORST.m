@@ -107,14 +107,14 @@ par.betareshare = 1/0.9519;
 
 % timelag between shares
 par.ia_share_rnd = 'gp';
-par.ia_share_par = [1/1.5070 1 0];
+par.ia_share_par = [1/1.5070 0.3 0];
 
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 %%% Simulation Parameters
-%currently: one tick of t = 1/4 day
-par.ticksPerDay = 4;
-par.tmax = 1e4;
+%currently: one tick of t = 1/96 day -> 15 min
+par.ticksPerDay = 96;
+par.tmax = 3e4;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;

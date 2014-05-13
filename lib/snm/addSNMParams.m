@@ -1,6 +1,6 @@
 function par = addSNMParams(par)
 
-par.snm.newVideoProb = 0.3;
+par.snm.newVideoProb = 0.25;
 par.snm.classes.perc = [3.6 5.3 3.3 5.3 82.4];
 %lifespan in days
 par.snm.classes.lifeSpan = [1.1 3.4 6.4 10.7 24.2];
