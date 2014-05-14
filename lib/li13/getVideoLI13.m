@@ -1,4 +1,4 @@
-function vid = getVideoLI13(li13)
+function vid = getVideoLI13(li13, eventType)
 
 cumSum = cumsum(li13.p);
 rnd = rand();

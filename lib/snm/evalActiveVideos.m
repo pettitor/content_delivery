@@ -1,6 +1,6 @@
 clear;
 
-files = dir('results/cdsim_demandModel_SNM_13-May-2014*.mat');
+files = dir('results/cdsim_demandModel_SNM_14-May-2014*.mat');
 
 for f=1:length(files)
     clear par stats;
@@ -9,10 +9,20 @@ for f=1:length(files)
     fi = figure(f);
     plot(stats.snm.numActiveVids);
     
-    figName = strcat('results/figs/cdsim_demandModel-', num2str(par.demand_model), '_newVidProb-', num2str(par.snm.newVideoProb), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_scaleOfIntAriTime-', num2str(par.ia_share_par(2)), '_number-', num2str(f));
+    if par.snm.dayNightCycle.enabled
+        tmps = strcat('dayNight-', num2str(par.snm.dayNightCycle.newVideoProbDay), '-', num2str(par.snm.dayNightCycle.newVideoProbNight));
+    else
+       tmps = num2str(par.snm.newVideoProb);
+    end
+    
+    figName = strcat('results/figs/cdsim_demandModel-', num2str(par.demand_model), '_newVidProb-', tmps, '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_scaleOfIntAriTime-', num2str(par.ia_share_par(2)), '_number-', num2str(f));
     title(figName);
     saveas(fi,strcat(figName, '.jpg'),'jpg');
 end
+%TODO specify new vid prob (empty vs full list)
+%TODO initial phase vs 'normal' behaviour (drops into init phase if list empty)
+
+%TODO plot cache hit rate for snm (different scenarios), li13
 
 %% test inter-arrival time
 par.ia_share_rnd = 'gp';

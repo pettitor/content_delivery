@@ -1,4 +1,4 @@
-function vid=getVideo(uid, nvids, par, t, H, wall, snm, li13, categories)
+function vid=getVideo(uid, nvids, par, t, H, wall, eventType, snm, li13, categories)
 
 ZIPF = 1;
 WALL = 2;
@@ -28,12 +28,12 @@ LI13 = 5;
             % George you can implement your model here
         case SNM    
             %http://www.sigcomm.org/sites/default/files/ccr/papers/2013/October/2541468-2541470.pdf
-            vid = getVideoSNM(par, snm, t);
+            vid = getVideoSNM(par, snm, t, eventType);
                         
             % note: don't try to model popularity cascades (observed in
             % geographically distributed user base)
         case LI13
-            vid = getVideoLI13(li13);
+            vid = getVideoLI13(li13, eventType);
     end
     
 end

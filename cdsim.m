@@ -143,7 +143,7 @@ while events.t(1) < par.tmax
             %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVideo(uid, nvids, par, t, H, wall, snm, li13); %, categories); % consider GV
+                vid = getVideo(uid, nvids, par, t, H, wall, WATCH, snm, li13); %, categories); % consider GV
                 if (par.demand_model == SNM)
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
@@ -191,7 +191,7 @@ while events.t(1) < par.tmax
                     else
                         h = NaN;
                     end
-                    vid = getVideo(uid, stats.views, par, t, h, wall, category);
+                    vid = getVideo(uid, stats.views, par, t, h, wall, SHARE, snm, li13, category);
                     
                     dt = random(par.ia_share_rnd, ...
                             par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
@@ -212,7 +212,7 @@ while events.t(1) < par.tmax
             % update wall of friends
             % share random video according to interest
             if (isnan(vid))
-                vid = getVideo(uid, nvids, par, t, H, wall, category);
+                vid = getVideo(uid, nvids, par, t, H, wall, SHARE, snm, li13, category);
             end
             wall = updateWall(GF, wall, uid, vid);
             
