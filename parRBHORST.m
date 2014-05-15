@@ -91,9 +91,16 @@ par.sharing_model = WALL;
 
 par.alpha = 1+1; % global Zipf law popularity, consider a<1, a>1
 
+%currently: one tick of t = 1/96 day -> 15 min
+par.ticksPerDay = 96;
+par.ticksPerSecond = par.ticksPerDay/24/60/60;
+
 % timelag between demands
 par.ia_demand_rnd = 'exp';
-par.ia_demand_par = [10];
+
+% consider par.tickPerDay
+par.ia_demand_par_seconds = 900; % ia time in seconds
+par.ia_demand_par = [par.ia_demand_par_seconds*par.ticksPerSecond];
 
 % basic model from propagation based paper
 par.pshare = 8e4/24/1923507; % 8e4 per day, consider time or user dependent
@@ -112,8 +119,6 @@ par.ia_share_par = [1/1.5070 0.3 0];
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 %%% Simulation Parameters
-%currently: one tick of t = 1/96 day -> 15 min
-par.ticksPerDay = 96;
 par.tmax = 3e4;
 
 par.rand_stream = 'mt19937ar';

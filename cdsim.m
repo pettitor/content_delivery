@@ -201,6 +201,8 @@ while events.t(1) < par.tmax
                     %TODO after lunch
             end
 
+            hourindex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
+            
             % add watch event
             dt = random(par.ia_demand_rnd, ...
                     par.ia_demand_par(1));
