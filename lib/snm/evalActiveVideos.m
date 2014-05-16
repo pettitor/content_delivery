@@ -1,19 +1,21 @@
 clear;
 
-files = dir('results/cdsim_demandModel_SNM_14-May-2014*.mat');
+files = dir('results/cdsim_demandModel_SNM_16-May-2014*.mat');
 
 for f=1:length(files)
     clear par stats;
     load(strcat('results/', files(f).name));
     
     fi = figure(f);
-    plot(stats.snm.numActiveVids);
+    hold all;
+    plot(stats.snm.time, stats.snm.numActiveVids);
     
-    if par.snm.dayNightCycle.enabled
-        tmps = strcat('dayNight-', num2str(par.snm.dayNightCycle.newVideoProbDay), '-', num2str(par.snm.dayNightCycle.newVideoProbNight));
-    else
-       tmps = num2str(par.snm.newVideoProb);
+    for i=1:floor(par.tmax/par.ticksPerDay)
+        v = par.ticksPerDay*i;
+        line([v v],get(gca,'YLim'));
     end
+    
+    tmps = num2str(par.snm.newVideoProb);
     
     figName = strcat('results/figs/cdsim_demandModel-', num2str(par.demand_model), '_newVidProb-', tmps, '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_scaleOfIntAriTime-', num2str(par.ia_share_par(2)), '_number-', num2str(f));
     title(figName);

@@ -119,7 +119,7 @@ par.ia_share_par = [1/1.5070 1 0];
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 %%% Simulation Parameters
-par.tmax = 3e4;
+par.tmax = 3e2;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;

@@ -122,6 +122,7 @@ stats.uid = nan(1,60000);
 stats.share = nan(1,60000);
 stats.t = nan(1,60000);
 stats.snm.numActiveVids = [];
+stats.snm.time = [];
 
 t2 = 0;
 while events.t(1) < par.tmax
@@ -147,6 +148,7 @@ while events.t(1) < par.tmax
                 if (par.demand_model == SNM)
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
+                    stats.snm.time = [stats.snm.time t];
                 elseif (par.demand_model == LI13)
                     li13 = updateLI13(vid, WATCH, par, li13);
                 end
