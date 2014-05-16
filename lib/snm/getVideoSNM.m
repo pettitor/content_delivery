@@ -21,27 +21,9 @@ elseif (~isempty(snm.active) && ~isempty(snm.unseen))
     end
     
     if watchVid
-        if par.snm.dayNightCycle.enabled
-            %day-night cycle
-            tOD = mod(time, par.ticksPerDay);
-
-            ds = par.snm.dayNightCycle.dayTime(1) * par.ticksPerDay/24;
-            de = par.snm.dayNightCycle.dayTime(2) * par.ticksPerDay/24;
-
-
-            rnd = rand();
-            if (tOD > ds && tOD < de)
-                %day-time
-                newOne = rnd < par.snm.dayNightCycle.newVideoProbDay;
-            else
-                %night-time
-                newOne = rnd < par.snm.dayNightCycle.newVideoProbNight;
-            end
-        else
-            %standard behaviour
-            rnd = rand();
-            newOne = rnd < par.snm.newVideoProb;
-        end
+        %standard behaviour
+        rnd = rand();
+        newOne = rnd < par.snm.newVideoProb;
     else
         newOne = false;
     end
