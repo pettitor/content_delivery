@@ -1,6 +1,7 @@
+%% active videos snm
 clear;
 
-files = dir('results/cdsim_demandModel_SNM_16-May-2014*.mat');
+files = dir('results/cdsim_demandModel_SNM_17-May-2014*.mat');
 
 for f=1:length(files)
     clear par stats;
@@ -17,7 +18,7 @@ for f=1:length(files)
     
     tmps = num2str(par.snm.newVideoProb);
     
-    figName = strcat('results/figs/cdsim_demandModel-', num2str(par.demand_model), '_newVidProb-', tmps, '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_scaleOfIntAriTime-', num2str(par.ia_share_par(2)), '_number-', num2str(f));
+    figName = strcat('results/figs/cdsim_demandModel-', num2str(par.demand_model), '_newVidProb-', tmps, '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
     title(figName);
     saveas(fi,strcat(figName, '.jpg'),'jpg');
 end
@@ -26,16 +27,38 @@ end
 
 %TODO plot cache hit rate for snm (different scenarios), li13
 
-%% test inter-arrival time
-par.ia_share_rnd = 'gp';
-par.ia_share_par = [1/1.5070 0.5 0];
+%% plot views (log log)
+clear;
 
-numTrials = 6000;
-stats = nan(1,numTrials);
+files = dir('results/cdsim_demandModel_ZIPF_17-May-2014*.mat');
 
-for t=1:numTrials
-    stats(t) = random(par.ia_share_rnd, par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    views = stats.views(stats.views~=0);
+    views = sort(views, 'descend');
+    
+    fi = figure(f);
+    loglog(views)
+    
 end
+%% probability density
+clear;
 
-plot(stats);
-mean(stats)
+files = dir('results/cdsim_demandModel_ZIPF_17-May-2014*.mat');
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    views = stats.views(stats.views~=0);
+    
+    fi = figure(f);
+    n = hist(views,0:max(views));
+    %views = sort(views, 'descend');
+    
+    plot(0:max(views),n/sum(views),'.')
+    set(gca,'xscale','log','yscale','log')
+    
+end
