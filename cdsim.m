@@ -101,6 +101,7 @@ snm = struct;
 li13 = struct;
 if (par.demand_model == SNM)
     snm = prepareSNM(par);
+    stats.snm.classes = snm.videoClass;
 elseif (par.demand_model == LI13)
     li13 = prepareLI13(par);
 end
