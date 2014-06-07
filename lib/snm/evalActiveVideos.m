@@ -102,12 +102,41 @@ for f=1:length(files)
     
 end
 
-%% eval classes
+%% requests per class (percentage)
 
-videoClasses = stats.snm.classes(stats.watch(~isnan(stats.watch)));
-requestPercentage = zeros(1, length(par.snm.classes.perc));
+clear;
 
-for i=1:length(par.snm.classes.perc)
-   requestPercentage(i) = length(videoClasses(videoClasses==i))/length(videoClasses)*100;
+files = dir('results/cdsim_demandModel_SNM_03-Jun-2014*.mat');
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+
+    videoClasses = stats.snm.classes(stats.watch(~isnan(stats.watch)));
+    requestPercentage = zeros(1, length(par.snm.classes.perc));
+
+    for i=1:length(par.snm.classes.perc)
+       requestPercentage(i) = length(videoClasses(videoClasses==i))/length(videoClasses)*100;
+    end
+    requestPercentage
 end
-requestPercentage
+
+%% requests per class (mean)
+clear;
+
+files = dir('results/cdsim_demandModel_SNM_03-Jun-2014*.mat');
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    videoClasses = stats.snm.classes;
+    views = stats.views;
+    numberOfRequests = zeros(1, length(par.snm.classes.perc));
+
+    for i=1:length(par.snm.classes.perc)
+       numberOfRequests(i) =  mean(views(videoClasses==i));
+    end
+
+    numberOfRequests
+end
