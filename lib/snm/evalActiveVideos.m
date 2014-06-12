@@ -1,7 +1,7 @@
-%% active videos snm
-clear;
+filePattern = 'results/cdsim_demandModel_SNM_12-Jun-2014*.mat';
 
-files = dir('results/cdsim_demandModel_SNM_03-Jun-2014*.mat');
+%% active videos snm
+files = dir(filePattern);
 
 for f=1:length(files)
     clear par stats;
@@ -28,9 +28,7 @@ end
 %TODO plot cache hit rate for snm (different scenarios), li13
 
 %% plot views (log log)
-clear;
-
-files = dir('results/cdsim_demandModel_SNM_03-Jun-2014*.mat');
+files = dir(filePattern);
 
 for f=1:length(files)
     clear par stats;
@@ -51,9 +49,7 @@ for f=1:length(files)
     saveas(fi,strcat(figName, '.jpg'),'jpg');
 end
 %% probability density
-clear;
-
-files = dir('results/cdsim_demandModel_SNM_03-Jun-2014*.mat');
+files = dir(filePattern);
 
 for f=1:length(files)
     clear par stats;
@@ -72,10 +68,7 @@ for f=1:length(files)
 end
 
 %% plot views
-
-clear;
-
-files = dir('results/cdsim_demandModel_SNM_03-Jun-2014*.mat');
+files = dir(filePattern);
 
 for f=1:length(files)
     clear par stats;
@@ -103,10 +96,7 @@ for f=1:length(files)
 end
 
 %% requests per class (percentage)
-
-clear;
-
-files = dir('results/cdsim_demandModel_SNM_03-Jun-2014*.mat');
+files = dir(filePattern);
 
 for f=1:length(files)
     clear par stats;
@@ -122,9 +112,7 @@ for f=1:length(files)
 end
 
 %% requests per class (mean)
-clear;
-
-files = dir('results/cdsim_demandModel_SNM_03-Jun-2014*.mat');
+files = dir(filePattern);
 
 for f=1:length(files)
     clear par stats;
