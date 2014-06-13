@@ -9,7 +9,7 @@ if (eventType == WATCH)
         probs = li13.p;
     else
         times = t-li13.lastShare;
-        probs = li13.p/times;
+        probs = li13.p./times;
     end
     
     cumSum = cumsum(probs);
