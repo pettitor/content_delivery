@@ -1,4 +1,4 @@
-filePattern = 'results/cdsim_demandModel_SNM_12-Jun-2014*.mat';
+filePattern = 'results/cdsim_demandModel_LI13_13-Jun-2014*.mat';
 
 %% active videos snm
 files = dir(filePattern);
@@ -40,12 +40,11 @@ for f=1:length(files)
     fi = figure(f);
     loglog(views)
     
-    
     axis([0 10^4 0 10^4]);
     xlabel('Video index (ranked by popularity)');
     ylabel('Number of requests');
     
-    figName = strcat('results/figs/cdsim_loglog_demandModel-', num2str(par.demand_model), '_newVidProb-', num2str(par.snm.newVideoProb), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
+    figName = strcat('results/figs/cdsim_loglog_demandModel-', num2str(par.demand_model), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
     saveas(fi,strcat(figName, '.jpg'),'jpg');
 end
 %% probability density
@@ -59,7 +58,7 @@ for f=1:length(files)
     
     fi = figure(f);
     n = hist(views,0:max(views));
-    %views = sort(views, 'descend');
+    views = sort(views, 'descend');
     
     
     plot(0:max(views),n/sum(views),'.')
