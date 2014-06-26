@@ -22,23 +22,40 @@ parRBHORST;
 
 %%% specify Parameter Study
 
-cachesizeAS = [0 0.05 0.1 0.2];
-cachesizeUSER = [1 2 3 4 5];
-for l=[10 20 40 80]
+cachesizeAS = [0 0.1 0.2];
+cachesizeUSER = [1 2 4 8 16 32 64 128];
+
+LOCAL = 1;
+RANDOM = 2;
+RANDOM2 = 4;
+RBHORST = 3;
+
+pcacheUSER = [0 0.1 0.2 0.4 0.8 1];
+pcacheUSER = [0.1];
+par.resourceselection = RANDOM2;
+
+par.cachingstrategy = [LRU LRU];
+
+par.nvids = 10000;
+
+%for ll=[1 5 10 20 40 80]
+%    par.maxitemsAS = ll;
+for l=[3]
     
-    par.maxitemsAS = l;
+    par.RBHORSTprio = l;
+%     
+% for k=1:length(pcacheUSER)
+%     
+%     par.pcacheUSER = pcacheUSER(k);
     
-for k=[3]
-    
-    par.cachingstrategy(2) = k;
-    
-for i=4:4%1:length(cachesizeAS)
+for i=1:length(cachesizeAS)
 
     par.cachesizeAS = cachesizeAS(i); % proportional to AS size
 
-for j=5:5%1:length(cachesizeUSER)
+for j=1:length(cachesizeUSER)
 
     par.cachesizeUSER = cachesizeUSER(j);  % videos
+    par.pcacheUSER = 1/par.cachesizeUSER;
 
 %%%%%% Run simulation
 
@@ -50,31 +67,26 @@ toc
 %matlabpool close
 
 %%% Save Results
+
 ZIPF = 1;
 WALL = 2;
 YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
-demandModel =  '';
-switch par.demand_model
-    case ZIPF
-        demandModel = 'ZIPF';
-    case WALL
-        demandModel = 'WALL';
-    case YTSTATS
-        demandModel = 'YTSTATS';
-    case SNM
-        demandModel = 'SNM';
-    case LI13
-        demandModel = 'LI13';
-end
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13'};
+resourceSel = {'LOCAL','RANDOM','RBHORST','RANDOM2'};
 
-
-save(['results/cdsim_demandModel_' demandModel '_' date '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER)...
+save(['results/cdsim_demandModel_' char(demandModel(par.demand_model)) '_' char(resourceSel(par.resourceselection))...
+    date '_csAS' num2str(par.cachesizeAS) '_csUSR' num2str(par.cachesizeUSER)...
+    '_pcUSR' num2str(par.pcacheUSER) ...
     '_' num2str(par.cachingstrategy(1)) '_' num2str(par.cachingstrategy(2)) ...
-    '_maxitemsAS' num2str(par.maxitemsAS) '.mat'], 'par', 'stats')
-
+    '.mat'], 'par', 'stats')
+    %'_RBHORSTprio' num2str(par.RBHORSTprio) ...
+    %'_RANDOM' ...
+    %'_maxitemsAS' num2str(par.maxitemsAS) ...
+    
 end
 end
 end
-end
+%end
+%end

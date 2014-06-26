@@ -23,8 +23,8 @@ LI13 = 5;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
-RandStream.setGlobalStream(s);
-%RandStream.setDefaultStream(s);
+%RandStream.setGlobalStream(s);
+RandStream.setDefaultStream(s);
 
 
 %rand('twister', par.seed)
@@ -58,20 +58,22 @@ AS = sum(~(ones(par.ASn,1)*rand(1,nusers)<cumsum(par.ASp)'*ones(1,nusers)))+1;
 % number of users in each AS
 nASuser = histc(AS, 1:par.ASn);
 
+%TODO all to 0 only pcacheUSER have capacity
+
 iAScacheUSER = rand(1, length(AS)) < par.pcacheUSER;
 nAScacheUSER = sum(iAScacheUSER);
 
 % one cache per isp and end user
-cache.AS = [1:par.ASn AS(iAScacheUSER)]';
+cache.AS = [1:par.ASn AS]';
 
-cache.type = [ones(1,par.ASn) 2*ones(1,nAScacheUSER)]';
+cache.type = [ones(1,par.ASn) 2*ones(1,nusers)]';
 
 % cache.strategy = NaN(size(cache.type));
 % for i=1:length(par.cachingstrategy);
 %     cache.strategy(cache.type == i) = par.cachingstrategy(i);
 % end
 
-cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*ones(1,nAScacheUSER)]';
+cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*iAScacheUSER]';
 
 cache.items = cell(length(cache.capacity),1);
 nitems = max(cache.capacity);
@@ -89,6 +91,8 @@ end
 stats.cache_access = zeros(length(cache.capacity),1);
 stats.cache_hit = stats.cache_access;
 stats.cache_serve = stats.cache_access;
+stats.AS_access = zeros(par.ASn,1);
+stats.AS_hit = zeros(par.ASn,1);
 
 % progress bar
 %wait = waitbar(0,'Simulating... 0%');
@@ -101,7 +105,6 @@ snm = struct;
 li13 = struct;
 if (par.demand_model == SNM)
     snm = prepareSNM(par);
-    stats.snm.classes = snm.videoClass;
 elseif (par.demand_model == LI13)
     li13 = prepareLI13(par);
 end
@@ -112,16 +115,16 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
-%for i=1:maxID
+for i=1:maxID
     events = addEvent(events, 0, WATCH, i, i, NaN);
-%end
+end
 
 % queue.active = [];
 
-stats.watch = nan(1,60000);
-stats.uid = nan(1,60000);
-stats.share = nan(1,60000);
-stats.t = nan(1,60000);
+stats.watch = nan(1,600000);
+stats.uid = nan(1,600000);
+stats.share = nan(1,600000);
+stats.t = nan(1,600000);
 stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
@@ -151,7 +154,7 @@ while events.t(1) < par.tmax
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
                     stats.snm.time = [stats.snm.time t];
                 elseif (par.demand_model == LI13)
-                    li13 = updateLI13(vid, WATCH, par, li13, t);
+                    li13 = updateLI13(vid, WATCH, par, li13);
                 end
             end
             stats.views(vid) = stats.views(vid) + 1;
@@ -163,8 +166,12 @@ while events.t(1) < par.tmax
             %TODO
             GV = updateGV(GV, vid);
 
-            [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par.resourceselection);
-                        
+            [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par.resourceselection, par);
+            
+             if (cid)
+                 stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
+             end               
+            
             % Event necessary?
             %events = addEvent(events, t, CACHE, user, id);
 
@@ -202,16 +209,6 @@ while events.t(1) < par.tmax
                     maxID = maxID+1;
                     events = addEvent(events, t+dt, SHARE, user, maxID, vid);
                     %TODO after lunch
-                case LI13
-                    vid = getVideoLI13(li13, SHARE, t, vid);
-                    
-                    if (~isnan(vid))
-                        dt = random(par.ia_share_rnd, ...
-                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
-
-                        maxID = maxID+1;
-                        events = addEvent(events, t+dt, SHARE, user, maxID, vid);
-                    end
             end
 
             hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
@@ -231,7 +228,7 @@ while events.t(1) < par.tmax
             wall = updateWall(GF, wall, uid, vid);
             
             if (par.demand_model == LI13)
-                li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:)));
+                li13 = updateLI13(vid, SHARE, par, li13, find(GF(uid,:)));
             end
             
             stats.share(id) = vid;
