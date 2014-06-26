@@ -89,8 +89,8 @@ YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
 
-par.demand_model = ZIPF;
-par.sharing_model = ZIPF;
+par.demand_model = LI13;
+par.sharing_model = LI13;
 
 par.alpha = 1+1; % global Zipf law popularity, consider a<1, a>1
 
@@ -102,9 +102,9 @@ par.ticksPerSecond = par.ticksPerDay/24/60/60;
 par.ia_demand_rnd = 'exp';
 
 % consider par.tickPerDay
-%par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
-par.ia_demand_par_seconds = 3600*ones(1,24); % constant ia time in seconds
-par.ia_demand_par = par.ia_demand_par_seconds*par.ticksPerSecond;
+par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
+%par.ia_demand_par_seconds = 3600*ones(1,24); % constant ia time in seconds
+par.ia_demand_par = par.ia_demand_par_seconds;%*par.ticksPerSecond;
 
 % basic model from propagation based paper
 par.pshare = 8e4/24/1923507; % 8e4 per day, consider time or user dependent
