@@ -10,13 +10,16 @@ if (eventType == WATCH)
     else
         times = t-li13.lastShare;
         probs = li13.p./times;
+        %probs decrease the farther away the last share was
     end
     
     cumSum = cumsum(probs);
-    rnd = rand();
+    rnd = rand() * sum(probs);
+    %make sure that rand() goes to the limit of the probs array
 
-    idx = find(rnd <= cumSum, 1, 'first'); %find video according to p and rnd
-
+    idx = find(rnd <= cumSum, 1, 'first');
+    %find video according to p and rnd
+    
     if (~isempty(idx))
         vid = idx;
     else
