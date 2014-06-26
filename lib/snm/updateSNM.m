@@ -9,15 +9,11 @@ function snm = updateSNM(vid, snm, time)
 if any(snm.unseen == vid)
     snm.unseen = snm.unseen(snm.unseen~=vid);
     snm.active = [snm.active vid];
-    if snm.videoLifeSpan(vid) == -1
-        snm.endOfLife(vid) = -1;    
-    else 
-        snm.endOfLife(vid) = time + snm.videoLifeSpan(vid);
-    end
+    snm.endOfLife(vid) = time + snm.videoLifeSpan(vid);
 end
 
 for e = snm.active
-   if snm.endOfLife(e) < time && snm.endOfLife(e) ~= -1
+   if snm.endOfLife(e) < time
        snm.active = snm.active(snm.active~=e);
    end
 end

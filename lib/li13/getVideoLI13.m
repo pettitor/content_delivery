@@ -47,5 +47,3 @@ end
 %TODO bei view event: p/(time-lastShare) -> abfangen if (time-lastShare) == 0
 %par.initialView = zeros(nvids); -> ersten view reinschreiben
 %bei share event: p/(time-initialView) -> abfangen if (time-lastShare) == 0
-
-end
