@@ -121,6 +121,9 @@ par.ia_share_par = [1/1.5070 1 0];
 %%% Simulation Parameters
 par.tmax = 3e3;
 
+%temporal attenuation
+par.tmpAttenuationExp = 0.017;
+
 par.rand_stream = 'mt19937ar';
 par.seed = 13;
 

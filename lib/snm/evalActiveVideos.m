@@ -1,4 +1,4 @@
-filePattern = 'results/cdsim_demandModel_LI13_13-Jun-2014*.mat';
+filePattern = 'results/cdsim_demandModel_LI13_26-Jun-2014_atte*.mat';
 
 %% active videos snm
 files = dir(filePattern);
@@ -17,7 +17,7 @@ for f=1:length(files)
     end
     
     figName = strcat('results/figs/cdsim_demandModel-', num2str(par.demand_model), '_newVidProb-', num2str(par.snm.newVideoProb), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
-    title('Number of active videos');
+    title('Number of active videos' + files(f).name);
     xlabel('Time (ticks)');
     ylabel('Number of active videos');
     saveas(fi,strcat(figName, '.jpg'),'jpg');
@@ -41,10 +41,12 @@ for f=1:length(files)
     loglog(views)
     
     axis([0 10^4 0 10^4]);
+    title(num2str(par.tmpAttenuationExp));
     xlabel('Video index (ranked by popularity)');
     ylabel('Number of requests');
     
-    figName = strcat('results/figs/cdsim_loglog_demandModel-', num2str(par.demand_model), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
+    figName = ['results/figs/cdsim_demandModel_' num2str(par.demand_model) '_' date '_atte' num2str(par.tmpAttenuationExp)];
+    %figName = strcat('results/figs/cdsim_loglog_demandModel-', num2str(par.demand_model), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
     saveas(fi,strcat(figName, '.jpg'),'jpg');
 end
 %% probability density
@@ -63,6 +65,7 @@ for f=1:length(files)
     
     plot(0:max(views),n/sum(views),'.')
     set(gca,'xscale','log','yscale','log')
+    title(files(f).name);
     
 end
 
@@ -87,6 +90,7 @@ for f=1:length(files)
     
     xlabel('Time (ticks)');
     ylabel('Number of requests');
+    title(files(f).name);
     
     
     figName = strcat('results/figs/cdsim_diurnal_demandModel-', num2str(par.demand_model), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
@@ -107,6 +111,7 @@ for f=1:length(files)
     for i=1:length(par.snm.classes.perc)
        requestPercentage(i) = length(videoClasses(videoClasses==i))/length(videoClasses)*100;
     end
+    files(f).name
     requestPercentage
 end
 
@@ -125,5 +130,6 @@ for f=1:length(files)
        numberOfRequests(i) =  mean(views(videoClasses==i));
     end
 
+    files(f).name
     numberOfRequests
 end

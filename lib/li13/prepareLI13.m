@@ -10,4 +10,7 @@ li13.shr = sum(exprnd(par.li13.SHRm/par.li13.SHRk,par.li13.SHRk,par.nvids));
 li13.lastShare = ones(1,par.nvids)/par.nvids;
 li13.initialView = ones(1,par.nvids)/par.nvids;
 
+%temporal attenuation
+li13.tmpAttenuationExp = par.tmpAttenuationExp;
+
 end
