@@ -15,7 +15,7 @@ addpath('lib/li13');
 
 parRBHORST;
 
-attenution = [0.014 0.015 0.016 0.017 0.018 0.019 0.020 0.021 0.022 0.023 0.024];
+attenution = [0.016 0.017 0.018 0.019 0.020];
 
 for i=1:length(attenution)
     par.tmpAttenuationExp = attenution(i);

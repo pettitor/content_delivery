@@ -23,8 +23,8 @@ LI13 = 5;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
-%RandStream.setGlobalStream(s);
-RandStream.setDefaultStream(s);
+RandStream.setGlobalStream(s);
+%RandStream.setDefaultStream(s);
 
 
 %rand('twister', par.seed)
@@ -105,6 +105,7 @@ snm = struct;
 li13 = struct;
 if (par.demand_model == SNM)
     snm = prepareSNM(par);
+    stats.snm.classes = snm.videoClass;
 elseif (par.demand_model == LI13)
     li13 = prepareLI13(par);
 end
@@ -115,9 +116,9 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
-for i=1:maxID
+%for i=1:maxID
     events = addEvent(events, 0, WATCH, i, i, NaN);
-end
+%end
 
 % queue.active = [];
 
@@ -154,7 +155,7 @@ while events.t(1) < par.tmax
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
                     stats.snm.time = [stats.snm.time t];
                 elseif (par.demand_model == LI13)
-                    li13 = updateLI13(vid, WATCH, par, li13);
+                    li13 = updateLI13(vid, WATCH, par, li13, t);
                 end
             end
             stats.views(vid) = stats.views(vid) + 1;
@@ -209,6 +210,16 @@ while events.t(1) < par.tmax
                     maxID = maxID+1;
                     events = addEvent(events, t+dt, SHARE, user, maxID, vid);
                     %TODO after lunch
+                case LI13
+                    vid = getVideoLI13(li13, SHARE, t, vid);
+                    
+                    if (~isnan(vid))
+                        dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+
+                        maxID = maxID+1;
+                        events = addEvent(events, t+dt, SHARE, user, maxID, vid);
+                    end
             end
 
             hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
@@ -228,7 +239,7 @@ while events.t(1) < par.tmax
             wall = updateWall(GF, wall, uid, vid);
             
             if (par.demand_model == LI13)
-                li13 = updateLI13(vid, SHARE, par, li13, find(GF(uid,:)));
+                li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:)));
             end
             
             stats.share(id) = vid;

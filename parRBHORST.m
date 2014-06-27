@@ -51,7 +51,7 @@ LOCAL = 1;
 RANDOM = 2;
 RBHORST = 3;
 
-par.resourceselection = RBHORST;
+par.resourceselection = LOCAL;
 
 par.RBHORSTprio = 1;
 
@@ -123,7 +123,7 @@ par.ia_share_par = [1/1.5070 1 0];
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 %%% Simulation Parameters
-par.tmax = 3e2;
+par.tmax = 3e3;
 
 %temporal attenuation
 par.tmpAttenuationExp = 0.017;
