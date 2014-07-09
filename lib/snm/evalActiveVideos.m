@@ -1,5 +1,4 @@
-filePattern = 'results/cdsim_demandModel_LI13_26-Jun-2014_atte*.mat';
-
+filePattern = 'results/cdsim_demandModel_li13_*.mat';
 %% active videos snm
 files = dir(filePattern);
 
@@ -45,9 +44,10 @@ for f=1:length(files)
     xlabel('Video index (ranked by popularity)');
     ylabel('Number of requests');
     
+    name = ['loglog_li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed)];
     figName = ['results/figs/cdsim_demandModel_' num2str(par.demand_model) '_' date '_atte' num2str(par.tmpAttenuationExp)];
     %figName = strcat('results/figs/cdsim_loglog_demandModel-', num2str(par.demand_model), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
-    saveas(fi,strcat(figName, '.jpg'),'jpg');
+    saveas(fi,['results/figs/loglog_' files(f).name '.jpg'],'jpg');
 end
 %% probability density
 files = dir(filePattern);
@@ -133,3 +133,33 @@ for f=1:length(files)
     files(f).name
     numberOfRequests
 end
+
+%% temporal locality
+%fuer 10 populaeresten videos
+files = dir(filePattern);
+color = gray(11);
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    [b,idx] = sort(stats.views,'descend');
+    vids = idx(1:10); %populaeresten videos
+    fi = figure(f)
+    clf;box on;hold all;
+    for i=1:length(vids)
+        a = stats.t(stats.watch == vids(i));
+
+        c = histc(a-min(a),0:4:par.tmax-min(a));
+        plot(1:length(c), c, '.', 'Color',color(i,:));
+    end
+    
+    %x: 800
+    %y: 90
+    
+    saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
+end
+%erstmal tag/nacht raus lassen
+%0.017 aus views raus -> erstmal nur bei share
+%evtl. 0.017 zwischen views & shares unterschiedlich
+%notlösung: einmal zipf simulieren

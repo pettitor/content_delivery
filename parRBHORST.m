@@ -126,6 +126,8 @@ par.ia_share_par = [1/1.5070 1 0];
 par.tmax = 3e3;
 
 %temporal attenuation
+par.shareAttenuation = true;
+par.viewAttenuation = true;
 par.tmpAttenuationExp = 0.017;
 
 par.rand_stream = 'mt19937ar';

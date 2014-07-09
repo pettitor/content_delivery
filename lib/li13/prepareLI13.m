@@ -12,5 +12,7 @@ li13.initialView = ones(1,par.nvids)/par.nvids;
 
 %temporal attenuation
 li13.tmpAttenuationExp = par.tmpAttenuationExp;
+li13.shareAttenuation = par.shareAttenuation;
+li13.viewAttenuation = par.viewAttenuation;
 
 end

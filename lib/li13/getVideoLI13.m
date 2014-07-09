@@ -8,9 +8,12 @@ if (eventType == WATCH)
     if (t == 0)
         probs = li13.p;
     else
-        times = t-li13.lastShare;
-        %probs = li13.p./times;
-        probs = li13.p.*exp(-li13.tmpAttenuationExp*times);
+        if (li13.viewAttenuation)
+            times = t-li13.lastShare;
+            probs = li13.p.*exp(-li13.tmpAttenuationExp*times);
+        else
+            probs = li13.p;
+        end
         %probs decrease the farther away the last share was
     end
     
@@ -31,8 +34,11 @@ else
     if (timeSinceFirstView == 0)
         prob = li13.shr(currentVid);
     else
-        %prob = li13.shr(currentVid)/timeSinceFirstView;
-        prob = li13.shr(currentVid)*exp(-li13.tmpAttenuationExp*timeSinceFirstView);
+        if (li13.shareAttenuation)
+           prob = li13.shr(currentVid)*exp(-li13.tmpAttenuationExp*timeSinceFirstView);
+        else
+           prob = li13.shr(currentVid);
+        end
     end
     
     r = rand();
@@ -42,8 +48,3 @@ else
         vid = nan;
     end
 end
-
-%par.lastShare
-%TODO bei view event: p/(time-lastShare) -> abfangen if (time-lastShare) == 0
-%par.initialView = zeros(nvids); -> ersten view reinschreiben
-%bei share event: p/(time-initialView) -> abfangen if (time-lastShare) == 0
