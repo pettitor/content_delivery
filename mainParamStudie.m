@@ -27,7 +27,7 @@ stats = cdsim(par);
 toc
 
 name = ['li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed)];
-save(['results/cdsim_demandModel_' name '.mat'], 'par', 'stats')
+save(['results/cdsim_demandModel_' name '_1.mat'], 'par', 'stats')
 
 
 %% diurnal vs non-diurnal | no attenuation

@@ -155,7 +155,7 @@ while events.t(1) < par.tmax
         case UPDATE
             %add video to set of active videos
             li13 = updateLI13(vid, UPDATE, par, li13, t);
-            u = 10000;%floor(rand() * nusers); %pick a random user
+            u = 4;%floor(rand() * nusers); %pick a random user
             events = addEvent(events, t, WATCH, u, i, vid);
         case WATCH
             
