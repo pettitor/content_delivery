@@ -7,6 +7,7 @@ WATCH=1;
 SHARE=2;
 RESHARE=3;
 CACHE=4;
+UPDATE=5;
 
 % caching strategies
 LRU = 1;
@@ -116,6 +117,13 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
+%make sure UPDATE is first in queue (otherwise no video acitve)
+arrivalTimes = random(par.ia_video_rnd, par.tmax/par.nvids, [par.nvids, 1]);
+arrivalTimes(1) = 0; %make sure, that on start one video is active
+for i=1:par.nvids
+   events = addEvent(events, arrivalTimes(i), UPDATE, NaN, 0, i); 
+end
+
 %for i=1:maxID
     events = addEvent(events, 0, WATCH, i, i, NaN);
 %end
@@ -144,6 +152,11 @@ while events.t(1) < par.tmax
     end
     
     switch type
+        case UPDATE
+            %add video to set of active videos
+            li13 = updateLI13(vid, UPDATE, par, li13, t);
+            u = 10000;%floor(rand() * nusers); %pick a random user
+            events = addEvent(events, t, WATCH, u, i, vid);
         case WATCH
             
             %uid = getUserID(GF);
@@ -155,6 +168,10 @@ while events.t(1) < par.tmax
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
                     stats.snm.time = [stats.snm.time t];
                 elseif (par.demand_model == LI13)
+                    li13 = updateLI13(vid, WATCH, par, li13, t);
+                end
+            else
+                if (par.demand_model == LI13)
                     li13 = updateLI13(vid, WATCH, par, li13, t);
                 end
             end

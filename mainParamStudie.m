@@ -16,6 +16,20 @@ addpath('lib/li13');
 parRBHORST;
 
 seeds = [234, 567];
+%% just a small test
+par.shareAttenuation = false;
+par.viewAttenuation = false;
+
+clear('stats');
+par.seed = seeds(1);
+tic
+stats = cdsim(par);
+toc
+
+name = ['li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed)];
+save(['results/cdsim_demandModel_' name '.mat'], 'par', 'stats')
+
+
 %% diurnal vs non-diurnal | no attenuation
 par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16];
 par.shareAttenuation = false;

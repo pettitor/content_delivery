@@ -125,6 +125,9 @@ par.ia_share_par = [1/1.5070 1 0];
 %%% Simulation Parameters
 par.tmax = 3e3;
 
+%distribution of video arrivals
+par.ia_video_rnd = 'exp';
+
 %temporal attenuation
 par.shareAttenuation = true;
 par.viewAttenuation = true;
