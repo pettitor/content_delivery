@@ -118,14 +118,16 @@ events.id=[];
 events.vid=[];
 
 %make sure UPDATE is first in queue (otherwise no video acitve)
-arrivalTimes = random(par.ia_video_rnd, par.tmax/par.nvids, [par.nvids, 1]);
+%arrivalTimes = random(par.ia_video_rnd, par.tmax/par.nvids, [par.nvids, 1]);
+arrivalTimes = rand(par.nvids, 1);
+arrivalTimes = arrivalTimes*par.tmax;
 arrivalTimes(1) = 0; %make sure, that on start one video is active
 for i=1:par.nvids
    events = addEvent(events, arrivalTimes(i), UPDATE, NaN, 0, i); 
 end
 
 %for i=1:maxID
-    events = addEvent(events, 0, WATCH, i, i, NaN);
+    events = addEvent(events, 0, WATCH, 4, 4, NaN);
 %end
 
 % queue.active = [];
@@ -155,7 +157,8 @@ while events.t(1) < par.tmax
         case UPDATE
             %add video to set of active videos
             li13 = updateLI13(vid, UPDATE, par, li13, t);
-            u = 4;%floor(rand() * nusers); %pick a random user
+            u = floor(rand() * nusers); %pick a random user
+            %disp(num2str(u))
             events = addEvent(events, t, WATCH, u, i, vid);
         case WATCH
             
@@ -256,7 +259,8 @@ while events.t(1) < par.tmax
             wall = updateWall(GF, wall, uid, vid);
             
             if (par.demand_model == LI13)
-                li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:)));
+                %find 'last': id 4897 returns several entries, should fix that
+                li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:), 1, 'last' ));
             end
             
             stats.share(id) = vid;
