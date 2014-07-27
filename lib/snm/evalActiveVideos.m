@@ -1,4 +1,5 @@
 filePattern = 'results/cdsim_demandModel_li13_*.mat';
+
 %% active videos snm
 files = dir(filePattern);
 
@@ -159,7 +160,5 @@ for f=1:length(files)
     
     saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end
-%erstmal tag/nacht raus lassen
-%0.017 aus views raus -> erstmal nur bei share
-%evtl. 0.017 zwischen views & shares unterschiedlich
-%notlösung: einmal zipf simulieren
+
+%TODO histc (anzahl views pro zeitintervall)
