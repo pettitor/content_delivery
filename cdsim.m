@@ -125,11 +125,12 @@ userUpload = rand(par.nvids, 1);
 userUpload = floor(userUpload*nusers);
 arrivalTimes(1) = 0; %make sure, that on start one video is active
 for i=1:par.nvids
-   events = addEvent(events, arrivalTimes(i), UPLOAD, NaN, 0, userUpload(i)); 
+   events = addEvent(events, arrivalTimes(i), UPLOAD, userUpload(i), 0, i); 
 end
 
 %for i=1:maxID
-    events = addEvent(events, 0, WATCH, 4, 4, NaN);
+u = floor(rand()*nusers);
+    events = addEvent(events, 0, WATCH, i, i, NaN);
 %end
 
 % queue.active = [];
@@ -160,7 +161,6 @@ while events.t(1) < par.tmax
             %add video to set of active videos
             li13 = updateLI13(vid, UPLOAD, par, li13, t);
             u = floor(rand() * nusers); %pick a random user
-            %disp(num2str(u))
             events = addEvent(events, t, WATCH, u, i, vid);
         case WATCH
             

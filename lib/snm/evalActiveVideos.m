@@ -161,4 +161,25 @@ for f=1:length(files)
     saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end
 
-%TODO histc (anzahl views pro zeitintervall)
+%% number request per time period
+%just for the x top most popular videos
+files = dir(filePattern);
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    [b,idx] = sort(stats.views,'descend');
+    vids = idx(1:5); %populaeresten videos
+    for i=1:length(vids)
+        a = stats.t(stats.watch == vids(i));
+
+        %4 ticks = one day -> 12 ticks = 3 days
+        c(:,i) = histc(a,0:12:par.tmax);
+    end
+    
+    fi = figure(f);
+    bar(c);
+    
+    saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
+end
