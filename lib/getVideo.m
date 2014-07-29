@@ -35,7 +35,7 @@ LI13 = 5;
             % note: don't try to model popularity cascades (observed in
             % geographically distributed user base)
         case LI13
-            vid = getVideoLI13(li13, eventType);
+            vid = getVideoLI13(li13, eventType, t);
     end
     
 end
