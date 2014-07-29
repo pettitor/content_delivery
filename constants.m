@@ -3,7 +3,8 @@ WALL = 2;
 YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
-demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13'};
+ZIPF2 = 6;
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2'};
 resourceSel = {'LOCAL','RANDOM','RBHORST','RANDOM2'};
 
 % caching strategies
