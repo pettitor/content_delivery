@@ -8,9 +8,9 @@ par.ASn = 50;
 par.ASp = geopdf(0:(par.ASn-1), 0.1);
 par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
-par.nvids = 10000;
+par.nvids = 10000; % video catalog
 
-par.cachesizeAS = 0.1; % proportional to AS size
+par.cachesizeAS = 0.02; % proportional to video catalog
 
 par.cachesizeUSER = 5; % items
 
@@ -88,11 +88,16 @@ WALL = 2;
 YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
+ZIPF2 = 6;
 
 par.demand_model = LI13;
 par.sharing_model = LI13;
 
-par.alpha = 1+1; % global Zipf law popularity, consider a<1, a>1
+par.alpha = 0.6; % global Zipf law popularity, consider a<1, a>1
+
+a=exp(-par.alpha .* log(1:par.nvids));
+zipfcdf = cumsum([0 a]);
+par.zipfcdf = zipfcdf/zipfcdf(end);
 
 %currently: one tick of t = 1/96 day -> 15 min
 par.ticksPerDay = 96;

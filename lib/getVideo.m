@@ -24,6 +24,8 @@ LI13 = 5;
                 % TODO check correct value for alpha
                 vid = randraw('zeta', par.alpha, 1);
             end
+        case ZIPF2
+            vid=find(par.zipfcdf>rand(),1,'first')-1;
         case YTSTATS
             % George you can implement your model here
         case SNM    

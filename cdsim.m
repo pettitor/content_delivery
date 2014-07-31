@@ -29,8 +29,6 @@ RandStream.setGlobalStream(s);
 
 
 %rand('twister', par.seed)
-
-
 GF = par.GF; % graph with friend relations
 nusers = par.nuser;
 GV = sparse(par.nvids); % graph with video interest
@@ -54,7 +52,7 @@ preshare = par.preshare;
 pshare = par.pshare;
 
 % draw ASnumbers of end user according to probability in par.ASp
-AS = sum(~(ones(par.ASn,1)*rand(1,nusers)<cumsum(par.ASp)'*ones(1,nusers)))+1;
+AS = sum(~(ones(par.ASn,1)*rand(1,nusers)<cumsum(par.ASp)'*ones(1,nusers)),1)+1;
 
 % number of users in each AS
 nASuser = histc(AS, 1:par.ASn);
