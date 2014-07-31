@@ -30,8 +30,8 @@ access = [];
             
             % pic random cache to serve
             cid = find(local & hit & user);
-            %cid = cid(randi(length(cid)));
-            cid = cid(random('unid',1,length(cid)));
+            cid = cid(randi(length(cid)));
+            %cid = cid(random('unid',1,length(cid)));
             % alternative share load on caches with hit
             
             % if not available look in isp cache
@@ -40,8 +40,8 @@ access = [];
                stats.cache_access(local & ~user) = stats.cache_access(local & ~user) + 1;
                if any(local & hit & ~user)
                 cid = find(local & hit & ~user);
-                %cid = cid(randi(length(cid)));
-                cid = cid(random('unid',1,length(cid)));
+                cid = cid(randi(length(cid)));
+                %cid = cid(random('unid',1,length(cid)));
             
                 stats.cache_hit(cid) = stats.cache_hit(cid) + 1;
                 end

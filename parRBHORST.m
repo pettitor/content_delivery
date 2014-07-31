@@ -8,7 +8,7 @@ par.ASn = 50;
 par.ASp = geopdf(0:(par.ASn-1), 0.1);
 par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
-par.nvids = 10000; % video catalog
+par.nvids = 1000; % video catalog
 
 par.cachesizeAS = 0.02; % proportional to video catalog
 
@@ -128,7 +128,7 @@ par.ia_share_par = [1/1.5070 1 0];
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 %%% Simulation Parameters
-par.tmax = 3e3;
+par.tmax = 3e2;
 
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
@@ -136,7 +136,7 @@ par.ia_video_rnd = 'exp';
 %temporal attenuation
 par.shareAttenuation = true;
 par.viewAttenuation = true;
-par.tmpAttenuationExp = 0.017;
+par.tmpAttenuationExp = 0.17;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;

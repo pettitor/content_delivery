@@ -17,8 +17,8 @@ parRBHORST;
 
 seeds = [234, 567];
 %% just a small test
-par.shareAttenuation = false;
-par.viewAttenuation = false;
+par.shareAttenuation = true;
+par.viewAttenuation = true;
 
 clear('stats');
 par.seed = seeds(1);

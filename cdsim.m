@@ -63,17 +63,16 @@ iAScacheUSER = rand(1, length(AS)) < par.pcacheUSER;
 nAScacheUSER = sum(iAScacheUSER);
 
 % one cache per isp and end user
-cache.AS = [1:par.ASn AS]';
+cache.AS = [1:par.ASn AS(iAScacheUSER)]';
 
-cache.type = [ones(1,par.ASn) 2*ones(1,nusers)]';
+cache.type = [ones(1,par.ASn) 2*ones(1,nAScacheUSER)]';
 
 % cache.strategy = NaN(size(cache.type));
 % for i=1:length(par.cachingstrategy);
 %     cache.strategy(cache.type == i) = par.cachingstrategy(i);
 % end
 
-cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*iAScacheUSER]';
-noc = find(cache.capacity == 0);
+cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*ones(1,nAScacheUSER)]';
 
 cache.items = cell(length(cache.capacity),1);
 nitems = max(cache.capacity);
@@ -119,11 +118,11 @@ events.vid=[];
 %make sure UPLOAD is first in queue (otherwise no video acitve)
 userUpload = rand(par.nvids, 1);
 userUpload = floor(userUpload*nusers);
-events = addEvent(events, 0, UPLOAD, userUpload(1), 0, 1);
+events = addEvent(events, 0, par.tmax, UPLOAD, userUpload(1), 0, 1);
 
 %for i=1:maxID
 %u = floor(rand()*nusers);
-%    events = addEvent(events, 0, WATCH, i, i, NaN);
+%    events = addEvent(events, 0, par.tmax, WATCH, i, i, NaN);
 %end
 
 % queue.active = [];
@@ -146,7 +145,7 @@ while events.t(1) < par.tmax
     t1 = floor(t);
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
-        disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
+        disp(['Progress: ' num2str(100*(t1/par.tmax)) '%' num2str(length(events.t))])
         if (100*(t1/par.tmax) == 16)
            disp('test') 
         end
@@ -157,9 +156,10 @@ while events.t(1) < par.tmax
             %add video to set of active videos
             li13 = updateLI13(vid, UPLOAD, par, li13, t);
             u = floor(rand() * nusers); %pick a random user
-            events = addEvent(events, t, WATCH, 4, i, vid);
-            deltaT = random(par.ia_video_rnd, par.tmax/par.nvids);
-            events = addEvent(events, t+deltaT, UPLOAD, 4, i, vid+1);
+            events = addEvent(events, t, par.tmax, WATCH, 4, i, vid);
+            deltaT = exprnd(par.tmax/par.nvids);
+            %deltaT = random(par.ia_video_rnd, par.tmax/par.nvids);
+            events = addEvent(events, t+deltaT, par.tmax, UPLOAD, 4, i, vid+1);
         case WATCH
             
             %uid = getUserID(GF);
@@ -194,10 +194,10 @@ while events.t(1) < par.tmax
              end               
             
              % remove caches without capacity
-             access = setdiff(access, noc);
+             %access = setdiff(access, noc);
              
             % Event necessary?
-            %events = addEvent(events, t, CACHE, user, id);
+            %events = addEvent(events, t, par.tmax, CACHE, user, id);
 
             %TODO update only caches which were accessed
             % update user cache
@@ -211,12 +211,12 @@ while events.t(1) < par.tmax
                     reshare = any(wall(uid,:)==vid);
                     if ((~reshare && r < pshare) || (reshare && r < preshare))
                         % add (re)share event
-
+    
                         dt = random(par.ia_share_rnd, ...
                             par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
                         
                         maxID = maxID+1;
-                        events = addEvent(events, t+dt, SHARE, user, maxID, vid);
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
                     end
                 case YTSTATS
                     r = rand();
@@ -231,27 +231,28 @@ while events.t(1) < par.tmax
                             par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
                     
                     maxID = maxID+1;
-                    events = addEvent(events, t+dt, SHARE, user, maxID, vid);
+                    events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
                     %TODO after lunch
                 case LI13
                     vid = getVideoLI13(li13, SHARE, t, vid);
                     
                     if (~isnan(vid))
-                        dt = random(par.ia_share_rnd, ...
-                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+                        %dt = random(par.ia_share_rnd, ...
+                        %    par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
 
-                        maxID = maxID+1;
-                        events = addEvent(events, t+dt, SHARE, user, maxID, vid);
+                        %maxID = maxID+1;
+                        %events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
                     end
             end
 
             hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
             
             % add watch event
-            dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
+            dt = exprnd(par.ia_demand_par(hourIndex));
+            %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
                 
             maxID = maxID+1;
-            events = addEvent(events, t+dt, WATCH, user, maxID, NaN);
+            events = addEvent(events, t+dt, par.tmax, WATCH, user, maxID, NaN);
         
         case SHARE
             % update wall of friends
