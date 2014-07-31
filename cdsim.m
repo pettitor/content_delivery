@@ -75,6 +75,7 @@ cache.type = [ones(1,par.ASn) 2*ones(1,nusers)]';
 % end
 
 cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*iAScacheUSER]';
+noc = find(cache.capacity == 0);
 
 cache.items = cell(length(cache.capacity),1);
 nitems = max(cache.capacity);
@@ -118,15 +119,9 @@ events.id=[];
 events.vid=[];
 
 %make sure UPLOAD is first in queue (otherwise no video acitve)
-%arrivalTimes = random(par.ia_video_rnd, par.tmax/par.nvids, [par.nvids, 1]);
-arrivalTimes = rand(par.nvids, 1);
-arrivalTimes = arrivalTimes*par.tmax;
 userUpload = rand(par.nvids, 1);
 userUpload = floor(userUpload*nusers);
-arrivalTimes(1) = 0; %make sure, that on start one video is active
-for i=1:par.nvids
-   events = addEvent(events, arrivalTimes(i), UPLOAD, userUpload(i), 0, i); 
-end
+events = addEvent(events, 0, UPLOAD, userUpload(1), 0, 1);
 
 %for i=1:maxID
 u = floor(rand()*nusers);
@@ -161,7 +156,9 @@ while events.t(1) < par.tmax
             %add video to set of active videos
             li13 = updateLI13(vid, UPLOAD, par, li13, t);
             u = floor(rand() * nusers); %pick a random user
-            events = addEvent(events, t, WATCH, u, i, vid);
+            events = addEvent(events, t, WATCH, 4, i, vid);
+            deltaT = random(par.ia_video_rnd, par.tmax/par.nvids);
+            events = addEvent(events, t+deltaT, UPLOAD, 4, i, vid+1);
         case WATCH
             
             %uid = getUserID(GF);
@@ -188,13 +185,16 @@ while events.t(1) < par.tmax
        
             %TODO
             GV = updateGV(GV, vid);
-
+            
             [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par.resourceselection, par);
             
              if (cid)
                  stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
              end               
             
+             % remove caches without capacity
+             access = setdiff(access, noc);
+             
             % Event necessary?
             %events = addEvent(events, t, CACHE, user, id);
 
