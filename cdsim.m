@@ -122,8 +122,8 @@ userUpload = floor(userUpload*nusers);
 events = addEvent(events, 0, UPLOAD, userUpload(1), 0, 1);
 
 %for i=1:maxID
-u = floor(rand()*nusers);
-    events = addEvent(events, 0, WATCH, i, i, NaN);
+%u = floor(rand()*nusers);
+%    events = addEvent(events, 0, WATCH, i, i, NaN);
 %end
 
 % queue.active = [];
@@ -147,6 +147,9 @@ while events.t(1) < par.tmax
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
         disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
+        if (100*(t1/par.tmax) == 16)
+           disp('test') 
+        end
     end
     
     switch type
