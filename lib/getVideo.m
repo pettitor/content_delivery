@@ -5,6 +5,7 @@ WALL = 2;
 YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
+ZIPF2 = 6;
     
     % TODO
     % niche - popular
