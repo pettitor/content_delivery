@@ -21,6 +21,8 @@ WALL = 2;
 YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
+ZIPF2 = 6;
+LI13Custom = 7;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
@@ -105,7 +107,7 @@ li13 = struct;
 if (par.demand_model == SNM)
     snm = prepareSNM(par);
     stats.snm.classes = snm.videoClass;
-elseif (par.demand_model == LI13)
+elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
     li13 = prepareLI13(par);
 end
 
@@ -115,15 +117,17 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
-%make sure UPLOAD is first in queue (otherwise no video acitve)
-userUpload = rand(par.nvids, 1);
-userUpload = floor(userUpload*nusers);
-events = addEvent(events, 0, par.tmax, UPLOAD, userUpload(1), 0, 1);
-
-%for i=1:maxID
-%u = floor(rand()*nusers);
-%    events = addEvent(events, 0, par.tmax, WATCH, i, i, NaN);
-%end
+if (par.demand_model == LI13Custom)
+    %make sure UPLOAD is first in queue (otherwise no video acitve)
+    userUpload = rand(par.nvids, 1);
+    userUpload = floor(userUpload*nusers);
+    events = addEvent(events, 0, par.tmax, UPLOAD, userUpload(1), 0, 1);
+else
+    %for i=1:maxID
+    %u = floor(rand()*nusers);
+        events = addEvent(events, 0, par.tmax, WATCH, i, i, NaN);
+    %end
+end
 
 % queue.active = [];
 
@@ -170,11 +174,11 @@ while events.t(1) < par.tmax
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
                     stats.snm.time = [stats.snm.time t];
-                elseif (par.demand_model == LI13)
+                elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
                     li13 = updateLI13(vid, WATCH, par, li13, t);
                 end
             else
-                if (par.demand_model == LI13)
+                if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                     li13 = updateLI13(vid, WATCH, par, li13, t);
                 end
             end
@@ -237,11 +241,21 @@ while events.t(1) < par.tmax
                     vid = getVideoLI13(li13, SHARE, t, vid);
                     
                     if (~isnan(vid))
-                        %dt = random(par.ia_share_rnd, ...
-                        %    par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+                        dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
 
-                        %maxID = maxID+1;
-                        %events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                        maxID = maxID+1;
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                    end
+                case LI13Custom
+                    vid = getVideoLI13Custom(li13, SHARE, t, vid);
+                    
+                    if (~isnan(vid))
+                        dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+
+                        maxID = maxID+1;
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
                     end
             end
 
@@ -262,7 +276,7 @@ while events.t(1) < par.tmax
             end
             wall = updateWall(GF, wall, uid, vid);
             
-            if (par.demand_model == LI13)
+            if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 %find 'last': id 4897 returns several entries, should fix that
                 li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:), 1, 'last' ));
             end
@@ -274,7 +288,7 @@ while events.t(1) < par.tmax
             % update wall of friends
             wall = updateWall(GF, wall, stats.uid(id), stats.vid(id));
             
-            if (par.demand_model == LI13)
+            if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 li13 = updateLI13(vid, SHARE, par, li13, find(GF(uid,:)));
             end
             

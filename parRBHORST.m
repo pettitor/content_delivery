@@ -89,6 +89,7 @@ YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
 ZIPF2 = 6;
+LI13Custom = 7;
 
 par.demand_model = LI13;
 par.sharing_model = LI13;
@@ -144,6 +145,6 @@ par.seed = 13;
 % demand model parameters
 if (par.demand_model == SNM)
     par = addSNMParams(par);
-elseif (par.demand_model == LI13)
+elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
     par = addLI13Params(par);
 end

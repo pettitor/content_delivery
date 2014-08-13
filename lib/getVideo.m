@@ -6,6 +6,7 @@ YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
 ZIPF2 = 6;
+LI13Custom = 7;
     
     % TODO
     % niche - popular
@@ -37,6 +38,8 @@ ZIPF2 = 6;
             % geographically distributed user base)
         case LI13
             vid = getVideoLI13(li13, eventType, t);
+        case LI13Custom
+            vid = getVideoLI13Custom(li13, eventType, t);
     end
     
 end
