@@ -117,24 +117,28 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
+uploadCounter = 1;
+
 if (par.demand_model == LI13Custom && par.uploadEvents)
     %make sure UPLOAD is first in queue (otherwise no video acitve)
     userUpload = rand(par.nvids, 1);
     userUpload = floor(userUpload*nusers);
-    events = addEvent(events, 0, par.tmax, UPLOAD, userUpload(1), 0, 1);
+    events = addEvent(events, 0, par.tmax, UPLOAD, userUpload(uploadCounter), 1, 1);
+    uploadCounter = uploadCounter + 1;
 else
     %for i=1:maxID
     %u = floor(rand()*nusers);
-        events = addEvent(events, 0, par.tmax, WATCH, i, i, NaN);
+        events = addEvent(events, 0, par.tmax, WATCH, 1, 1, NaN);
     %end
 end
 
 % queue.active = [];
 
-stats.watch = nan(1,600000);
-stats.uid = nan(1,600000);
-stats.share = nan(1,600000);
-stats.t = nan(1,600000);
+stats.upload = nan(1,3000000);
+stats.watch = nan(1,3000000);
+stats.uid = nan(1,3000000);
+stats.share = nan(1,3000000);
+stats.t = nan(1,3000000);
 stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
@@ -149,7 +153,10 @@ while ~isempty(events.t) && events.t(1) < par.tmax
     t1 = floor(t);
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
-        disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
+        disp(['Progress: ' num2str(100*(t1/par.tmax)) '% '  num2str(length(events.t))])
+        if 100*(t1/par.tmax) == 13
+           disp('slow') 
+        end
     end
     
     switch type
@@ -157,10 +164,18 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             %add video to set of active videos
             li13 = updateLI13(vid, UPLOAD, par, li13, t);
             u = floor(rand() * nusers); %pick a random user
-            events = addEvent(events, t, par.tmax, WATCH, 4, i, vid);
+            maxID = maxID + 1;
+            events = addEvent(events, t, par.tmax, WATCH, user, maxID, vid);
             deltaT = exprnd(par.tmax/par.nvids);
             %deltaT = random(par.ia_video_rnd, par.tmax/par.nvids);
-            events = addEvent(events, t+deltaT, par.tmax, UPLOAD, 4, i, vid+1);
+            maxID = maxID + 1;
+            events = addEvent(events, t+deltaT, par.tmax, UPLOAD, userUpload(uploadCounter), maxID, vid+1);
+            uploadCounter = uploadCounter + 1;
+            
+            stats.t(id) = t;
+            stats.upload(id) = vid;
+            stats.uid(id) = user;
+            
         case WATCH
             
             %uid = getUserID(GF);

@@ -1,4 +1,4 @@
-filePattern = 'results/cdsim_demandModel_li13_*.mat';
+filePattern = 'results/cdsim_14-Aug-2014*.mat';
 
 %% active videos snm
 files = dir(filePattern);
@@ -41,7 +41,7 @@ for f=1:length(files)
     loglog(views)
     
     axis([0 10^4 0 10^4]);
-    title(num2str(par.tmpAttenuationExp));
+    title(files(f).name);
     xlabel('Video index (ranked by popularity)');
     ylabel('Number of requests');
     
@@ -155,6 +155,8 @@ for f=1:length(files)
         plot(1:length(c), c, '.', 'Color',color(i,:));
     end
     
+    
+    title(files(f).name);
     %x: 800
     %y: 90
     
@@ -179,7 +181,9 @@ for f=1:length(files)
     end
     
     fi = figure(f);
+    title(files(f).name);
     bar(c);
     
     saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end
+
