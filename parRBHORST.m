@@ -134,7 +134,8 @@ par.tmax = 3e2;
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
 
-%temporal attenuation
+%li13 Custom settings, upload events and temporal attenuation
+par.uploadEvents = true;
 par.shareAttenuation = true;
 par.viewAttenuation = true;
 par.tmpAttenuationExp = 0.17;

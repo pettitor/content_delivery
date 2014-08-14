@@ -15,7 +15,53 @@ addpath('lib/li13');
 
 parRBHORST;
 
-seeds = [234, 567];
+seeds = [234]; %, 567];
+%% new study with separated LIs
+ZIPF = 1;
+WALL = 2;
+YTSTATS = 3;
+SNM = 4;
+LI13 = 5;
+ZIPF2 = 6;
+LI13Custom = 7;
+
+par.demand_model = LI13;
+par.sharing_model = LI13;
+
+for j=1:length(seeds)
+    clear('stats');
+    par.seed = seeds(j);
+    tic
+    stats = cdsim(par);
+    toc
+
+    name = ['li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model)];
+    save(['results/cdsim_demandModel_' name '_1.mat'], 'par', 'stats')
+end
+
+
+par.demand_model = LI13Custom;
+par.sharing_model = LI13Custom;
+%all possible combinations concerning upload events and attenuations
+combis = [0 0 0; 0 0 1; 0 1 0; 0 1 1; 1 0 0; 1 0 1; 1 1 0; 1 1 1];
+for j=1:length(seeds)
+    for i=1:size(combis,1)
+        par.shareAttenuation = combis(i,1);
+        par.viewAttenuation = combis(i,2);
+        par.uploadEvents = combis(i,3);
+
+        clear('stats');
+        par.seed = seeds(j);
+        tic
+        stats = cdsim(par);
+        toc
+
+        name = ['li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model)];
+        save(['results/cdsim_demandModel_' name '_1.mat'], 'par', 'stats')
+
+    end
+end
+
 %% just a small test
 par.shareAttenuation = true;
 par.viewAttenuation = true;

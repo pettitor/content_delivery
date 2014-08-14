@@ -117,7 +117,7 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
-if (par.demand_model == LI13Custom)
+if (par.demand_model == LI13Custom && par.uploadEvents)
     %make sure UPLOAD is first in queue (otherwise no video acitve)
     userUpload = rand(par.nvids, 1);
     userUpload = floor(userUpload*nusers);
@@ -139,7 +139,7 @@ stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
 t2 = 0;
-while events.t(1) < par.tmax
+while ~isempty(events.t) && events.t(1) < par.tmax
     t = events.t(1); events.t(1)=[];
     type = events.type(1); events.type(1)=[];
     user = events.user(1); events.user(1)=[];
@@ -149,10 +149,7 @@ while events.t(1) < par.tmax
     t1 = floor(t);
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
-        disp(['Progress: ' num2str(100*(t1/par.tmax)) '%' num2str(length(events.t))])
-        if (100*(t1/par.tmax) == 16)
-           disp('test') 
-        end
+        disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
     end
     
     switch type
