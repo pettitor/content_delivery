@@ -14,7 +14,7 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
     if (cache.capacity(id) > 0)
     switch par.cachingstrategy(cache.type(id))
         case LRU
-            
+
             i = cache.items(id,:) == vid;
             if any(i)
                 cache.score(id,i) = t;
