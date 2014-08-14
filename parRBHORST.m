@@ -8,7 +8,7 @@ par.ASn = 50;
 par.ASp = geopdf(0:(par.ASn-1), 0.1);
 par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
-par.nvids = 10000; % video catalog
+par.nvids = 1000; % video catalog
 
 par.cachesizeAS = 0.02; % proportional to video catalog
 
@@ -89,6 +89,7 @@ YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
 ZIPF2 = 6;
+LI13Custom = 7;
 
 par.demand_model = LI13;
 par.sharing_model = LI13;
@@ -128,15 +129,16 @@ par.ia_share_par = [1/1.5070 1 0];
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 %%% Simulation Parameters
-par.tmax = 3e3;
+par.tmax = 3e2;
 
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
 
-%temporal attenuation
+%li13 Custom settings, upload events and temporal attenuation
+par.uploadEvents = true;
 par.shareAttenuation = true;
 par.viewAttenuation = true;
-par.tmpAttenuationExp = 0.017;
+par.tmpAttenuationExp = 0.17;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;
@@ -144,6 +146,6 @@ par.seed = 13;
 % demand model parameters
 if (par.demand_model == SNM)
     par = addSNMParams(par);
-elseif (par.demand_model == LI13)
+elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
     par = addLI13Params(par);
 end

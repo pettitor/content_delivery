@@ -4,6 +4,7 @@ YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
 ZIPF2 = 6;
+LI13Custom = 7;
 demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2'};
 resourceSel = {'LOCAL','RANDOM','RBHORST','RANDOM2'};
 

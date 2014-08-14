@@ -21,6 +21,8 @@ WALL = 2;
 YTSTATS = 3;
 SNM = 4;
 LI13 = 5;
+ZIPF2 = 6;
+LI13Custom = 7;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
@@ -63,17 +65,16 @@ iAScacheUSER = rand(1, length(AS)) < par.pcacheUSER;
 nAScacheUSER = sum(iAScacheUSER);
 
 % one cache per isp and end user
-cache.AS = [1:par.ASn AS]';
+cache.AS = [1:par.ASn AS(iAScacheUSER)]';
 
-cache.type = [ones(1,par.ASn) 2*ones(1,nusers)]';
+cache.type = [ones(1,par.ASn) 2*ones(1,nAScacheUSER)]';
 
 % cache.strategy = NaN(size(cache.type));
 % for i=1:length(par.cachingstrategy);
 %     cache.strategy(cache.type == i) = par.cachingstrategy(i);
 % end
 
-cache.capacity = [ceil(par.cachesizeAS*nvids) par.cachesizeUSER*iAScacheUSER]';
-%cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*iAScacheUSER]';
+cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*ones(1,nAScacheUSER)]';
 
 cache.items = cell(length(cache.capacity),1);
 nitems = max(cache.capacity);
@@ -106,7 +107,7 @@ li13 = struct;
 if (par.demand_model == SNM)
     snm = prepareSNM(par);
     stats.snm.classes = snm.videoClass;
-elseif (par.demand_model == LI13)
+elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
     li13 = prepareLI13(par);
 end
 
@@ -116,21 +117,17 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
-%make sure UPLOAD is first in queue (otherwise no video acitve)
-%arrivalTimes = random(par.ia_video_rnd, par.tmax/par.nvids, [par.nvids, 1]);
-arrivalTimes = rand(par.nvids, 1);
-arrivalTimes = arrivalTimes*par.tmax;
-userUpload = rand(par.nvids, 1);
-userUpload = floor(userUpload*nusers);
-arrivalTimes(1) = 0; %make sure, that on start one video is active
-for i=1:par.nvids
-   events = addEvent(events, arrivalTimes(i), UPLOAD, userUpload(i), 0, i); 
+if (par.demand_model == LI13Custom && par.uploadEvents)
+    %make sure UPLOAD is first in queue (otherwise no video acitve)
+    userUpload = rand(par.nvids, 1);
+    userUpload = floor(userUpload*nusers);
+    events = addEvent(events, 0, par.tmax, UPLOAD, userUpload(1), 0, 1);
+else
+    %for i=1:maxID
+    %u = floor(rand()*nusers);
+        events = addEvent(events, 0, par.tmax, WATCH, i, i, NaN);
+    %end
 end
-
-%for i=1:maxID
-u = floor(rand()*nusers);
-    events = addEvent(events, 0, WATCH, i, i, NaN);
-%end
 
 % queue.active = [];
 
@@ -142,7 +139,7 @@ stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
 t2 = 0;
-while events.t(1) < par.tmax
+while ~isempty(events.t) && events.t(1) < par.tmax
     t = events.t(1); events.t(1)=[];
     type = events.type(1); events.type(1)=[];
     user = events.user(1); events.user(1)=[];
@@ -160,7 +157,10 @@ while events.t(1) < par.tmax
             %add video to set of active videos
             li13 = updateLI13(vid, UPLOAD, par, li13, t);
             u = floor(rand() * nusers); %pick a random user
-            events = addEvent(events, t, WATCH, u, i, vid);
+            events = addEvent(events, t, par.tmax, WATCH, 4, i, vid);
+            deltaT = exprnd(par.tmax/par.nvids);
+            %deltaT = random(par.ia_video_rnd, par.tmax/par.nvids);
+            events = addEvent(events, t+deltaT, par.tmax, UPLOAD, 4, i, vid+1);
         case WATCH
             
             %uid = getUserID(GF);
@@ -171,11 +171,11 @@ while events.t(1) < par.tmax
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
                     stats.snm.time = [stats.snm.time t];
-                elseif (par.demand_model == LI13)
+                elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
                     li13 = updateLI13(vid, WATCH, par, li13, t);
                 end
             else
-                if (par.demand_model == LI13)
+                if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                     li13 = updateLI13(vid, WATCH, par, li13, t);
                 end
             end
@@ -187,15 +187,18 @@ while events.t(1) < par.tmax
        
             %TODO
             GV = updateGV(GV, vid);
-
+            
             [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par.resourceselection, par);
             
              if (cid)
                  stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
              end               
             
+             % remove caches without capacity
+             %access = setdiff(access, noc);
+             
             % Event necessary?
-            %events = addEvent(events, t, CACHE, user, id);
+            %events = addEvent(events, t, par.tmax, CACHE, user, id);
 
             %TODO update only caches which were accessed
             % update user cache
@@ -209,12 +212,12 @@ while events.t(1) < par.tmax
                     reshare = any(wall(uid,:)==vid);
                     if ((~reshare && r < pshare) || (reshare && r < preshare))
                         % add (re)share event
-
+    
                         dt = random(par.ia_share_rnd, ...
                             par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
                         
                         maxID = maxID+1;
-                        events = addEvent(events, t+dt, SHARE, user, maxID, vid);
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
                     end
                 case YTSTATS
                     r = rand();
@@ -229,7 +232,7 @@ while events.t(1) < par.tmax
                             par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
                     
                     maxID = maxID+1;
-                    events = addEvent(events, t+dt, SHARE, user, maxID, vid);
+                    events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
                     %TODO after lunch
                 case LI13
                     vid = getVideoLI13(li13, SHARE, t, vid);
@@ -239,17 +242,28 @@ while events.t(1) < par.tmax
                             par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
 
                         maxID = maxID+1;
-                        events = addEvent(events, t+dt, SHARE, user, maxID, vid);
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                    end
+                case LI13Custom
+                    vid = getVideoLI13Custom(li13, SHARE, t, vid);
+                    
+                    if (~isnan(vid))
+                        dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+
+                        maxID = maxID+1;
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
                     end
             end
 
             hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
             
             % add watch event
-            dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
+            dt = exprnd(par.ia_demand_par(hourIndex));
+            %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
                 
             maxID = maxID+1;
-            events = addEvent(events, t+dt, WATCH, user, maxID, NaN);
+            events = addEvent(events, t+dt, par.tmax, WATCH, user, maxID, NaN);
         
         case SHARE
             % update wall of friends
@@ -259,7 +273,7 @@ while events.t(1) < par.tmax
             end
             wall = updateWall(GF, wall, uid, vid);
             
-            if (par.demand_model == LI13)
+            if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 %find 'last': id 4897 returns several entries, should fix that
                 li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:), 1, 'last' ));
             end
@@ -271,7 +285,7 @@ while events.t(1) < par.tmax
             % update wall of friends
             wall = updateWall(GF, wall, stats.uid(id), stats.vid(id));
             
-            if (par.demand_model == LI13)
+            if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 li13 = updateLI13(vid, SHARE, par, li13, find(GF(uid,:)));
             end
             

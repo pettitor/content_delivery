@@ -5,17 +5,7 @@ SHARE=2;
 RESHARE=3;
 
 if (eventType == WATCH)
-    if (t == 0)
-        probs = li13.p;
-    else
-        if (li13.viewAttenuation)
-            times = t-li13.lastShare;
-            probs = li13.p.*exp(-li13.tmpAttenuationExp*times);
-        else
-            probs = li13.p;
-        end
-        %probs decrease the farther away the last share was
-    end
+    probs = li13.p;
     
     cumSum = cumsum(probs);
     rnd = rand() * sum(probs);
@@ -30,16 +20,7 @@ if (eventType == WATCH)
         vid = randi(length(probs));
     end
 else
-    timeSinceFirstView = t-li13.initialView(currentVid);
-    if (timeSinceFirstView == 0)
-        prob = li13.shr(currentVid);
-    else
-        if (li13.shareAttenuation)
-           prob = li13.shr(currentVid)*exp(-li13.tmpAttenuationExp*timeSinceFirstView);
-        else
-           prob = li13.shr(currentVid);
-        end
-    end
+    prob = li13.shr(currentVid);
     
     r = rand();
     if (r > prob)
