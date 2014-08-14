@@ -1,12 +1,6 @@
 function vid=getVideo(uid, nvids, par, t, H, wall, eventType, snm, li13, categories)
 
-ZIPF = 1;
-WALL = 2;
-YTSTATS = 3;
-SNM = 4;
-LI13 = 5;
-ZIPF2 = 6;
-LI13Custom = 7;
+constants
     
     % TODO
     % niche - popular
