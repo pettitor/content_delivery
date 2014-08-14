@@ -35,10 +35,10 @@ for j=1:length(seeds)
     stats = cdsim(par);
     toc
 
-    name = ['li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model)];
-    save(['results/cdsim_demandModel_' name '_1.mat'], 'par', 'stats')
+    name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model)];
+    save(['results/cdsim_' name '.mat'], 'par', 'stats')
 end
-
+%% li13 custom part (in one block)
 
 par.demand_model = LI13Custom;
 par.sharing_model = LI13Custom;
@@ -56,24 +56,59 @@ for j=1:length(seeds)
         stats = cdsim(par);
         toc
 
-        name = ['li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model)];
-        save(['results/cdsim_demandModel_' name '_1.mat'], 'par', 'stats')
+        name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_uploadEvents_' num2str(par.uploadEvents)];
+        save(['results/cdsim_' name '.mat'], 'par', 'stats')
 
     end
 end
 
-%% just a small test
-par.shareAttenuation = true;
-par.viewAttenuation = true;
+%% same as above just split up - part 1
 
-clear('stats');
-par.seed = seeds(1);
-tic
-stats = cdsim(par);
-toc
+par.demand_model = LI13Custom;
+par.sharing_model = LI13Custom;
+%all possible combinations concerning upload events and attenuations
+combis = [0 0 0; 0 0 1; 0 1 0; 0 1 1];
+for j=1:length(seeds)
+    for i=1:size(combis,1)
+        par.shareAttenuation = combis(i,1);
+        par.viewAttenuation = combis(i,2);
+        par.uploadEvents = combis(i,3);
 
-name = ['li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed)];
-save(['results/cdsim_demandModel_' name '_1.mat'], 'par', 'stats')
+        clear('stats');
+        par.seed = seeds(j);
+        tic
+        stats = cdsim(par);
+        toc
+
+        name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_uploadEvents_' num2str(par.uploadEvents)];
+        save(['results/cdsim_' name '.mat'], 'par', 'stats')
+
+    end
+end
+
+%% same as above just split up - part 2
+
+par.demand_model = LI13Custom;
+par.sharing_model = LI13Custom;
+%all possible combinations concerning upload events and attenuations
+combis = [1 0 0; 1 0 1; 1 1 0; 1 1 1];
+for j=1:length(seeds)
+    for i=1:size(combis,1)
+        par.shareAttenuation = combis(i,1);
+        par.viewAttenuation = combis(i,2);
+        par.uploadEvents = combis(i,3);
+
+        clear('stats');
+        par.seed = seeds(j);
+        tic
+        stats = cdsim(par);
+        toc
+
+        name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_uploadEvents_' num2str(par.uploadEvents)];
+        save(['results/cdsim_' name '.mat'], 'par', 'stats')
+
+    end
+end
 
 
 %% diurnal vs non-diurnal | no attenuation
