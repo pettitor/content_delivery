@@ -15,8 +15,9 @@ addpath('lib/li13');
 
 parRBHORST;
 
-seeds = [234]; %, 567];
-%% new study with separated LIs
+%seeds = [234]; %, 567];
+seeds = [567];
+% new study with separated LIs
 ZIPF = 1;
 WALL = 2;
 YTSTATS = 3;
@@ -25,14 +26,18 @@ LI13 = 5;
 ZIPF2 = 6;
 LI13Custom = 7;
 
-par.demand_model = LI13;
-par.sharing_model = LI13;
+par.demand_model = LI13Custom;
+par.sharing_model = LI13Custom;
+
+par.shareAttenuation = 1;
+par.viewAttenuation = 1;
+par.uploadEvents = 1;
 
 for j=1:length(seeds)
     clear('stats');
     par.seed = seeds(j);
     tic
-    stats = cdsim(par);
+    stats = cdsim2(par);
     toc
 
     name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model)];
