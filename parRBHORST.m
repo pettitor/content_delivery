@@ -109,7 +109,7 @@ par.ia_demand_rnd = 'exp';
 
 % consider par.tickPerDay
 par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
-par.ia_demand_par_seconds = 36000*ones(1,24); % constant ia time in seconds
+par.ia_demand_par_seconds = 2*ones(1,24); % constant ia time in seconds
 par.ia_demand_par = par.ia_demand_par_seconds;%*par.ticksPerSecond;
 
 % basic model from propagation based paper

@@ -176,7 +176,7 @@ for f=1:length(files)
     for i=1:length(vids)
         a = stats.t(stats.watch == vids(i));
 
-        %4 ticks = one day -> 12 ticks = 3 days
+        %96 ticks = one day -> 12 ticks = 3 hours
         c(:,i) = histc(a,0:12:par.tmax);
     end
     

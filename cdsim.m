@@ -137,9 +137,6 @@ while ~isempty(events.t) && events.t(1) < par.tmax
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
         disp(['Progress: ' num2str(100*(t1/par.tmax)) '% '  num2str(length(events.t))])
-        if 100*(t1/par.tmax) == 13
-           disp('slow') 
-        end
     end
     
     switch type
@@ -169,14 +166,12 @@ while ~isempty(events.t) && events.t(1) < par.tmax
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
                     stats.snm.time = [stats.snm.time t];
-                elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
-                    li13 = updateLI13(vid, WATCH, par, li13, t);
-                end
-            else
-                if (par.demand_model == LI13 || par.demand_model == LI13Custom)
-                    li13 = updateLI13(vid, WATCH, par, li13, t);
                 end
             end
+            if (par.demand_model == LI13 || par.demand_model == LI13Custom)
+                li13 = updateLI13(vid, WATCH, par, li13, t);
+            end
+            
             stats.views(vid) = stats.views(vid) + 1;
             
             stats.t(id) = t;
