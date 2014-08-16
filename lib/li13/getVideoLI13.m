@@ -1,8 +1,6 @@
 function vid = getVideoLI13(li13, eventType, t, currentVid)
 
-WATCH=1;
-SHARE=2;
-RESHARE=3;
+constants;
 
 if (eventType == WATCH)
     probs = li13.p;

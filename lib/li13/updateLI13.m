@@ -1,10 +1,6 @@
 function li13 = updateLI13(video, eventType, par, li13, time, numberOfFriends)
 
-WATCH=1;
-SHARE=2;
-RESHARE=3;
-CACHE=4;
-UPDATE=5;
+constants;
 
 if (eventType == WATCH)
     if (li13.v(video) == 0)
@@ -15,7 +11,7 @@ if (eventType == WATCH)
     
     li13.ev(video) = li13.e(video) + li13.v(video);
     li13.p = li13.ev/sum(li13.ev);
-elseif (eventType == UPDATE)
+elseif (eventType == UPLOAD)
     li13.p(video) = 1/par.nvids;
 else
     li13.lastShare(video) = time;

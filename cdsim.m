@@ -3,26 +3,9 @@ function [stats] = cdsim(par)
 disp(par)
 
 % event types
-WATCH=1;
-SHARE=2;
-RESHARE=3;
-CACHE=4;
-UPLOAD=5;
-
 % caching strategies
-LRU = 1;
-LFU = 2;
-
-SLWND = 5;
-
 %sim models
-ZIPF = 1;
-WALL = 2;
-YTSTATS = 3;
-SNM = 4;
-LI13 = 5;
-ZIPF2 = 6;
-LI13Custom = 7;
+constants;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);

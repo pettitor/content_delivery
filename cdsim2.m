@@ -1,28 +1,11 @@
-function [stats] = cdsim(par)
+function [stats] = cdsim2(par)
 
 disp(par)
 
 % event types
-WATCH=1;
-SHARE=2;
-RESHARE=3;
-CACHE=4;
-UPLOAD=5;
-
 % caching strategies
-LRU = 1;
-LFU = 2;
-
-SLWND = 5;
-
 %sim models
-ZIPF = 1;
-WALL = 2;
-YTSTATS = 3;
-SNM = 4;
-LI13 = 5;
-ZIPF2 = 6;
-LI13Custom = 7;
+constants;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
@@ -103,7 +86,13 @@ maxID=nusers;
 
 %snm specific data
 snm = struct;
-li13 = prepareLI13(par);
+li13 = struct;
+if (par.demand_model == SNM)
+    snm = prepareSNM(par);
+    stats.snm.classes = snm.videoClass;
+elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
+    li13 = prepareLI13(par);
+end
 
 events.t = [];
 events.type=[];
@@ -111,10 +100,20 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
+uploadCounter = 1;
+
+if (par.demand_model == LI13Custom && par.uploadEvents)
+    %make sure UPLOAD is first in queue (otherwise no video acitve)
+    userUpload = rand(par.nvids, 1);
+    userUpload = floor(userUpload*nusers);
+    events = addEvent(events, 0, par.tmax, UPLOAD, userUpload(uploadCounter), 1, 1);
+    uploadCounter = uploadCounter + 1;
+else
     %for i=1:maxID
     u = floor(rand()*nusers);
         events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
     %end
+end
 
 % queue.active = [];
 
@@ -144,13 +143,39 @@ while ~isempty(events.t) && events.t(1) < par.tmax
     end
     
     switch type
+        case UPLOAD
+            %add video to set of active videos
+            li13 = updateLI13(vid, UPLOAD, par, li13, t);
+            u = floor(rand() * nusers); %pick a random user
+            maxID = maxID + 1;
+            events = addEvent(events, t, par.tmax, WATCH, user, maxID, vid);
+            deltaT = exprnd(par.tmax/par.nvids);
+            %deltaT = random(par.ia_video_rnd, par.tmax/par.nvids);
+            maxID = maxID + 1;
+            events = addEvent(events, t+deltaT, par.tmax, UPLOAD, userUpload(uploadCounter), maxID, vid+1);
+            uploadCounter = uploadCounter + 1;
+            
+            stats.t(id) = t;
+            stats.upload(id) = vid;
+            stats.uid(id) = user;
+            
         case WATCH
+            
+            %uid = getUserID(GF);
             uid = user;
             if isnan(vid)
-                vid = getVideo(uid, nvids, par, t, H, wall, WATCH, snm, li13);
-                li13 = updateLI13(vid, WATCH, par, li13, t);
+                vid = getVideo(uid, nvids, par, t, H, wall, WATCH, snm, li13); %, categories); % consider GV
+                if (par.demand_model == SNM)
+                    snm = updateSNM(vid, snm, t);
+                    stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
+                    stats.snm.time = [stats.snm.time t];
+                elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
+                    li13 = updateLI13(vid, WATCH, par, li13, t);
+                end
             else
-                li13 = updateLI13(vid, WATCH, par, li13, t);
+                if (par.demand_model == LI13 || par.demand_model == LI13Custom)
+                    li13 = updateLI13(vid, WATCH, par, li13, t);
+                end
             end
             stats.views(vid) = stats.views(vid) + 1;
             
@@ -179,15 +204,54 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             % update local isp cache if video is popular
             %cache = updateCache(cache, stats, 1:par.ASn, vid, par.ISPcachingstrategy, par);
             
+            switch par.sharing_model
+                case WALL
+                    r = rand();
+                    reshare = any(wall(uid,:)==vid);
+                    if ((~reshare && r < pshare) || (reshare && r < preshare))
+                        % add (re)share event
+    
+                        dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+                        
+                        maxID = maxID+1;
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                    end
+                case YTSTATS
+                    r = rand();
+                    if (r < pshare)
+                        h = getHistory(uid, stats);
+                    else
+                        h = NaN;
+                    end
+                    vid = getVideo(uid, stats.views, par, t, h, wall, SHARE, snm, li13, category);
+                    
+                    dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
+                    
+                    maxID = maxID+1;
+                    events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                    %TODO after lunch
+                case LI13
+                    vid = getVideoLI13(li13, SHARE, t, vid);
+                    
+                    if (~isnan(vid))
+                        dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
 
-            vid = getVideoLI13(li13, SHARE, t, vid);
+                        maxID = maxID+1;
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                    end
+                case LI13Custom
+                    vid = getVideoLI13Custom(li13, SHARE, t, vid);
+                    
+                    if (~isnan(vid))
+                        dt = random(par.ia_share_rnd, ...
+                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
 
-            if (~isnan(vid))
-                dt = random(par.ia_share_rnd, ...
-                    par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
-
-                maxID = maxID+1;
-                events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                        maxID = maxID+1;
+                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                    end
             end
 
             hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
@@ -207,11 +271,25 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             end
             wall = updateWall(GF, wall, uid, vid);
             
-            %find 'last': id 4897 returns several entries, should fix that
-            li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:), 1, 'last' ));
+            if (par.demand_model == LI13 || par.demand_model == LI13Custom)
+                %find 'last': id 4897 returns several entries, should fix that
+                li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:), 1, 'last' ));
+            end
             
             stats.share(id) = vid;
             stats.t(id) = t;
+            
+        case RESHARE % currently not used
+            % update wall of friends
+            wall = updateWall(GF, wall, stats.uid(id), stats.vid(id));
+            
+            if (par.demand_model == LI13 || par.demand_model == LI13Custom)
+                li13 = updateLI13(vid, SHARE, par, li13, find(GF(uid,:)));
+            end
+            
+            stats.share(id) = stats.vid(id);
+            stats.t(id) = t;
+
     end  
 end
 stats.AS = AS;
