@@ -23,8 +23,18 @@ constants;
 % par.demand_model = LI13Custom;
 % par.sharing_model = LI13Custom;
 
-par.demand_model = LI13;
-par.sharing_model = LI13;
+par.demand_model = ZIPF2;
+par.sharing_model = ZIPF2;
+
+%par.alpha = alpha; % global Zipf law popularity, consider a<1, a>1
+
+par.alpha = 0.99;
+
+a=exp(-par.alpha .* log(1:par.nvids));
+zipfcdf = cumsum([0 a]);
+par.zipfcdf = zipfcdf/zipfcdf(end);
+
+par.tmax = 1e4;
 
 % par.shareAttenuation = 1;
 % par.viewAttenuation = 1;

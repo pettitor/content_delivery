@@ -159,6 +159,10 @@ while ~isempty(events.t) && events.t(1) < par.tmax
         case WATCH
             
             %uid = getUserID(GF);
+            if isnan(user)
+                %user auswürfeln
+                user = randi(nusers);
+            end
             uid = user;
             if isnan(vid)
                 vid = getVideo(uid, nvids, par, t, H, wall, WATCH, snm, li13); %, categories); % consider GV
@@ -256,7 +260,7 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
                 
             maxID = maxID+1;
-            events = addEvent(events, t+dt, par.tmax, WATCH, user, maxID, NaN);
+            events = addEvent(events, t+dt, par.tmax, WATCH, NaN, maxID, NaN);
         
         case SHARE
             % update wall of friends

@@ -1,4 +1,4 @@
-function [cid, update, stats] = selectResource(cache, stats, AS, uid, vid, par, iCacheUser)
+function [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par, iCacheUser)
 
 LOCAL = 1;
 RANDOM = 2;
@@ -6,7 +6,6 @@ RANDOM2 = 4;
 RBHORST = 3;
 
 cid = []; % if no local cache can serve the request
-update = [];
 
     switch par.resourceselection
         case LOCAL
