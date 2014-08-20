@@ -1,4 +1,4 @@
-filePattern = 'results/cdsim_16-Aug-2014*.mat';
+filePattern = 'results/cdsim_20-Aug-2014*.mat';
 
 %% active videos snm
 files = dir(filePattern);
@@ -33,7 +33,6 @@ files = dir(filePattern);
 for f=1:length(files)
     clear par stats;
     load(strcat('results/', files(f).name));
-    
     views = stats.views;%(stats.views~=0);
     views = sort(views, 'descend');
     
@@ -180,7 +179,8 @@ for f=1:length(files)
         c(:,i) = histc(a,0:12:par.tmax);
     end
     
-    fi = figure(f);
+    fi = figure(f)
+    clf;box on;hold all;
     title(files(f).name);
     bar(c);
     

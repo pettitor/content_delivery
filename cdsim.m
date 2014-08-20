@@ -100,18 +100,14 @@ events.user=[];
 events.id=[];
 events.vid=[];
 
-uploadCounter = 1;
 
 if (par.demand_model == LI13Custom && par.uploadEvents)
     %make sure UPLOAD is first in queue (otherwise no video acitve)
-    userUpload = rand(par.nvids, 1);
-    userUpload = floor(userUpload*nusers);
-    events = addEvent(events, 0, par.tmax, UPLOAD, userUpload(uploadCounter), 1, 1);
-    uploadCounter = uploadCounter + 1;
+    events = addEvent(events, 0, par.tmax, UPLOAD, floor(rand()*nusers), 1, 1);
 else
     %for i=1:maxID
     u = floor(rand()*nusers);
-        events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
+    events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
     %end
 end
 
@@ -149,8 +145,7 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             deltaT = exprnd(par.tmax/par.nvids);
             %deltaT = random(par.ia_video_rnd, par.tmax/par.nvids);
             maxID = maxID + 1;
-            events = addEvent(events, t+deltaT, par.tmax, UPLOAD, userUpload(uploadCounter), maxID, vid+1);
-            uploadCounter = uploadCounter + 1;
+            events = addEvent(events, t+deltaT, par.tmax, UPLOAD, floor(rand()*nusers), maxID, vid+1);
             
             stats.t(id) = t;
             stats.upload(id) = vid;
@@ -176,6 +171,10 @@ while ~isempty(events.t) && events.t(1) < par.tmax
                 li13 = updateLI13(vid, WATCH, par, li13, t);
             end
             
+            
+            if (vid > length(stats.views))
+               stats.views(vid) = 0;
+            end
             stats.views(vid) = stats.views(vid) + 1;
             
             stats.t(id) = t;
@@ -272,7 +271,11 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             
             if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 %find 'last': id 4897 returns several entries, should fix that
-                li13 = updateLI13(vid, SHARE, par, li13, t, find(GF(uid,:), 1, 'last' ));
+                numOfFriends = find(GF(uid,:), 1, 'last');
+                if (isempty(numOfFriends))
+                    numOfFriends = 1;
+                end
+                li13 = updateLI13(vid, SHARE, par, li13, t, numOfFriends);
             end
             
             stats.share(id) = vid;

@@ -3,6 +3,13 @@ function li13 = updateLI13(video, eventType, par, li13, time, numberOfFriends)
 constants;
 
 if (eventType == WATCH)
+    if (video > length(li13.v)) %do initialization of values if more than par.nvids are simulated
+       li13.v(video) = 0;
+       li13.e(video) = 1;
+       li13.ev(video) = 1;
+       li13.p(video) = 1/par.nvids;
+       li13.shr(video) = sum(exprnd(par.li13.SHRm/par.li13.SHRk,par.li13.SHRk,1));
+    end
     if (li13.v(video) == 0)
         li13.initialView(video) = time;
         li13.lastShare(video) = time;

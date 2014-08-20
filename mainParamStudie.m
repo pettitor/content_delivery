@@ -20,11 +20,15 @@ seeds = [234];
 % new study with separated LIs
 constants;
 
-% par.demand_model = LI13Custom;
-% par.sharing_model = LI13Custom;
+%% normal li
+par.demand_model = LI13;
+par.sharing_model = LI13;
 
-par.demand_model = ZIPF2;
-par.sharing_model = ZIPF2;
+par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
+par.ia_demand_par = par.ia_demand_par_seconds*0.5;%*par.ticksPerSecond;
+
+%par.demand_model = ZIPF2;
+%par.sharing_model = ZIPF2;
 
 %par.alpha = alpha; % global Zipf law popularity, consider a<1, a>1
 
@@ -34,11 +38,11 @@ a=exp(-par.alpha .* log(1:par.nvids));
 zipfcdf = cumsum([0 a]);
 par.zipfcdf = zipfcdf/zipfcdf(end);
 
-par.tmax = 1e4;
+%par.tmax = 1e4;
 
-% par.shareAttenuation = 1;
-% par.viewAttenuation = 1;
-% par.uploadEvents = 1;
+par.shareAttenuation = 1;
+par.viewAttenuation = 1;
+par.uploadEvents = 0;
 
 for j=1:length(seeds)
     clear('stats');
@@ -53,19 +57,29 @@ end
 %% li13 custom part (in one block)
 constants;
 
+par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
+par.ia_demand_par = par.ia_demand_par_seconds*0.5;%*par.ticksPerSecond;
+
 par.demand_model = LI13Custom;
 par.sharing_model = LI13Custom;
 %all possible combinations concerning upload events and attenuations
-combis = [0 0 0; 0 0 1; 0 1 0; 0 1 1; 1 0 0; 1 0 1; 1 1 0; 1 1 1];
+%combis = [0 0 0; 0 0 1; 0 1 0; 0 1 1; 1 0 0; 1 0 1; 1 1 0; 1 1 1];
+combis = [0 0 1];
+par.tmax = 3e3;
 for j=1:length(seeds)
-    %for i=1:size(combis,1)
-        %par.shareAttenuation = combis(i,1);
-        %par.viewAttenuation = combis(i,2);
-        %par.uploadEvents = combis(i,3);
-        par.shareAttenuation = 0;
-        par.viewAttenuation = 1;
-        par.uploadEvents = 1;
-
+    for i=1:size(combis,1)
+        par.shareAttenuation = combis(i,1);
+        par.viewAttenuation = combis(i,2);
+        par.uploadEvents = combis(i,3);
+        
+        if (par.uploadEvents)
+            par.ia_demand_par_seconds = 4*ones(1,24);
+            par.ia_demand_par = par.ia_demand_par_seconds;
+        else
+            par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
+            par.ia_demand_par = par.ia_demand_par_seconds*0.5;
+        end
+        
         clear('stats');
         par.seed = seeds(j);
         tic
@@ -75,7 +89,7 @@ for j=1:length(seeds)
         name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_uploadEvents_' num2str(par.uploadEvents)];
         save(['results/cdsim_' name '.mat'], 'par', 'stats')
 
-    %end
+    end
 end
 
 %% same as above just split up - part 1
