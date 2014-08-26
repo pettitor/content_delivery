@@ -137,8 +137,11 @@ par.ia_video_rnd = 'exp';
 %li13 Custom settings, upload events and temporal attenuation
 par.uploadEvents = true;
 par.shareAttenuation = true;
+par.shareAttenuationExp = 0.3;
 par.viewAttenuation = true;
-par.tmpAttenuationExp = 0.17;
+par.viewAttenuationExp = 0.17;
+par.viewAttenuationNew = true;
+par.viewAttenuationNewExp = 0.04;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;

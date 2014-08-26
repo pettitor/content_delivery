@@ -159,6 +159,10 @@ while ~isempty(events.t) && events.t(1) < par.tmax
                 user = randi(nusers);
             end
             uid = user;
+            if (uid == 0)
+                uid = 1;
+            end
+            
             if isnan(vid)
                 vid = getVideo(uid, nvids, par, t, H, wall, WATCH, snm, li13); %, categories); % consider GV
                 if (par.demand_model == SNM)
