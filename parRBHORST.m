@@ -129,7 +129,7 @@ par.ia_share_par = [1/1.5070 1 0];
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 %%% Simulation Parameters
-par.tmax = 3e2;
+par.tmax = 3e3;
 
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
