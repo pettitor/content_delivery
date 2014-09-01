@@ -9,8 +9,8 @@ constants;
 
 % Dependendt on Matlab Version
 s = RandStream(par.rand_stream, 'Seed', par.seed);
-RandStream.setGlobalStream(s);
-%RandStream.setDefaultStream(s);
+%RandStream.setGlobalStream(s);
+RandStream.setDefaultStream(s);
 
 
 %rand('twister', par.seed)
