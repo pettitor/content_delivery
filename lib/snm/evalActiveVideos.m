@@ -1,4 +1,4 @@
-filePattern = 'results/cdsim_20-Aug-2014*.mat';
+filePattern = 'results/cdsim_29-Aug-2014*longSim*.mat';
 
 %% active videos snm
 files = dir(filePattern);
@@ -37,15 +37,32 @@ for f=1:length(files)
     views = sort(views, 'descend');
     
     fi = figure(f);
-    loglog(views)
+    %hold on
     
-    axis([0 10^4 0 10^4]);
+    ydata = log10(views+1)';
+    xdata = log10(1:length(views))+1;
+
+    %f=@(a,xdata)a(1).*xdata.^(-a(2));
+    flog=@(a,xdata)a(1)+xdata.*(-a(2));
+
+    a = lsqcurvefit(flog,[4 2],xdata,ydata)
+    
+    clf
+    %loglog(views,'.')
+    plot(xdata,ydata);
+    hold all
+    plot(xdata,ydata,'.');
+    plot(xdata,flog(a, xdata));
+    
+    axis([1 4.5 0 4.5]);
     title(files(f).name);
     xlabel('Video index (ranked by popularity)');
     ylabel('Number of requests');
     
+    %hold off
+    
     name = ['loglog_li13_diurnal_' date '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_seed_' num2str(par.seed)];
-    figName = ['results/figs/cdsim_demandModel_' num2str(par.demand_model) '_' date '_atte' num2str(par.tmpAttenuationExp)];
+    figName = ['results/figs/cdsim_demandModel_' num2str(par.demand_model) '_' date];
     %figName = strcat('results/figs/cdsim_loglog_demandModel-', num2str(par.demand_model), '_ticksPerDay-', num2str(par.ticksPerDay), '_ticks-', num2str(par.tmax), '_number-', num2str(f));
     saveas(fi,['results/figs/loglog_' files(f).name '.jpg'],'jpg');
 end
@@ -183,6 +200,7 @@ for f=1:length(files)
     clf;box on;hold all;
     title(files(f).name);
     bar(c);
+    %axis([0 30 0 2500]);
     
     saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end

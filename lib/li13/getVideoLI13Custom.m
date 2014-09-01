@@ -8,7 +8,10 @@ if (eventType == WATCH)
     else
         if (li13.viewAttenuation)
             times = t-li13.lastShare;
-            probs = li13.p.*exp(-li13.tmpAttenuationExp*times);
+            probs = li13.p.*exp(-li13.viewAttenuationExp*times);
+        elseif (li13.viewAttenuationNew)
+            timeSinceFirstView = t-li13.initialView;
+            probs = li13.p.*exp(-li13.viewAttenuationNewExp*timeSinceFirstView);
         else
             probs = li13.p;
         end
@@ -33,14 +36,14 @@ else
         prob = li13.shr(currentVid);
     else
         if (li13.shareAttenuation)
-           prob = li13.shr(currentVid)*exp(-li13.tmpAttenuationExp*timeSinceFirstView);
+           prob = li13.shr(currentVid)*exp(-li13.shareAttenuationExp*timeSinceFirstView);
         else
            prob = li13.shr(currentVid);
         end
     end
     
     r = rand();
-    if (r > prob)
+    if (r < prob)
         vid = currentVid;
     else
         vid = nan;

@@ -8,4 +8,3 @@ par.li13.meanFriends = 78.7;
 par.li13.ViR = 0.8; %frei schnauze
 
 end
-
