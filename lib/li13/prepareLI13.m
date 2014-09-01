@@ -25,4 +25,7 @@ li13.viewAttenuationExp = par.viewAttenuationExp;
 li13.viewAttenuationNew = par.viewAttenuationNew;
 li13.viewAttenuationNewExp = par.viewAttenuationNewExp;
 
+li13.probabilityEquality = par.probabilityEquality;
+li13.probabilityEqualityExp = par.probabilityEqualityExp;
+
 end

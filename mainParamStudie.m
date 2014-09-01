@@ -74,6 +74,7 @@ for j=1:length(seeds)
         par.shareAttenuation = 1;
         par.viewAttenuation = 1;
         par.uploadEvents = 1;
+        par.probabilityEquality = 1;
         par.viewAttenuationNew = 0;
         
         if (par.uploadEvents)

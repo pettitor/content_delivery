@@ -143,6 +143,9 @@ par.viewAttenuationExp = 0.17;
 par.viewAttenuationNew = true;
 par.viewAttenuationNewExp = 0.04;
 
+par.probabilityEquality = true;
+par.probabilityEqualityExp = 0.5;
+
 par.rand_stream = 'mt19937ar';
 par.seed = 13;
 
