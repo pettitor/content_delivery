@@ -19,7 +19,7 @@ if (eventType == WATCH)
     li13.ev(video) = li13.e(video) + li13.v(video);
     
     if (li13.probabilityEquality)
-        ev1 = li13.ev*exp(-li13.probabilityEqualityExp);
+        ev1 = log(li13.ev);
     
         li13.p = ev1/sum(ev1);
     else
