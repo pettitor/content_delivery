@@ -118,6 +118,7 @@ stats.watch = nan(1,3000000);
 stats.uid = nan(1,3000000);
 stats.share = nan(1,3000000);
 stats.t = nan(1,3000000);
+stats.numOfFriends = nan(1,3000000);
 stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
@@ -275,11 +276,13 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             
             if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 %find 'last': id 4897 returns several entries, should fix that
-                numOfFriends = find(GF(uid,:), 1, 'last');
+                %numOfFriends = find(GF(uid,:), 1, 'last');
+                numOfFriends = sum(GF(uid,:)); 
                 if (isempty(numOfFriends))
                     numOfFriends = 1;
                 end
                 li13 = updateLI13(vid, SHARE, par, li13, t, numOfFriends);
+                stats.numOfFriends(id) = numOfFriends;
             end
             
             stats.share(id) = vid;
