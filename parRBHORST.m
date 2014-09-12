@@ -139,7 +139,7 @@ par.uploadEvents = true;
 par.shareAttenuation = true;
 par.shareAttenuationExp = 0.3;
 par.viewAttenuation = true;
-par.viewAttenuationExp = 0.17;
+par.viewAttenuationExp = 0.06;
 par.viewAttenuationNew = true;
 par.viewAttenuationNewExp = 0.04;
 
