@@ -87,11 +87,14 @@ maxID=nusers;
 %snm specific data
 snm = struct;
 li13 = struct;
+box = struct;
 if (par.demand_model == SNM)
     snm = prepareSNM(par);
     stats.snm.classes = snm.videoClass;
 elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
     li13 = prepareLI13(par);
+elseif (par.demand_model == boxModel)
+    box = prepareBoxModel(par);
 end
 
 events.t = [];
@@ -104,6 +107,13 @@ events.vid=[];
 if (par.demand_model == LI13Custom && par.uploadEvents)
     %make sure UPLOAD is first in queue (otherwise no video acitve)
     events = addEvent(events, 0, par.tmax, UPLOAD, floor(rand()*nusers), 1, 1);
+elseif (par.demand_model == boxModel)
+    maxID = 1;
+    u = floor(rand()*nusers);
+    
+    events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
+    
+    box.idx = box.idx + 1;
 else
     %for i=1:maxID
     u = floor(rand()*nusers);
@@ -174,6 +184,13 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             end
             if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 li13 = updateLI13(vid, WATCH, par, li13, t);
+            elseif (par.demand_model == boxModel)
+                maxID = maxID + 1;
+                u = floor(rand()*nusers);
+
+                events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
+
+                box.idx = box.idx + 1;
             end
             
             
@@ -262,9 +279,11 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             % add watch event
             dt = exprnd(par.ia_demand_par(hourIndex));
             %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
-                
-            maxID = maxID+1;
-            events = addEvent(events, t+dt, par.tmax, WATCH, NaN, maxID, NaN);
+            
+            if (par.demand_model ~= boxModel)
+                maxID = maxID+1;
+                events = addEvent(events, t+dt, par.tmax, WATCH, NaN, maxID, NaN);
+            end
         
         case SHARE
             % update wall of friends

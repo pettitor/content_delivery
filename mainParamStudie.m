@@ -8,6 +8,7 @@ addpath('lib');
 addpath('lib/randraw');
 addpath('lib/snm');
 addpath('lib/li13');
+addpath('lib/boxModel');
 
 %%%%% Parameters
 
@@ -19,6 +20,20 @@ parRBHORST;
 seeds = [234];
 % new study with separated LIs
 constants;
+%% box model
+par.demand_model = boxModel;
+par.sharing_model = boxModel;
+
+for j=1:length(seeds)        
+    clear('stats');
+    par.seed = seeds(j);
+    tic
+    stats = cdsim(par);
+    toc
+
+    name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_attView_' num2str(par.viewAttenuation) '_attShare_' num2str(par.shareAttenuation) '_uploadEvents_' num2str(par.uploadEvents)];
+    save(['results/cdsim_' name '.mat'], 'par', 'stats')
+end
 
 %% li13 custom part (in one block)
 constants;

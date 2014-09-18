@@ -5,7 +5,8 @@ SNM = 4;
 LI13 = 5;
 ZIPF2 = 6;
 LI13Custom = 7;
-demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom'};
+boxModel = 8;
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom','BoxModel'};
 resourceSel = {'LOCAL','RANDOM','RBHORST','RANDOM2'};
 
 % caching strategies

@@ -1,5 +1,4 @@
-filePattern = 'results/cdsim_10-Sep-2014*.mat';
-
+filePattern = 'results/cdsim_18-Sep-2014*.mat';
 %% active videos snm
 files = dir(filePattern);
 
