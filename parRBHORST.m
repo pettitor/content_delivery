@@ -28,13 +28,6 @@ par.pcacheUSER = 0.1;
 % Sbihi ITC'25 cache cooperation
 
 % descending by tier, i.e. tier 1, tier 2, ...
-
-LRU = 1;
-LFU = 2;
-LRUAS = 3;
-RANDOM = 4;
-SLWND = 5;
-
 par.cachingstrategy = [LRU LRU];
 
 % SLWND sliding window parameter
@@ -46,11 +39,6 @@ par.maxitemsAS = 50;
 % Thresholds: prefetching, rarest/demanded, popular/niche
 
 %%% Resource selection strategy
-
-LOCAL = 1;
-RANDOM = 2;
-RBHORST = 3;
-
 par.resourceselection = LOCAL;
 
 par.RBHORSTprio = 1;
@@ -81,18 +69,6 @@ par.historysize = 100;
 
 par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.016 0.011 0.010 0.008 0.005 0.005 0.003 0.002 0.002];
 par.ncategories = 4;
-
-%%% Item specific content demand (temporal, spatial)
-ZIPF = 1;
-WALL = 2;
-YTSTATS = 3;
-SNM = 4;
-LI13 = 5;
-ZIPF2 = 6;
-LI13Custom = 7;
-
-par.demand_model = LI13;
-par.sharing_model = LI13;
 
 par.alpha = 0.6; % global Zipf law popularity, consider a<1, a>1
 
@@ -134,6 +110,9 @@ par.tmax = 3e3;
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
 
+par.demand_model = boxModel;
+par.sharing_model = boxModel;
+
 %li13 Custom settings, upload events and temporal attenuation
 par.uploadEvents = true;
 par.shareAttenuation = true;
@@ -142,11 +121,13 @@ par.viewAttenuation = true;
 par.viewAttenuationExp = 0.06;
 par.viewAttenuationNew = true;
 par.viewAttenuationNewExp = 0.04;
-
 par.probabilityEquality = true;
 
+%box model settings
 par.box.nrequests = 10000;
 par.box.alpha = 0.99;
+par.box.lifeSpanMode = proofOfConcept;
+%par.box.lifeSpanMode = SNM_Like;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;

@@ -9,6 +9,10 @@ boxModel = 8;
 demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom','BoxModel'};
 resourceSel = {'LOCAL','RANDOM','RBHORST','RANDOM2'};
 
+%box model lifespan modes
+proofOfConcept = 1;
+SNM_Like = 2;
+
 % caching strategies
 LRU = 1;
 LFU = 2;

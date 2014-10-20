@@ -1,5 +1,7 @@
 function box = prepareBoxModel(par)
 
+constants
+
 a=exp(-par.box.alpha .* log(1:par.nvids));
 zipfcdf = cumsum([0 a]);
 box.zipfcdf = zipfcdf/zipfcdf(end);
@@ -13,11 +15,29 @@ end
 nrequests = nrequests(randperm(par.nvids));
 
 % lifespan auswürfeln
-m = par.tmax/10; % hier brauchen wir noch realistische werte, optimal wäre abhängig von views
-v = par.tmax;
-mu = log((m^2)/sqrt(v+m^2));
-sigma = sqrt(log(v/(m^2)+1));
-tau = lognrnd(mu, sigma, 1, par.nvids);
+lifespan = nan(1,par.nvids);
+switch par.box.lifeSpanMode
+    case proofOfConcept
+        m = par.tmax/10; % hier brauchen wir noch realistische werte, optimal wäre abhängig von views
+        v = par.tmax;
+        mu = log((m^2)/sqrt(v+m^2));
+        sigma = sqrt(log(v/(m^2)+1));
+        lifespan = lognrnd(mu, sigma, 1, par.nvids);
+    case SNM_Like
+        perc = [3.6 5.3 3.3 5.3 82.4];
+        percCumSum = cumsum(perc);
+        percSum = sum(perc);
+        spans = [0,2;2,5;5,8;8,13;13,38];
+        
+        for i=1:length(lifespan)
+            rnd = rand() * percSum;
+            idx = find(rnd <= percCumSum, 1, 'first');
+            lower = spans(idx,1);
+            upper = spans(idx,2);
+            
+            lifespan(i) = lower+rand()*(upper-lower);
+        end
+end
 
 % importzeitpunkt auswürfeln
 vidimport = cumsum(exprnd(par.tmax/par.nvids, 1, par.nvids));
@@ -25,7 +45,7 @@ vidimport = cumsum(exprnd(par.tmax/par.nvids, 1, par.nvids));
 box.viewt = [];
 box.viewid = [];
 for i=1:length(nrequests)
-    box.viewt = [box.viewt vidimport(i)+cumsum(exprnd(tau(i)/nrequests(i), 1, nrequests(i)))];
+    box.viewt = [box.viewt vidimport(i)+cumsum(exprnd(lifespan(i)/nrequests(i), 1, nrequests(i)))];
     box.viewid = [box.viewid i*ones(1,nrequests(i))];
 end
 
