@@ -178,6 +178,40 @@ for f=1:length(files)
     saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end
 
+%% lifespan verteilung
+%fuer 10 populaeresten videos
+files = dir(filePattern);
+color = gray(11);
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    %[b,idx] = sort(stats.views,'descend');
+  
+    lifespan = nan(1,par.nvids);
+    fi = figure(f)
+    clf;box on;hold all;
+    for i=1:par.nvids
+        a = stats.t(stats.watch == i);
+
+        if(~isempty(a))
+            lifespan(i) = max(a)-min(a);
+        else
+            lifespan(i) = 0;
+        end
+    end
+    
+    c = histc(lifespan,1:par.ticksPerDay:par.tmax);
+    plot(c,'.')
+    
+    title(files(f).name);
+    %x: 800
+    %y: 90
+    
+    saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
+end
+
 %% number request per time period
 %just for the x top most popular videos
 files = dir(filePattern);

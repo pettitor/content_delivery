@@ -126,8 +126,8 @@ par.probabilityEquality = true;
 %box model settings
 par.box.nrequests = 10000;
 par.box.alpha = 0.99;
-par.box.lifeSpanMode = proofOfConcept;
-%par.box.lifeSpanMode = SNM_Like;
+%par.box.lifeSpanMode = proofOfConcept;
+par.box.lifeSpanMode = SNM_Like;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;

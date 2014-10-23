@@ -37,6 +37,7 @@ switch par.box.lifeSpanMode
             
             lifespan(i) = lower+rand()*(upper-lower);
         end
+        lifespan = lifespan*par.ticksPerDay;
 end
 
 % importzeitpunkt auswürfeln
