@@ -21,15 +21,23 @@ parRBHORST;
 seeds = [234];
 % new study with separated LIs
 %% box model
-for j=1:length(seeds)        
-    clear('stats');
-    par.seed = seeds(j);
-    tic
-    stats = cdsim(par);
-    toc
+mus = [4 4.5 5 5.5 6 6.5 7];
+sigma = [0.14 0.16 0.18 0.2 0.22 0.24 0.26];
 
-    name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_lifeSpanMode_' num2str(par.box.lifeSpanMode)];
-    save(['results/cdsim_' name '.mat'], 'par', 'stats')
+for j=1:length(seeds)
+    for x = 1:length(sigma)
+        clear('stats');
+        par.seed = seeds(j);
+        
+        par.box.lifespan.sigma = sigma(x);
+        
+        tic
+        stats = cdsim(par);
+        toc
+
+        name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_lifeSpanMode_' num2str(par.box.lifeSpanMode) '_mu_' num2str(par.box.lifespan.mu) '_sigma_' num2str(par.box.lifespan.sigma)];
+        save(['results/cdsim_' name '.mat'], 'par', 'stats')
+    end
 end
 
 %% li13 custom part (in one block)

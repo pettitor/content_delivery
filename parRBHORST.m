@@ -130,13 +130,15 @@ par.box.alpha = 0.99;
 %parameters for box model, lifespanMode: SNM_Like
 par.box.lifespan.percentage = [3.6 5.3 3.3 5.3 82.4];
 par.box.lifespan.lifespan = [0,2;2,5;5,8;8,13;13,38];
-par.box.lifeSpanMode = SNM_Like;
-%par.box.lifeSpanMode = proofOfConcept;
+%par.box.lifeSpanMode = SNM_Like;
+par.box.lifeSpanMode = proofOfConcept;
 %parameters for box model, lifespanMode: proofOfConcept
-m = par.tmax/10; % hier brauchen wir noch realistische werte, optimal wäre abhängig von views
-v = par.tmax;
-par.box.lifespan.mu = log((m^2)/sqrt(v+m^2));
-par.box.lifespan.sigma = sqrt(log(v/(m^2)+1));
+par.box.lifespan.mu = 5.6874;
+par.box.lifespan.sigma = 0.1811;
+%v = 3e3;
+%m = v/10;
+%par.box.lifespan.mu = log((m^2)/sqrt(v+m^2));
+%par.box.lifespan.sigma = sqrt(log(v/(m^2)+1));
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;

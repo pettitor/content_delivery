@@ -1,4 +1,4 @@
-filePattern = 'results/cdsim_20-Oct-2014*.mat';
+filePattern = 'results/cdsim_29-Oct-2014*.mat';
 %% active videos snm
 files = dir(filePattern);
 
@@ -206,6 +206,7 @@ for f=1:length(files)
     plot(c,'.')
     
     title(files(f).name);
+    %axis([0 35 0 250]);
     %x: 800
     %y: 90
     
