@@ -18,22 +18,16 @@ nrequests = nrequests(randperm(par.nvids));
 lifespan = nan(1,par.nvids);
 switch par.box.lifeSpanMode
     case proofOfConcept
-        m = par.tmax/10; % hier brauchen wir noch realistische werte, optimal wäre abhängig von views
-        v = par.tmax;
-        mu = log((m^2)/sqrt(v+m^2));
-        sigma = sqrt(log(v/(m^2)+1));
-        lifespan = lognrnd(mu, sigma, 1, par.nvids);
+        lifespan = lognrnd(par.box.lifespan.mu, par.box.lifespan.sigma, 1, par.nvids);
     case SNM_Like
-        perc = [3.6 5.3 3.3 5.3 82.4];
-        percCumSum = cumsum(perc);
-        percSum = sum(perc);
-        spans = [0,2;2,5;5,8;8,13;13,38];
+        percCumSum = cumsum(par.box.lifespan.percentage);
+        percSum = sum(par.box.lifespan.percentage);
         
         for i=1:length(lifespan)
             rnd = rand() * percSum;
             idx = find(rnd <= percCumSum, 1, 'first');
-            lower = spans(idx,1);
-            upper = spans(idx,2);
+            lower = par.box.lifespan.lifespan(idx,1);
+            upper = par.box.lifespan.lifespan(idx,2);
             
             lifespan(i) = lower+rand()*(upper-lower);
         end

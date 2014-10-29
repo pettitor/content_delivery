@@ -126,8 +126,17 @@ par.probabilityEquality = true;
 %box model settings
 par.box.nrequests = 10000;
 par.box.alpha = 0.99;
-%par.box.lifeSpanMode = proofOfConcept;
+
+%parameters for box model, lifespanMode: SNM_Like
+par.box.lifespan.percentage = [3.6 5.3 3.3 5.3 82.4];
+par.box.lifespan.lifespan = [0,2;2,5;5,8;8,13;13,38];
 par.box.lifeSpanMode = SNM_Like;
+%par.box.lifeSpanMode = proofOfConcept;
+%parameters for box model, lifespanMode: proofOfConcept
+m = par.tmax/10; % hier brauchen wir noch realistische werte, optimal wäre abhängig von views
+v = par.tmax;
+par.box.lifespan.mu = log((m^2)/sqrt(v+m^2));
+par.box.lifespan.sigma = sqrt(log(v/(m^2)+1));
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;
