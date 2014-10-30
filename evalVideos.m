@@ -1,4 +1,4 @@
-filePattern = 'results/cdsim_29-Oct-2014*.mat';
+filePattern = 'results/cdsim_s_*.mat';
 %% active videos snm
 files = dir(filePattern);
 
@@ -183,6 +183,10 @@ end
 files = dir(filePattern);
 color = gray(11);
 
+marker = {'.--','d-'};
+
+fi = figure(2)
+clf;box on;hold all;
 for f=1:length(files)
     clear par stats;
     load(strcat('results/', files(f).name));
@@ -190,8 +194,8 @@ for f=1:length(files)
     %[b,idx] = sort(stats.views,'descend');
   
     lifespan = nan(1,par.nvids);
-    fi = figure(f)
-    clf;box on;hold all;
+    %fi = figure(f)
+    %clf;box on;hold all;
     for i=1:par.nvids
         a = stats.t(stats.watch == i);
 
@@ -203,15 +207,16 @@ for f=1:length(files)
     end
     
     c = histc(lifespan,1:par.ticksPerDay:par.tmax);
-    plot(c,'.')
+    plot(c,marker{f})
     
     title(files(f).name);
     %axis([0 35 0 250]);
     %x: 800
     %y: 90
     
-    saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
+    %saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end
+saveas(fi,['results/figs/temporalLocality_all.jpg'],'jpg');
 
 %% number request per time period
 %just for the x top most popular videos

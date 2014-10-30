@@ -188,9 +188,11 @@ while ~isempty(events.t) && events.t(1) < par.tmax
                 maxID = maxID + 1;
                 u = floor(rand()*nusers);
 
-                events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
+                if (box.idx <= length(box.viewt))
+                    events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
 
-                box.idx = box.idx + 1;
+                    box.idx = box.idx + 1;
+                end
             end
             
             

@@ -3,18 +3,25 @@
 %%% Resource size and distribution (CDN, caches, end-devices)
 
 % still need good model for unada cache distribution among ASes
-par.ASn = 50;
+par.ASn = 1;
 
 par.ASp = geopdf(0:(par.ASn-1), 0.1);
 par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
 par.nvids = 1000; % video catalog
 
+[1 5 10 20 40]/100
+
+
+par.alpha = 0.99
+
+%vgl. mit / ohne temporal locality
+
 par.cachesizeAS = 0.02; % proportional to video catalog
 
 par.cachesizeUSER = 5; % items
 
-par.pcacheUSER = 0.1;
+par.pcacheUSER = 0.0;
 
 %%% Video bitrate / chunk-size distribution
 
