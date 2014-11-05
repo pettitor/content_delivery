@@ -17,38 +17,26 @@ addpath('lib/boxModel');
 
 parRBHORST;
 
-%seeds = [234]; %, 567];
-seeds = [234];
+%seeds = [234, 567];
+seeds = [234, 567];
 % new study with separated LIs
 %% box model
-mus = [4 4.5 5 5.5 6 6.5 7];
-sigma = [0.14 0.16 0.18 0.2 0.22 0.24 0.26];
+asCacheSize = [1 5 10 20 40]/100;
+%vgl. mit / ohne temporal locality
 
-for j=1:length(seeds)
-    %for x = 1:length(sigma)
+for i=1:length(asCacheSize)
+    for j=1:length(seeds)
         clear('stats');
         par.seed = seeds(j);
-        
-        % SNM
-        % mean 15.7
-        % std 14.4
-        m = 15.7*par.ticksPerDay;
-        v = 14.4*14.4*par.ticksPerDay;
-        
-        mu = log((m^2)/sqrt(v+m^2));
-        sigma = sqrt(log(v/(m^2)+1));
+        par.cachesizeAS = asCacheSize(i);
 
-        
-        par.box.lifespan.sigma = sigma;
-        par.box.lifespan.mu = mu;
-        
         tic
         stats = cdsim(par);
         toc
 
-        name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_lifeSpanMode_' num2str(par.box.lifeSpanMode) '_mu_' num2str(par.box.lifespan.mu) '_sigma_' num2str(par.box.lifespan.sigma)];
+        name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_lifeSpanMode_' num2str(par.box.lifeSpanMode) '_cachesizeAS_' num2str(par.cachesizeAS)];
         save(['results/cdsim_' name '.mat'], 'par', 'stats')
-    %end
+    end
 end
 
 %% li13 custom part (in one block)

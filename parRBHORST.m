@@ -10,13 +10,6 @@ par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
 par.nvids = 1000; % video catalog
 
-[1 5 10 20 40]/100
-
-
-par.alpha = 0.99
-
-%vgl. mit / ohne temporal locality
-
 par.cachesizeAS = 0.02; % proportional to video catalog
 
 par.cachesizeUSER = 5; % items
@@ -140,12 +133,8 @@ par.box.lifespan.lifespan = [0,2;2,5;5,8;8,13;13,38];
 %par.box.lifeSpanMode = SNM_Like;
 par.box.lifeSpanMode = proofOfConcept;
 %parameters for box model, lifespanMode: proofOfConcept
-par.box.lifespan.mu = 5.6874;
-par.box.lifespan.sigma = 0.1811;
-%v = 3e3;
-%m = v/10;
-%par.box.lifespan.mu = log((m^2)/sqrt(v+m^2));
-%par.box.lifespan.sigma = sqrt(log(v/(m^2)+1));
+par.box.lifespan.mu = 7.3136;
+par.box.lifespan.sigma = 0.0934;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;

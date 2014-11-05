@@ -1,4 +1,4 @@
-filePattern = 'results/cdsim_s_*.mat';
+filePattern = 'results/cdsim_05-Nov-2014_seed_567*.mat';
 %% active videos snm
 files = dir(filePattern);
 
@@ -179,7 +179,39 @@ for f=1:length(files)
 end
 
 %% lifespan verteilung
-%fuer 10 populaeresten videos
+files = dir(filePattern);
+color = gray(11);
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    %[b,idx] = sort(stats.views,'descend');
+  
+    lifespan = nan(1,par.nvids);
+    fi = figure(f)
+    clf;box on;hold all;
+    for i=1:par.nvids
+        a = stats.t(stats.watch == i);
+
+        if(~isempty(a))
+            lifespan(i) = max(a)-min(a);
+        else
+            lifespan(i) = 0;
+        end
+    end
+    
+    c = histc(lifespan,1:par.ticksPerDay:par.tmax);
+    plot(c,'.')
+    
+    title(files(f).name);
+    %x: 800
+    %y: 90
+    
+    saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
+end
+
+%% lifespan verteilung - meherere sims in einem plot
 files = dir(filePattern);
 color = gray(11);
 
@@ -244,3 +276,14 @@ for f=1:length(files)
     saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end
 
+%% cache hit ratio
+
+files = dir(filePattern);
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    disp(files(f).name);
+    stats.cache_hit./stats.cache_access
+end
