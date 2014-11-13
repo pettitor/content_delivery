@@ -65,7 +65,10 @@ nitems = max(cache.capacity);
 %     cache.items{i} = NaN(1,nitems);
 % end
 cache.items = sparse(length(cache.capacity), nitems);
-
+for i=1:length(cache.capacity)
+    perm = randperm(par.nvids);
+    cache.items(i,1:cache.capacity(i)) = perm(1:cache.capacity(i));
+end
 cache.score = sparse(length(cache.capacity), nitems);
 
 if (any(par.cachingstrategy == SLWND))

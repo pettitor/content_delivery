@@ -277,19 +277,22 @@ for f=1:length(files)
 end
 
 %% cache hit ratio
-
+filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_234_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
 files = dir(filePattern);
 
 for f=1:length(files)
     clear par stats;
-    load(strcat('results/', files(f).name));
+    load(strcat('results/cacheHit/', files(f).name));
     
     disp(files(f).name);
     stats.cache_hit./stats.cache_access
 end
 
 %% plot cache hit ratio
-filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_234_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
+filePattern = 'results/cacheHit/cdsim_12-Nov-2014_seed_234_demandModel_6_lifeSpanMode_1_cachesizeAS_*.mat';
+filePattern = 'results/cacheHit/cdsim_12-Nov-2014_seed_567_demandModel_6_lifeSpanMode_1_cachesizeAS_*.mat';
+%filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_234_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
+%filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_567_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
 files = dir(filePattern);
 
 cacheHitRatio = NaN(1, length(files));
@@ -303,7 +306,8 @@ for f=1:length(files)
     cacheHitRatio(f) = r;
     cacheSize(f) = par.cachesizeAS; 
 end
-
+figure(1);
+box on;hold all;
 plot(cacheSize, cacheHitRatio, '.');
 
 axis([0 1 0 1]);

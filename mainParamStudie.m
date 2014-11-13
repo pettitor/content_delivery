@@ -21,21 +21,28 @@ parRBHORST;
 seeds = [234, 567];
 % new study with separated LIs
 %% box model
-asCacheSize = [1 5 10 20 40]/100;
-%vgl. mit / ohne temporal locality
+%asCacheSize = [1 5 10 20 40]/100;
+asCacheSize = [1 20 40]/100;
+demanModels = [ZIPF2, boxModel];
 
-for i=1:length(asCacheSize)
-    for j=1:length(seeds)
-        clear('stats');
-        par.seed = seeds(j);
-        par.cachesizeAS = asCacheSize(i);
+for h=1:length(demanModels)
+    for i=1:length(asCacheSize)
+        for j=1:length(seeds)
+            clear('stats');
+            par.seed = seeds(j);
+            
+            par.cachesizeAS = asCacheSize(i);
+            
+            par.demand_model = demanModels(h);
+            par.sharing_model = demanModels(h);
 
-        tic
-        stats = cdsim(par);
-        toc
+            tic
+            stats = cdsim(par);
+            toc
 
-        name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_lifeSpanMode_' num2str(par.box.lifeSpanMode) '_cachesizeAS_' num2str(par.cachesizeAS)];
-        save(['results/cdsim_' name '.mat'], 'par', 'stats')
+            name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_lifeSpanMode_' num2str(par.box.lifeSpanMode) '_cachesizeAS_' num2str(par.cachesizeAS)];
+            save(['results/cdsim_' name '.mat'], 'par', 'stats')
+        end
     end
 end
 
