@@ -70,7 +70,7 @@ par.historysize = 100;
 par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.016 0.011 0.010 0.008 0.005 0.005 0.003 0.002 0.002];
 par.ncategories = 4;
 
-par.alpha = 0.6; % global Zipf law popularity, consider a<1, a>1
+par.alpha = 0.99; % global Zipf law popularity, consider a<1, a>1
 
 a=exp(-par.alpha .* log(1:par.nvids));
 zipfcdf = cumsum([0 a]);
@@ -110,8 +110,8 @@ par.tmax = 3e3;
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
 
-par.demand_model = boxModel;
-par.sharing_model = boxModel;
+par.demand_model = ZIPF2;
+par.sharing_model = ZIPF2;
 
 %li13 Custom settings, upload events and temporal attenuation
 par.uploadEvents = true;
