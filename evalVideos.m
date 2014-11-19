@@ -289,25 +289,38 @@ for f=1:length(files)
 end
 
 %% plot cache hit ratio
-filePattern = 'results/cacheHit/cdsim_12-Nov-2014_seed_234_demandModel_6_lifeSpanMode_1_cachesizeAS_*.mat';
-filePattern = 'results/cacheHit/cdsim_12-Nov-2014_seed_567_demandModel_6_lifeSpanMode_1_cachesizeAS_*.mat';
+%filePattern = 'results/cacheHit/cdsim_12-Nov-2014_seed_234_demandModel_6_lifeSpanMode_1_cachesizeAS_*.mat';
+%filePattern = 'results/cacheHit/cdsim_12-Nov-2014_seed_567_demandModel_6_lifeSpanMode_1_cachesizeAS_*.mat';
 %filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_234_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
 %filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_567_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
-files = dir(filePattern);
 
-cacheHitRatio = NaN(1, length(files));
-cacheSize = NaN(1, length(files));
-for f=1:length(files)
-    clear par stats;
-    load(strcat('results/cacheHit/', files(f).name));
+
+
+constants;
+seeds = [234, 567];
+demanModels = [ZIPF2, boxModel];
+%mean ueber versch. seeds
+%1 plot with all box models
+%1 plot with all zipfs
+
+basePattern = 'results/cacheHit/cdsim_*';
+for d=1:length(demanModels)
+    pattern = [basePattern '_demandModel_' num2str(demanModels(d))];
+    files = dir(pattern);
+    cacheHitRatio = NaN(1, length(files));
+    cacheSize = NaN(1, length(files));
+    for f=1:length(files)
+        clear par stats;
+        load(strcat('results/cacheHit/', files(f).name));
+        
+        r = stats.cache_hit./stats.cache_access;
     
-    r = stats.cache_hit./stats.cache_access;
+        cacheHitRatio(f) = r;
+        cacheSize(f) = par.cachesizeAS; 
+    end
     
-    cacheHitRatio(f) = r;
-    cacheSize(f) = par.cachesizeAS; 
+    figure(d)
+    plot(cacheSize, cacheHitRatio, '.');
+
+    axis([0 1 0 1]);
 end
-figure(1);
-box on;hold all;
-plot(cacheSize, cacheHitRatio, '.');
-
-axis([0 1 0 1]);

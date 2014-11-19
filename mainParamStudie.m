@@ -21,8 +21,7 @@ parRBHORST;
 seeds = [234, 567];
 % new study with separated LIs
 %% box model
-%asCacheSize = [1 5 10 20 40]/100;
-asCacheSize = [1 20 40]/100;
+asCacheSize = [1 5 10 20 40]/100;
 demanModels = [ZIPF2, boxModel];
 
 for h=1:length(demanModels)

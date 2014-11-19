@@ -62,7 +62,9 @@ n = max([CG{1}' CG{2}'])+1;
 par.GF = sparse(CG{1}'+1, CG{2}'+1, ones(1,length(CG{1})), n, n);
 
 
-par.nuser = size(par.GF,1);
+%par.nuser = size(par.GF,1);
+% TODO just for debug
+par.nuser = 900;
 % par.GF = rand(1000,1000)<0.3;
 
 par.historysize = 100;
