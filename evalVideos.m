@@ -305,10 +305,11 @@ demanModels = [ZIPF2, boxModel];
 
 basePattern = 'results/cacheHit/cdsim_*';
 for d=1:length(demanModels)
-    pattern = [basePattern '_demandModel_' num2str(demanModels(d))];
+    pattern = [basePattern '_demandModel_' num2str(demanModels(d)) '*'];
     files = dir(pattern);
     cacheHitRatio = NaN(1, length(files));
     cacheSize = NaN(1, length(files));
+    seed = NaN(1, length(files));
     for f=1:length(files)
         clear par stats;
         load(strcat('results/cacheHit/', files(f).name));
@@ -316,11 +317,13 @@ for d=1:length(demanModels)
         r = stats.cache_hit./stats.cache_access;
     
         cacheHitRatio(f) = r;
-        cacheSize(f) = par.cachesizeAS; 
+        cacheSize(f) = par.cachesizeAS;
+        seed(f) = par.seed;
     end
     
     figure(d)
     plot(cacheSize, cacheHitRatio, '.');
+    title(['Demand Model: ' demandModel(demanModels(d))])
 
     axis([0 1 0 1]);
 end
