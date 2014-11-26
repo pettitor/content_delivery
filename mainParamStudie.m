@@ -18,11 +18,13 @@ addpath('lib/boxModel');
 parRBHORST;
 
 %seeds = [234, 567];
-seeds = [234, 567];
+seeds = [234];%, 567];
 % new study with separated LIs
 %% box model
-asCacheSize = [1 5 10 20 40]/100;
-demanModels = [ZIPF2, boxModel];
+asCacheSize = [1] / 100;% 5 10 20 40]/100;
+%demanModels = [ZIPF2, boxModel];
+demanModels = [LI13, LI13Custom];
+
 
 for h=1:length(demanModels)
     for i=1:length(asCacheSize)

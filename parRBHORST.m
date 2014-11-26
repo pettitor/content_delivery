@@ -143,8 +143,5 @@ par.ia_demand_par = par.ia_demand_par_seconds * par.ticksPerSecond;
 par.ia_demand_par = (par.tmax/par.box.nrequests)*ones(1,24);
 
 % demand model parameters
-if (par.demand_model == SNM)
-    par = addSNMParams(par);
-elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
-    par = addLI13Params(par);
-end
+par = addSNMParams(par);
+par = addLI13Params(par);
