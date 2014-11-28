@@ -260,12 +260,9 @@ while ~isempty(events.t) && events.t(1) < par.tmax
                 case LI13
                     vid = getVideoLI13(li13, SHARE, t, vid);
                     
-                    if (~isnan(vid))
-                        dt = random(par.ia_share_rnd, ...
-                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
-
+                    if (~isnan(vid)) %nan if video should not be shared
                         maxID = maxID+1;
-                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                        events = addEvent(events, t, par.tmax, SHARE, user, maxID, vid);
                     end
                 case LI13Custom
                     vid = getVideoLI13Custom(li13, SHARE, t, vid);

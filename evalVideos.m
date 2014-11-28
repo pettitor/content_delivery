@@ -27,6 +27,7 @@ end
 %TODO plot cache hit rate for snm (different scenarios), li13
 
 %% plot views (log log)
+filePattern = 'results/cdsim_29-Nov-2014_*.mat';
 files = dir(filePattern);
 
 for f=1:length(files)
@@ -35,7 +36,7 @@ for f=1:length(files)
     views = stats.views;%(stats.views~=0);
     views = sort(views, 'descend');
     
-    fi = figure(f);
+    fi = figure(f+1);
     %hold on
     
     ydata = log10(views+1)';
@@ -53,6 +54,9 @@ for f=1:length(files)
     plot(xdata,ydata,'.');
     plot(xdata,flog(a, xdata));
     
+    %plot([1e1 1e3],10e3*[1e1 1e3].^-0.6)
+    
+    %set(gca,'xscale','log','yscale','log')
     axis([1 4.5 0 4.5]);
     title(files(f).name);
     xlabel('Video index (ranked by popularity)');
@@ -324,6 +328,7 @@ for d=1:length(demanModels)
     figure(d)
     plot(cacheSize, cacheHitRatio, '.');
     title(['Demand Model: ' demandModel(demanModels(d))])
+    set(gca,'xscale','log')
 
     axis([0 1 0 1]);
 end

@@ -100,8 +100,8 @@ par.tmax = 3e3;
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
 
-par.demand_model = ZIPF2;
-par.sharing_model = ZIPF2;
+par.demand_model = LI13;
+par.sharing_model = LI13;
 
 %li13 Custom settings, upload events and temporal attenuation
 par.uploadEvents = true;
@@ -141,6 +141,7 @@ par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2
 par.ia_demand_par_seconds = 4*ones(1,24); % constant ia time in seconds
 par.ia_demand_par = par.ia_demand_par_seconds * par.ticksPerSecond;
 par.ia_demand_par = (par.tmax/par.box.nrequests)*ones(1,24);
+%par.ia_demand_par = par.ia_demand_par * 5;
 
 % demand model parameters
 par = addSNMParams(par);
