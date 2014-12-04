@@ -27,7 +27,7 @@ end
 %TODO plot cache hit rate for snm (different scenarios), li13
 
 %% plot views (log log)
-filePattern = 'results/cdsim_29-Nov-2014_*.mat';
+filePattern = 'results/cdsim_03-Dec-2014_*.mat';
 files = dir(filePattern);
 
 for f=1:length(files)

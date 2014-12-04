@@ -135,6 +135,8 @@ stats.numOfFriends = nan(1,3000000);
 stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
+preCalFriends = sum(GF,2);
+
 t2 = 0;
 while ~isempty(events.t) && events.t(1) < par.tmax
     t = events.t(1); events.t(1)=[];
@@ -293,14 +295,26 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             if (isnan(vid))
                 vid = getVideo(uid, nvids, par, t, H, wall, SHARE, snm, li13, category);
             end
-            wall = updateWall(GF, wall, uid, vid);
+            
+            if (par.sharing_model == WALL)
+                wall = updateWall(GF, wall, uid, vid);
+            end
             
             if (par.demand_model == LI13 || par.demand_model == LI13Custom)
+                %graph, topmost is most current version
+                %numOfFriends = preCalFriends(uid);
                 %find 'last': id 4897 returns several entries, should fix that
                 %numOfFriends = find(GF(uid,:), 1, 'last');
-                numOfFriends = sum(GF(uid,:)); 
+                %numOfFriends = sum(GF(uid,:));
+                
+                %pareto
+                %K=0.9;
+                %numOfFriends = ceil(gprnd(1/K,2,K));
+                
+                %exponential
+                numOfFriends = ceil(exprnd(par.li13.meanFriends));
                 if (isempty(numOfFriends))
-                    numOfFriends = 1;
+                    numOfFriends = ceil(exprnd(par.li13.meanFriends));
                 end
                 li13 = updateLI13(vid, SHARE, par, li13, t, numOfFriends);
                 stats.numOfFriends(id) = numOfFriends;

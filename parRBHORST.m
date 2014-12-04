@@ -56,6 +56,9 @@ par.RBHORSTprio = 1;
 par.wallsize = 100;
 
 fG = fopen('data/graph10000.txt');
+%fG = fopen('data/graph100000.txt');
+%fG = fopen('data/facebook.txt');
+%fG = fopen('data/pokec.txt');
 CG = textscan(fG,'%f %f','CommentStyle','#');
 fclose(fG);
 n = max([CG{1}' CG{2}'])+1;
