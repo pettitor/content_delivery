@@ -126,12 +126,12 @@ end
 
 % queue.active = [];
 
-stats.upload = nan(1,3000000);
-stats.watch = nan(1,3000000);
-stats.uid = nan(1,3000000);
-stats.share = nan(1,3000000);
-stats.t = nan(1,3000000);
-stats.numOfFriends = nan(1,3000000);
+stats.upload = nan(1,6000000);
+stats.watch = nan(1,6000000);
+stats.uid = nan(1,6000000);
+stats.share = nan(1,6000000);
+stats.t = nan(1,6000000);
+stats.numOfFriends = nan(1,6000000);
 stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
@@ -308,11 +308,11 @@ while ~isempty(events.t) && events.t(1) < par.tmax
                 %numOfFriends = sum(GF(uid,:));
                 
                 %pareto
-                %K=0.9;
-                %numOfFriends = ceil(gprnd(1/K,2,K));
+                K=0.9;
+                numOfFriends = ceil(gprnd(1/K,2,K));
                 
                 %exponential
-                numOfFriends = ceil(exprnd(par.li13.meanFriends));
+                %numOfFriends = ceil(exprnd(par.li13.meanFriends));
                 if (isempty(numOfFriends))
                     numOfFriends = ceil(exprnd(par.li13.meanFriends));
                 end

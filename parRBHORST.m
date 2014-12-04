@@ -117,7 +117,7 @@ par.viewAttenuationNewExp = 0.04;
 par.probabilityEquality = true;
 
 %box model settings
-par.box.nrequests = 100000;
+par.box.nrequests = 3000000;
 par.box.alpha = 0.99;
 
 %parameters for box model, lifespanMode: SNM_Like
