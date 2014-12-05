@@ -302,14 +302,14 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             
             if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 %graph, topmost is most current version
-                %numOfFriends = preCalFriends(uid);
+                numOfFriends = preCalFriends(uid);
                 %find 'last': id 4897 returns several entries, should fix that
                 %numOfFriends = find(GF(uid,:), 1, 'last');
                 %numOfFriends = sum(GF(uid,:));
                 
                 %pareto
-                K=0.9;
-                numOfFriends = ceil(gprnd(1/K,2,K));
+                %K=0.9;
+                %numOfFriends = ceil(gprnd(1/K,2,K));
                 
                 %exponential
                 %numOfFriends = ceil(exprnd(par.li13.meanFriends));

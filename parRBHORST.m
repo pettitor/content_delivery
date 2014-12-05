@@ -8,7 +8,7 @@ par.ASn = 1;
 par.ASp = geopdf(0:(par.ASn-1), 0.1);
 par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
-par.nvids = 1000; % video catalog
+par.nvids = 63591; % video catalog
 
 par.cachesizeAS = 0.02; % proportional to video catalog
 
@@ -55,9 +55,9 @@ par.RBHORSTprio = 1;
 
 par.wallsize = 100;
 
-fG = fopen('data/graph10000.txt');
+%fG = fopen('data/graph10000.txt');
 %fG = fopen('data/graph100000.txt');
-%fG = fopen('data/facebook.txt');
+fG = fopen('data/facebook.txt');
 %fG = fopen('data/pokec.txt');
 CG = textscan(fG,'%f %f','CommentStyle','#');
 fclose(fG);
@@ -117,7 +117,7 @@ par.viewAttenuationNewExp = 0.04;
 par.probabilityEquality = true;
 
 %box model settings
-par.box.nrequests = 3000000;
+par.box.nrequests = 2905276;
 par.box.alpha = 0.99;
 
 %parameters for box model, lifespanMode: SNM_Like
