@@ -20,9 +20,9 @@ parRBHORST;
 %seeds = [234, 567];
 seeds = [234];%, 567];
 %% box model
-asCacheSize = [1] / 100;% 5 10 20 40]/100;
-%demanModels = [ZIPF2, boxModel];
-demanModels = [LI13];%, LI13Custom];
+asCacheSize = [5 10 20 40] / 100;%[1 5 10 20 40]/100;
+demanModels = [LI13];
+%demanModels = [boxModel, ZIPF2, LI13];
 
 
 for h=1:length(demanModels)
