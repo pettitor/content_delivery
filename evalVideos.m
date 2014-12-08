@@ -27,7 +27,7 @@ end
 %TODO plot cache hit rate for snm (different scenarios), li13
 
 %% plot views (log log)
-filePattern = 'results/cdsim_03-Dec-2014_*.mat';
+filePattern = 'results/cdsim_08-Dec-2014*.mat';
 files = dir(filePattern);
 
 for f=1:length(files)
@@ -43,21 +43,22 @@ for f=1:length(files)
     xdata = log10(1:length(views))+1;
 
     %f=@(a,xdata)a(1).*xdata.^(-a(2));
-    flog=@(a,xdata)a(1)+xdata.*(-a(2));
+    %flog=@(a,xdata)a(1)+xdata.*(-a(2));
 
-    a = lsqcurvefit(flog,[4 2],xdata,ydata)
+    %a = lsqcurvefit(flog,[4 2],xdata,ydata)
     
     clf
     %loglog(views,'.')
     plot(xdata,ydata);
     hold all
     plot(xdata,ydata,'.');
-    plot(xdata,flog(a, xdata));
+    plot([1 6],5*[1 6].^-0.85);
+    %plot(xdata,flog(a, xdata));
     
     %plot([1e1 1e3],10e3*[1e1 1e3].^-0.6)
     
     %set(gca,'xscale','log','yscale','log')
-    axis([1 4.5 0 4.5]);
+    axis([1 6 0 6]);
     title(files(f).name);
     xlabel('Video index (ranked by popularity)');
     ylabel('Number of requests');
@@ -299,10 +300,9 @@ end
 %filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_567_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
 
 
-
 constants;
-seeds = [234, 567];
-demanModels = [ZIPF2, boxModel];
+seeds = [234];%, 567];
+demanModels = [ZIPF2, boxModel, LI13];
 %mean ueber versch. seeds
 %1 plot with all box models
 %1 plot with all zipfs
@@ -329,6 +329,8 @@ for d=1:length(demanModels)
     plot(cacheSize, cacheHitRatio, '.');
     title(['Demand Model: ' demandModel(demanModels(d))])
     set(gca,'xscale','log')
+    xlabel('cache Size')
+    ylabel('cache Hit Ratio')
 
     axis([0 1 0 1]);
 end
