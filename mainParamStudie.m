@@ -19,8 +19,8 @@ parRBHORST;
 
 %seeds = [234, 567];
 seeds = [234];%, 567];
-%% box model
-asCacheSize = [5 10 20 40] / 100;%[1 5 10 20 40]/100;
+%% main sim
+asCacheSize = [5] / 100;%[1 5 10 20 40]/100;
 demanModels = [LI13];
 %demanModels = [boxModel, ZIPF2, LI13];
 
