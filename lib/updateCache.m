@@ -24,6 +24,19 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 cache.items(id,repl) = vid;
                 cache.score(id,repl) = t;
             end
+            
+            
+            
+%             if cache.items(id,1) ~= vid
+%                 i = cache.items(id,:) == vid;
+%                 if any(i)
+%                     cache.items(id,2:cache.capacity(id)) = cache.items(id,~i(1:cache.capacity(id)));
+%                     cache.items(id,1) = vid;
+%                 else
+%                     cache.items(id,2:cache.capacity(id)) = cache.items(id,1:cache.capacity(id)-1);
+%                     cache.items(id,1) = vid;
+%                 end
+%             end
        case LS
 
             i = cache.items(id,:) == vid;
@@ -41,19 +54,28 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 %cache.score(id,repl) = sum(stats.numOfFriends(stats.share==vid));
                 cache.score(id,repl) = stats.expViews(vid);
             end
-            
-            
-%             if cache.items(id,1) ~= vid
-%                 i = cache.items(id,:) == vid;
-%                 if any(i)
-%                     cache.items(id,2:cache.capacity(id)) = cache.items(id,~i(1:cache.capacity(id)));
-%                     cache.items(id,1) = vid;
-%                 else
-%                     cache.items(id,2:cache.capacity(id)) = cache.items(id,1:cache.capacity(id)-1);
-%                     cache.items(id,1) = vid;
-%                 end
-%             end
+       case LSLRU
 
+            i = cache.items(id,:) == vid;
+            if any(i)
+                cache.score(id,i) = stats.expViews(vid);
+                cache.score2(id,i) = t;
+            else
+                [~, last] = find(cache.items(id,:),1,'last');
+                if isempty(last); last = 0; end
+                repl = last + 1;
+                if (repl > cache.capacity(id));
+                    [res, repl] = min(cache.score(id,:));
+                    if (res == stats.expViews(vid))
+                        tmp = cache.score2(id,:);
+                        tmp(stats.expViews ~= stats.expViews(vid)) = NaN;
+                        [~, repl] = min(tmp);
+                    end
+                end
+                cache.items(id,repl) = vid;
+                cache.score(id,repl) = stats.expViews(vid);
+                cache.score2(id,repl) = t;
+            end
             
         case LRUAS
             % cache to optimize availability in AS

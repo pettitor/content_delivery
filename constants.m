@@ -18,6 +18,7 @@ LRU = 1;
 LFU = 2;
 LRUAS = 3;
 LS = 4;
+LSLRU = 5;
 
 SLWND = 5;
 

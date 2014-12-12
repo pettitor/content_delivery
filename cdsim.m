@@ -70,6 +70,7 @@ for i=1:length(cache.capacity)
     cache.items(i,1:cache.capacity(i)) = perm(1:cache.capacity(i));
 end
 cache.score = sparse(length(cache.capacity), nitems);
+cache.score2 = sparse(length(cache.capacity), nitems);
 
 if (any(par.cachingstrategy == SLWND))
     cache.wnd = sparse(length(cache.capacity), par.k);

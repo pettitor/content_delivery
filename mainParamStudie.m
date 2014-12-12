@@ -21,8 +21,9 @@ parRBHORST;
 seeds = [234];%, 567];
 %% main sim
 LI13LS = 9;
-asCacheSize = [1] / 100;%[1 5 10 20 40 60 80]/100;
-demanModels = [LI13LS];%[boxModel, ZIPF2, LI13, LI13LS];
+LI13LSLRU = 10;
+asCacheSize = [60] / 100;%[1 5 10 20 40 60 80]/100;
+demanModels = [LI13LSLRU];%[boxModel, ZIPF2, LI13, LI13LS];
 
 
 for h=1:length(demanModels)
@@ -37,6 +38,10 @@ for h=1:length(demanModels)
                 par.demand_model = LI13;
                 par.sharing_model = LI13;
                 par.cachingstrategy = [LS LS];
+            elseif (demanModels(h) == LI13LSLRU)
+                par.demand_model = LI13;
+                par.sharing_model = LI13;
+                par.cachingstrategy = [LSLRU LSLRU];
             else
                 par.demand_model = demanModels(h);
                 par.sharing_model = demanModels(h);

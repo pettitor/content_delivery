@@ -302,9 +302,10 @@ end
 
 constants;
 LI13LS = 9;
+LI13LSLRU = 10;
 seeds = [234];%, 567];
-demanModels = [ZIPF2, boxModel, LI13, LI13LS];
-demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom','BoxModel', 'LI13 - LS'};
+demanModels = [ZIPF2, boxModel, LI13, LI13LS, LI13LSLRU];
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13 - LRU','ZIPF2','LI13Custom','BoxModel', 'LI13 - LS', 'LI13 - LS and LRU'};
 %mean ueber versch. seeds
 %1 plot with all box models
 %1 plot with all zipfs
