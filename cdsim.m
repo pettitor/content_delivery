@@ -132,6 +132,7 @@ stats.uid = nan(1,6000000);
 stats.share = nan(1,6000000);
 stats.t = nan(1,6000000);
 stats.numOfFriends = nan(1,6000000);
+stats.expViews = zeros(1,par.nvids);
 stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
@@ -318,6 +319,7 @@ while ~isempty(events.t) && events.t(1) < par.tmax
                 end
                 li13 = updateLI13(vid, SHARE, par, li13, t, numOfFriends);
                 stats.numOfFriends(id) = numOfFriends;
+                stats.expViews(vid) = stats.expViews(vid) + numOfFriends;
             end
             
             stats.share(id) = vid;

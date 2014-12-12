@@ -28,7 +28,8 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
 
             i = cache.items(id,:) == vid;
             if any(i)
-                cache.score(id,i) = sum(stats.numOfFriends(stats.share==vid));
+                %cache.score(id,i) = sum(stats.numOfFriends(stats.share==vid));
+                cache.score(id,i) = stats.expViews(vid);
             else
                 [~, last] = find(cache.items(id,:),1,'last');
                 if isempty(last); last = 0; end
@@ -37,7 +38,8 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                     [~, repl] = min(cache.score(id,:));
                 end
                 cache.items(id,repl) = vid;
-                cache.score(id,repl) = sum(stats.numOfFriends(stats.share==vid));
+                %cache.score(id,repl) = sum(stats.numOfFriends(stats.share==vid));
+                cache.score(id,repl) = stats.expViews(vid);
             end
             
             
