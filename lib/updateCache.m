@@ -67,9 +67,9 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 if (repl > cache.capacity(id));
                     [res, repl] = min(cache.score(id,:));
                     if (res == stats.expViews(vid))
-                        tmp = cache.score2(id,:);
-                        tmp(stats.expViews ~= stats.expViews(vid)) = NaN;
-                        [~, repl] = min(tmp);
+                        tmpIdx = find(cache.score == stats.expViews(vid));
+                        [~, idx] = min(cache.score2(id,tmpIdx));
+                        repl = tmpIdx(idx);
                     end
                 end
                 cache.items(id,repl) = vid;
