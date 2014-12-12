@@ -27,7 +27,7 @@ end
 %TODO plot cache hit rate for snm (different scenarios), li13
 
 %% plot views (log log)
-filePattern = 'results/cdsim_08-Dec-2014*.mat';
+filePattern = 'results/cdsim_*-*.mat';
 files = dir(filePattern);
 
 for f=1:length(files)
@@ -301,8 +301,10 @@ end
 
 
 constants;
+LI13LS = 9;
 seeds = [234];%, 567];
-demanModels = [ZIPF2, boxModel, LI13];
+demanModels = [ZIPF2, boxModel, LI13, LI13LS];
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom','BoxModel', 'LI13 - LS'};
 %mean ueber versch. seeds
 %1 plot with all box models
 %1 plot with all zipfs

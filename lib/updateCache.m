@@ -3,11 +3,7 @@ function cache = updateCache(cache, stats, t, ids, vid, par)
 % possible ideas to improve performance: sort cache.items? parfor cellarray
 % accumarray?
 
-LRU = 1;
-LFU = 2;
-LRUAS = 3;
-RANDOM = 4;
-SLWND = 5;
+constants;
 
 for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
     id = ids(ii);
@@ -28,6 +24,22 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 cache.items(id,repl) = vid;
                 cache.score(id,repl) = t;
             end
+       case LS
+
+            i = cache.items(id,:) == vid;
+            if any(i)
+                cache.score(id,i) = sum(stats.numOfFriends(stats.share==vid));
+            else
+                [~, last] = find(cache.items(id,:),1,'last');
+                if isempty(last); last = 0; end
+                repl = last + 1;
+                if (repl > cache.capacity(id));
+                    [~, repl] = min(cache.score(id,:));
+                end
+                cache.items(id,repl) = vid;
+                cache.score(id,repl) = sum(stats.numOfFriends(stats.share==vid));
+            end
+            
             
 %             if cache.items(id,1) ~= vid
 %                 i = cache.items(id,:) == vid;

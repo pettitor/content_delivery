@@ -20,9 +20,9 @@ parRBHORST;
 %seeds = [234, 567];
 seeds = [234];%, 567];
 %% main sim
-asCacheSize = [5] / 100;%[1 5 10 20 40]/100;
-demanModels = [LI13];
-%demanModels = [boxModel, ZIPF2, LI13];
+LI13LS = 9;
+asCacheSize = [1] / 100;%[1 5 10 20 40 60 80]/100;
+demanModels = [LI13LS];%[boxModel, ZIPF2, LI13, LI13LS];
 
 
 for h=1:length(demanModels)
@@ -33,14 +33,20 @@ for h=1:length(demanModels)
             
             par.cachesizeAS = asCacheSize(i);
             
-            par.demand_model = demanModels(h);
-            par.sharing_model = demanModels(h);
+            if (demanModels(h) == LI13LS)
+                par.demand_model = LI13;
+                par.sharing_model = LI13;
+                par.cachingstrategy = [LS LS];
+            else
+                par.demand_model = demanModels(h);
+                par.sharing_model = demanModels(h);
+            end
 
             tic
             stats = cdsim(par);
             toc
 
-            name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model) '_lifeSpanMode_' num2str(par.box.lifeSpanMode) '_cachesizeAS_' num2str(par.cachesizeAS)];
+            name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(demanModels(h)) '_lifeSpanMode_' num2str(par.box.lifeSpanMode) '_cachesizeAS_' num2str(par.cachesizeAS)];
             save(['results/cdsim_' name '.mat'], 'par', 'stats')
         end
     end

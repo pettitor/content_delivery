@@ -17,6 +17,7 @@ SNM_Like = 2;
 LRU = 1;
 LFU = 2;
 LRUAS = 3;
+LS = 4;
 
 SLWND = 5;
 
