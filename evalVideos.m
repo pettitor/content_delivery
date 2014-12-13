@@ -337,3 +337,57 @@ for d=1:length(demanModels)
 
     axis([0 1 0 1]);
 end
+
+%% plot cache hit ratio newer one
+
+constants;
+LI13LS = 9;
+LI13LSLRU = 10;
+demanModels = [ZIPF2, boxModel, LI13, LI13LS, LI13LSLRU];
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13 - LRU','ZIPF2','LI13Custom','BoxModel', 'LI13 - LS', 'LI13 - LS and LRU'};
+numberOfRunsPerModel = 7;
+
+cacheHit = NaN(length(demanModels),numberOfRunsPerModel);
+cacheSize = NaN(length(demanModels),numberOfRunsPerModel);
+
+basePattern = 'results/cacheHit/cdsim_*';
+for d=1:length(demanModels)
+    pattern = [basePattern '_demandModel_' num2str(demanModels(d)) '*'];
+    files = dir(pattern);
+    %cacheHitRatio = NaN(1, length(files));
+    %cacheSize = NaN(1, length(files));
+    for f=1:length(files)
+        clear par stats;
+        load(strcat('results/cacheHit/', files(f).name));
+        
+        r = stats.cache_hit./stats.cache_access;
+    
+        cacheHit(d,f) = r;
+        cacheSize(d,f) = par.cachesizeAS;
+    end
+    
+    figure(d)
+    plot(cacheSize(d,:), cacheHit(d,:), '.');
+    title(['Demand Model: ' demandModel(demanModels(d))])
+    set(gca,'xscale','log')
+    xlabel('cache Size')
+    ylabel('cache Hit Ratio')
+
+    axis([0 1 0 1]);
+end
+
+color = ['m', 'c', 'r', 'g', 'b', 'k', 'y'];
+%color = gray(length(demanModels));
+figure(d+1)
+hold all;
+for idx=1:size(cacheHit,1)
+    plot(cacheSize(idx,:), cacheHit(idx,:), '.', 'Color',color(idx));%color(idx,:));
+end
+
+title('all Demand Models')
+set(gca,'xscale','log')
+xlabel('cache Size')
+ylabel('cache Hit Ratio')
+legend(demandModel(demanModels))
+
+axis([0 1 0 1]);
