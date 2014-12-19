@@ -22,8 +22,8 @@ seeds = [234];%, 567];
 %% main sim
 LI13LS = 9;
 LI13LSLRU = 10;
-asCacheSize = [60] / 100;%[1 5 10 20 40 60 80]/100;
-demanModels = [LI13LSLRU];%[boxModel, ZIPF2, LI13, LI13LS];
+asCacheSize = [1 5 10 20 40 60 80] / 100;
+demanModels = [LI13LSLRU, boxModel, ZIPF2, LI13, LI13LS];
 
 
 for h=1:length(demanModels)
