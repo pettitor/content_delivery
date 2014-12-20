@@ -59,6 +59,9 @@ par.wallsize = 100;
 %fG = fopen('data/graph100000.txt');
 %fG = fopen('data/facebook.txt');
 fG = fopen('data/pokec.txt');
+if (fG == -1)
+    disp(sprintf('Please make sure the graph-file is present.\nYou can download the facebook graph from: snap.stanford.edu/data/egonets-Facebook.html\nYou can download the pocek graph from: snap.stanford.edu/data/soc-pokec.html'));
+end
 CG = textscan(fG,'%f %f','CommentStyle','#');
 fclose(fG);
 n = max([CG{1}' CG{2}'])+1;
