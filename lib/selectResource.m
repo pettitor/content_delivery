@@ -25,39 +25,43 @@ cid = []; % if no local cache can serve the request
 %             end
 
 %            hit = cellfun(@(x)any(x == vid), cache.items,'UniformOutput',true);
-           access = find(personal);
+           access = personal;
            stats.cache_access(personal) = stats.cache_access(personal) + 1; 
            if any(hit & personal)
                 stats.cache_hit(hit & personal) = stats.cache_hit(hit & personal) + 1;
-                cid = find(hit & personal);
-           else
+                cid = find(hit & personal & ~cache.occupied);
+           end
+           if (isempty(cid))
                stats.cache_access(local & user) = stats.cache_access(local & user) + 1;
-               access = union(access, find(local & user));
+               access = access | (local & user);
                 % choose ressource in same AS if available
                if any(local & hit & user)
 
                 stats.cache_hit(local & hit & user) = stats.cache_hit(local & hit & user) + 1;
 
                 % pic random cache to serve
-                cid = find(local & hit & user);
-                cid = cid(randi(length(cid)));
+                cid = find(local & hit & user & ~cache.occupied);
+                if (cid)
+                    cid = cid(randi(length(cid)));
+                end
                 %cid = cid(random('unid',1,length(cid)));
                 % alternative share load on caches with hit
-
-                % if not available look in isp cache
-               else
-                   access = union(access, find(local & ~user));
-                   stats.cache_access(local & ~user) = stats.cache_access(local & ~user) + 1;
-                   if any(local & hit & ~user)
-                    cid = find(local & hit & ~user);
-                    cid = cid(randi(length(cid)));
-                    %cid = cid(random('unid',1,length(cid)));
-
-                    stats.cache_hit(cid) = stats.cache_hit(cid) + 1;
-                    end
-                % else no cache hit
                end
            end
+           % if not available look in isp cache
+           if (isempty(cid))
+               access = access | (local & ~user);
+               stats.cache_access(local & ~user) = stats.cache_access(local & ~user) + 1;
+               if any(local & hit & ~user)
+                cid = find(local & hit & ~user);
+                cid = cid(randi(length(cid)));
+                %cid = cid(random('unid',1,length(cid)));
+
+                stats.cache_hit(cid) = stats.cache_hit(cid) + 1;
+                end
+            % else no cache hit
+           end
+           access = find(access);
             
         case RANDOM
             % choose random resource

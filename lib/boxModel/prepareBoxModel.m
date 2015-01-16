@@ -2,14 +2,15 @@ function box = prepareBoxModel(par)
 
 constants
 
-a=exp(-par.box.alpha .* log(1:par.nvids));
+a=exp(-par.alpha .* log(1:par.nvids));
 zipfcdf = cumsum([0 a]);
 box.zipfcdf = zipfcdf/zipfcdf(end);
 
 % anzahl requests auswürfeln 
-vid = nan(1,par.box.nrequests);
+vid = nan(1,par.nrequests);
+rnds = rand(1,par.nrequests);
 for i=1:length(vid)
-    vid(i) = find(box.zipfcdf>rand(),1,'first')-1;
+    vid(i) = find(box.zipfcdf>rnds(i),1,'first')-1;
 end
 [nrequests,bin] = histc(vid,1:par.nvids);
 nrequests = nrequests(randperm(par.nvids));
