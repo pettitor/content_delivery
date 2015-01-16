@@ -63,27 +63,38 @@ ylabel('P(k)');
 xlabel('views k');
 set(gca,'xscale','log','yscale','log');
 %%
-figure(2);clf;box on;hold all;
+figure(2);%clf;box on;hold all;
 plot(sort(stats.cache_hit(stats.cache.type == 1)./stats.cache_access(stats.cache.type == 1), 'descend'))
 legend({'ISP', 'UNaDa'})
 xlabel('cache rank');
 ylabel('hit rate');
 %set(gca,'yscale','log');
-figure(3);clf;box on;hold all;
+figure(3);%clf;box on;hold all;
 plot(sort(stats.cache_hit(stats.cache.type == 2)./stats.cache_access(stats.cache.type == 2), 'descend'),'.')
 legend({'UNaDa'})
 xlabel('cache rank');
 ylabel('hit rate');
 ylim([0 1]) 
 %set(gca,'yscale','log');
+%%
+ISPcachecontrib = zeros(par.ASn, 1);
+for ii = 1:par.ASn
+    ISPcachecontrib(ii) = stats.cache_hit(ii) / sum(stats.cache_hit(stats.cache.AS == ii));
+    DCcontrib(1,ii) = sum(stats.cache_serve(stats.cache.AS == ii)) / sum(ismember(stats.uid(~isnan(stats.watch)), find(stats.AS == ii)));
+end
+%figure
+hold all;
+plot(sort(ISPcachecontrib,'descend'));
+%plot(sort(DCcontrib,'descend'));
+
 %% ISP cache size, hitrate
 figure(4);clf;box on;hold all;
 plot(histc(stats.AS, 1:50)*par.cachesizeAS, stats.cache_hit(stats.cache.type == 1)./stats.cache_access(stats.cache.type == 1), '.')
 xlabel('cache size');
 ylabel('hit rate');
 %% how are requests to ISP caches distributed?
-figure(5);clf;box on;hold all;
-assize = histc(stats.AS, 1:50);
+figure(5);%clf;box on;hold all;
+assize = histc(stats.AS, 1:par.ASn);
 asaccess = stats.cache_access(stats.cache.type == 1);
 plot(assize, asaccess,'.');
 plot(assize, stats.cache_hit(stats.cache.type == 1),'.');

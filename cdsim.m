@@ -63,6 +63,9 @@ cache.type = [ones(1,par.ASn) 2*ones(1,nAScacheUSER)]';
 cache.capacity = [ceil(par.cachesizeAS*nASuser) par.cachesizeUSER*ones(1,nAScacheUSER)]';
 
 cache.items = cell(length(cache.capacity),1);
+
+cache.occupied = false(length(cache.capacity),1);
+
 nitems = max(cache.capacity);
 % for i=1:length(cache.capacity)
 %     cache.items{i} = NaN(1,nitems);
@@ -100,7 +103,7 @@ if (par.demand_model == SNM)
     stats.snm.classes = snm.videoClass;
 elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
     li13 = prepareLI13(par);
-elseif (par.demand_model == boxModel)
+elseif (par.demand_model == BOX)
     box = prepareBoxModel(par);
 end
 
@@ -119,7 +122,7 @@ elseif (par.demand_model == MEME)
     events = addEvent(events, 0, par.tmax, UPLOAD, floor(rand()*nusers), 1, 1);
     u = floor(rand()*nusers);
     events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
-elseif (par.demand_model == boxModel)
+elseif (par.demand_model == BOX)
     maxID = 1;
     u = floor(rand()*nusers);
     
@@ -132,6 +135,8 @@ else
     events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
     %end
 end
+
+%profile on
 
 % queue.active = [];
 
@@ -160,6 +165,7 @@ while ~isempty(events.t) && events.t(1) < par.tmax
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
         disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
+        disp(['UNaDas occupied: ' num2str(100*sum(cache.occupied)/nAScacheUSER) '%'])
     end
     
     if (warmup && t>par.twarmup)
@@ -215,12 +221,10 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             end
             if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 li13 = updateLI13(vid, WATCH, par, li13, t);
-            elseif (par.demand_model == boxModel)
-                maxID = maxID + 1;
-                u = floor(rand()*nusers);
-
+            elseif (par.demand_model == BOX)
                 if (box.idx <= length(box.viewt))
-                    events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
+                    maxID = maxID + 1;
+                    events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, NaN, maxID, box.viewid(box.idx));
 
                     box.idx = box.idx + 1;
                 end
@@ -240,9 +244,13 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             GV = updateGV(GV, vid);
             
             [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par, iAScacheUSER);
-            
-             if (cid)
+            if (cid)
                  stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
+                 maxID = maxID+1;
+                 events = addEvent(events, t+1/par.uploadrate, par.tmax, SERVE, cid, maxID, vid);
+                 if (cache.type(cid)==2 & par.uploadrate > 0) % TODO
+                     cache.occupied(cid) = true;
+                 end
              end               
             
              % remove caches without capacity
@@ -310,7 +318,7 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             dt = exprnd(par.ia_demand_par(hourIndex));
             %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
             
-            if (par.demand_model ~= boxModel)
+            if (par.demand_model ~= BOX)
                 maxID = maxID+1;
                 events = addEvent(events, t+dt, par.tmax, WATCH, NaN, maxID, NaN);
             end
@@ -360,6 +368,9 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             
             stats.share(id) = stats.vid(id);
             stats.t(id) = t;
+        case SERVE
+            %uid is used as cid
+            cache.occupied(user) = false;
 
     end  
 end

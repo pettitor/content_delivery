@@ -3,7 +3,7 @@
 %%% Resource size and distribution (CDN, caches, end-devices)
 
 % still need good model for unada cache distribution among ASes
-par.ASn = 1;
+par.ASn = 20;
 
 par.ASp = geopdf(0:(par.ASn-1), 0.1);
 par.ASp(end) = 1-sum(par.ASp(1:end-1));
@@ -55,10 +55,10 @@ par.RBHORSTprio = 1;
 
 par.wallsize = 100;
 
-%fG = fopen('data/graph10000.txt');
+fG = fopen('data/graph10000.txt');
 %fG = fopen('data/graph100000.txt');
 %fG = fopen('data/facebook.txt');
-fG = fopen('data/pokec.txt');
+%fG = fopen('data/pokec.txt');
 if (fG == -1)
     disp(sprintf('Please make sure the graph-file is present.\nYou can download the facebook graph from: snap.stanford.edu/data/egonets-Facebook.html\nYou can download the pocek graph from: snap.stanford.edu/data/soc-pokec.html'));
 end
@@ -68,9 +68,9 @@ n = max([CG{1}' CG{2}'])+1;
 par.GF = sparse(CG{1}'+1, CG{2}'+1, ones(1,length(CG{1})), n, n);
 
 
-%par.nuser = size(par.GF,1);
+par.nuser = size(par.GF,1);
 % TODO just for debug
-par.nuser = 900;
+%par.nuser = 900;
 % par.GF = rand(1000,1000)<0.3;
 
 par.historysize = 100;
@@ -106,8 +106,8 @@ par.tmax = 1e3;
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
 
-par.demand_model = LI13;
-par.sharing_model = LI13;
+par.demand_model = BOX;
+par.sharing_model = BOX;
 
 %li13 Custom settings, upload events and temporal attenuation
 par.uploadEvents = true;
@@ -118,10 +118,6 @@ par.viewAttenuationExp = 0.06;
 par.viewAttenuationNew = true;
 par.viewAttenuationNewExp = 0.04;
 par.probabilityEquality = true;
-
-%box model settings
-par.box.nrequests = 2905276;
-par.box.alpha = 0.85;
 
 %parameters for box model, lifespanMode: SNM_Like
 par.box.lifespan.percentage = [3.6 5.3 3.3 5.3 82.4];
@@ -146,9 +142,12 @@ par.ia_demand_rnd = 'exp';
 par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
 par.ia_demand_par_seconds = 4*ones(1,24); % constant ia time in seconds
 par.ia_demand_par = par.ia_demand_par_seconds * par.ticksPerSecond;
-par.ia_demand_par = (par.tmax/par.box.nrequests)*ones(1,24);
-%par.ia_demand_par = par.ia_demand_par * 5;
+%par.ia_demand_par = (par.tmax/par.nrequests)*ones(1,24);
+
+par.twarmup = par.tmax/10;
+par.tmax = par.tmax + par.twarmup;
+par.nrequests = (par.tmax)./par.ia_demand_par;
 
 % demand model parameters
-par = addSNMParams(par);
-par = addLI13Params(par);
+%par = addSNMParams(par);
+%par = addLI13Params(par);
