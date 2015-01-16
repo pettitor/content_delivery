@@ -68,8 +68,12 @@ nitems = max(cache.capacity);
 %     cache.items{i} = NaN(1,nitems);
 % end
 cache.items = sparse(length(cache.capacity), nitems);
-
+for i=1:length(cache.capacity)
+    perm = randperm(par.nvids);
+    cache.items(i,1:cache.capacity(i)) = perm(1:cache.capacity(i));
+end
 cache.score = sparse(length(cache.capacity), nitems);
+cache.score2 = sparse(length(cache.capacity), nitems);
 
 if (any(par.cachingstrategy == SLWND))
     cache.wnd = sparse(length(cache.capacity), par.k);
@@ -90,11 +94,14 @@ maxID=nusers;
 %snm specific data
 snm = struct;
 li13 = struct;
+box = struct;
 if (par.demand_model == SNM)
     snm = prepareSNM(par);
     stats.snm.classes = snm.videoClass;
 elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
     li13 = prepareLI13(par);
+elseif (par.demand_model == boxModel)
+    box = prepareBoxModel(par);
 end
 
 events.t = [];
@@ -112,6 +119,13 @@ elseif (par.demand_model == MEME)
     events = addEvent(events, 0, par.tmax, UPLOAD, floor(rand()*nusers), 1, 1);
     u = floor(rand()*nusers);
     events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
+elseif (par.demand_model == boxModel)
+    maxID = 1;
+    u = floor(rand()*nusers);
+    
+    events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
+    
+    box.idx = box.idx + 1;
 else
     %for i=1:maxID
     u = floor(rand()*nusers);
@@ -121,15 +135,19 @@ end
 
 % queue.active = [];
 
-stats.upload = nan(1,3000000);
-stats.watch = nan(1,3000000);
-stats.uid = nan(1,3000000);
-stats.share = nan(1,3000000);
-stats.t = nan(1,3000000);
+stats.upload = nan(1,6000000);
+stats.watch = nan(1,6000000);
+stats.uid = nan(1,6000000);
+stats.share = nan(1,6000000);
+stats.t = nan(1,6000000);
+stats.numOfFriends = nan(1,6000000);
+stats.expViews = zeros(1,par.nvids);
 stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
 warmup = 1;
+preCalFriends = sum(GF,2);
+
 t2 = 0;
 while ~isempty(events.t) && events.t(1) < par.tmax
     t = events.t(1); events.t(1)=[];
@@ -197,6 +215,15 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             end
             if (par.demand_model == LI13 || par.demand_model == LI13Custom)
                 li13 = updateLI13(vid, WATCH, par, li13, t);
+            elseif (par.demand_model == boxModel)
+                maxID = maxID + 1;
+                u = floor(rand()*nusers);
+
+                if (box.idx <= length(box.viewt))
+                    events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
+
+                    box.idx = box.idx + 1;
+                end
             end
             
             
@@ -261,12 +288,9 @@ while ~isempty(events.t) && events.t(1) < par.tmax
                 case LI13
                     vid = getVideoLI13(li13, SHARE, t, vid);
                     
-                    if (~isnan(vid))
-                        dt = random(par.ia_share_rnd, ...
-                            par.ia_share_par(1), par.ia_share_par(2), par.ia_share_par(3));
-
+                    if (~isnan(vid)) %nan if video should not be shared
                         maxID = maxID+1;
-                        events = addEvent(events, t+dt, par.tmax, SHARE, user, maxID, vid);
+                        events = addEvent(events, t, par.tmax, SHARE, user, maxID, vid);
                     end
                 case LI13Custom
                     vid = getVideoLI13Custom(li13, SHARE, t, vid);
@@ -285,9 +309,11 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             % add watch event
             dt = exprnd(par.ia_demand_par(hourIndex));
             %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
-                
-            maxID = maxID+1;
-            events = addEvent(events, t+dt, par.tmax, WATCH, NaN, maxID, NaN);
+            
+            if (par.demand_model ~= boxModel)
+                maxID = maxID+1;
+                events = addEvent(events, t+dt, par.tmax, WATCH, NaN, maxID, NaN);
+            end
         
         case SHARE
             % update wall of friends
@@ -295,15 +321,30 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             if (isnan(vid))
                 vid = getVideo(uid, nvids, par, t, H, wall, SHARE, snm, li13, category);
             end
-            wall = updateWall(GF, wall, uid, vid);
+            
+            if (par.sharing_model == WALL)
+                wall = updateWall(GF, wall, uid, vid);
+            end
             
             if (par.demand_model == LI13 || par.demand_model == LI13Custom)
+                %graph, topmost is most current version
+                numOfFriends = preCalFriends(uid);
                 %find 'last': id 4897 returns several entries, should fix that
-                numOfFriends = find(GF(uid,:), 1, 'last');
+                %numOfFriends = find(GF(uid,:), 1, 'last');
+                %numOfFriends = sum(GF(uid,:));
+                
+                %pareto
+                %K=0.9;
+                %numOfFriends = ceil(gprnd(1/K,2,K));
+                
+                %exponential
+                %numOfFriends = ceil(exprnd(par.li13.meanFriends));
                 if (isempty(numOfFriends))
-                    numOfFriends = 1;
+                    numOfFriends = ceil(exprnd(par.li13.meanFriends));
                 end
                 li13 = updateLI13(vid, SHARE, par, li13, t, numOfFriends);
+                stats.numOfFriends(id) = numOfFriends;
+                stats.expViews(vid) = stats.expViews(vid) + numOfFriends;
             end
             
             stats.share(id) = vid;

@@ -3,18 +3,18 @@
 %%% Resource size and distribution (CDN, caches, end-devices)
 
 % still need good model for unada cache distribution among ASes
-par.ASn = 50;
+par.ASn = 1;
 
 par.ASp = geopdf(0:(par.ASn-1), 0.1);
 par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
-par.nvids = 1000; % video catalog
+par.nvids = 63591; % video catalog
 
 par.cachesizeAS = 0.02; % proportional to video catalog
 
 par.cachesizeUSER = 5; % items
 
-par.pcacheUSER = 0.1;
+par.pcacheUSER = 0.0;
 
 %%% Video bitrate / chunk-size distribution
 
@@ -28,13 +28,6 @@ par.pcacheUSER = 0.1;
 % Sbihi ITC'25 cache cooperation
 
 % descending by tier, i.e. tier 1, tier 2, ...
-
-LRU = 1;
-LFU = 2;
-LRUAS = 3;
-RANDOM = 4;
-SLWND = 5;
-
 par.cachingstrategy = [LRU LRU];
 
 % SLWND sliding window parameter
@@ -46,11 +39,6 @@ par.maxitemsAS = 50;
 % Thresholds: prefetching, rarest/demanded, popular/niche
 
 %%% Resource selection strategy
-
-LOCAL = 1;
-RANDOM = 2;
-RBHORST = 3;
-
 par.resourceselection = LOCAL;
 
 par.RBHORSTprio = 1;
@@ -67,14 +55,22 @@ par.RBHORSTprio = 1;
 
 par.wallsize = 100;
 
-fG = fopen('data/graph10000.txt');
+%fG = fopen('data/graph10000.txt');
+%fG = fopen('data/graph100000.txt');
+%fG = fopen('data/facebook.txt');
+fG = fopen('data/pokec.txt');
+if (fG == -1)
+    disp(sprintf('Please make sure the graph-file is present.\nYou can download the facebook graph from: snap.stanford.edu/data/egonets-Facebook.html\nYou can download the pocek graph from: snap.stanford.edu/data/soc-pokec.html'));
+end
 CG = textscan(fG,'%f %f','CommentStyle','#');
 fclose(fG);
 n = max([CG{1}' CG{2}'])+1;
 par.GF = sparse(CG{1}'+1, CG{2}'+1, ones(1,length(CG{1})), n, n);
 
 
-par.nuser = size(par.GF,1);
+%par.nuser = size(par.GF,1);
+% TODO just for debug
+par.nuser = 900;
 % par.GF = rand(1000,1000)<0.3;
 
 par.historysize = 100;
@@ -82,35 +78,11 @@ par.historysize = 100;
 par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.016 0.011 0.010 0.008 0.005 0.005 0.003 0.002 0.002];
 par.ncategories = 4;
 
-%%% Item specific content demand (temporal, spatial)
-ZIPF = 1;
-WALL = 2;
-YTSTATS = 3;
-SNM = 4;
-LI13 = 5;
-ZIPF2 = 6;
-LI13Custom = 7;
-
-par.demand_model = LI13;
-par.sharing_model = LI13;
-
-par.alpha = 0.6; % global Zipf law popularity, consider a<1, a>1
+par.alpha = 0.85; % global Zipf law popularity, consider a<1, a>1
 
 a=exp(-par.alpha .* log(1:par.nvids));
 zipfcdf = cumsum([0 a]);
 par.zipfcdf = zipfcdf/zipfcdf(end);
-
-%currently: one tick of t = 1/96 day -> 15 min
-par.ticksPerDay = 96;
-par.ticksPerSecond = par.ticksPerDay/24/60/60;
-
-% timelag between demands
-par.ia_demand_rnd = 'exp';
-
-% consider par.tickPerDay
-par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
-par.ia_demand_par_seconds = 4*ones(1,24); % constant ia time in seconds
-par.ia_demand_par = par.ia_demand_par_seconds;%*par.ticksPerSecond;
 
 % basic model from propagation based paper
 par.pshare = 8e4/24/1923507; % 8e4 per day, consider time or user dependent
@@ -134,21 +106,49 @@ par.tmax = 1e3;
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
 
+par.demand_model = LI13;
+par.sharing_model = LI13;
+
 %li13 Custom settings, upload events and temporal attenuation
 par.uploadEvents = true;
 par.shareAttenuation = true;
 par.shareAttenuationExp = 0.3;
 par.viewAttenuation = true;
-par.viewAttenuationExp = 0.17;
+par.viewAttenuationExp = 0.06;
 par.viewAttenuationNew = true;
 par.viewAttenuationNewExp = 0.04;
+par.probabilityEquality = true;
+
+%box model settings
+par.box.nrequests = 2905276;
+par.box.alpha = 0.85;
+
+%parameters for box model, lifespanMode: SNM_Like
+par.box.lifespan.percentage = [3.6 5.3 3.3 5.3 82.4];
+par.box.lifespan.lifespan = [0,2;2,5;5,8;8,13;13,38];
+%par.box.lifeSpanMode = SNM_Like;
+par.box.lifeSpanMode = proofOfConcept;
+%parameters for box model, lifespanMode: proofOfConcept
+par.box.lifespan.mu = 7.3136;
+par.box.lifespan.sigma = 0.0934;
 
 par.rand_stream = 'mt19937ar';
 par.seed = 13;
 
+%currently: one tick of t = 1/96 day -> 15 min
+par.ticksPerDay = 96;
+par.ticksPerSecond = par.ticksPerDay/24/60/60;
+
+% timelag between demands
+par.ia_demand_rnd = 'exp';
+
+% consider par.tickPerDay
+par.ia_demand_par_seconds = [2.89 5.11 11.41 20.61 29.05 21.63 10.59 5.66 3.23 2.42 2.00 1.69 0.08 0.21 0.09 0.06 0.10 0.10 0.07 0.09 0.08 0.01 0.13 0.16]; % ia time in seconds
+par.ia_demand_par_seconds = 4*ones(1,24); % constant ia time in seconds
+par.ia_demand_par = par.ia_demand_par_seconds * par.ticksPerSecond;
+par.ia_demand_par = (par.tmax/par.box.nrequests)*ones(1,24);
+%par.ia_demand_par = par.ia_demand_par * 5;
+
 % demand model parameters
-if (par.demand_model == SNM)
-    par = addSNMParams(par);
-elseif (par.demand_model == LI13 || par.demand_model == LI13Custom)
-    par = addLI13Params(par);
-end
+par = addSNMParams(par);
+par = addLI13Params(par);

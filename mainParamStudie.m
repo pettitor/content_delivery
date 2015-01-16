@@ -2,14 +2,16 @@
 
 clear par stats
 
+
+%%%%% Parameters
+constants;
 % add library
 
 addpath('lib');
 addpath('lib/randraw');
 addpath('lib/snm');
 addpath('lib/li13');
-
-%%%%% Parameters
+addpath('lib/boxModel');
 
 %%% load default Parameters
 
@@ -53,7 +55,47 @@ for j=1:length(seeds)
 
     name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(par.demand_model)];
     %save(['results/cdsim_' name '.mat'], 'par', 'stats')
+
+%seeds = [234, 567];
+seeds = [234];%, 567];
+%% main sim
+LI13LS = 9;
+LI13LSLRU = 10;
+asCacheSize = [1 5 10 20 40 60 80] / 100;
+demanModels = [LI13LSLRU, boxModel, ZIPF2, LI13, LI13LS];
+
+
+for h=1:length(demanModels)
+    for i=1:length(asCacheSize)
+        for j=1:length(seeds)
+            clear('stats');
+            par.seed = seeds(j);
+            
+            par.cachesizeAS = asCacheSize(i);
+            
+            if (demanModels(h) == LI13LS)
+                par.demand_model = LI13;
+                par.sharing_model = LI13;
+                par.cachingstrategy = [LS LS];
+            elseif (demanModels(h) == LI13LSLRU)
+                par.demand_model = LI13;
+                par.sharing_model = LI13;
+                par.cachingstrategy = [LSLRU LSLRU];
+            else
+                par.demand_model = demanModels(h);
+                par.sharing_model = demanModels(h);
+            end
+
+            tic
+            stats = cdsim(par);
+            toc
+
+            name = [date '_seed_' num2str(par.seed) '_demandModel_' num2str(demanModels(h)) '_lifeSpanMode_' num2str(par.box.lifeSpanMode) '_cachesizeAS_' num2str(par.cachesizeAS)];
+            save(['results/cdsim_' name '.mat'], 'par', 'stats')
+        end
+    end
 end
+
 %% li13 custom part (in one block)
 constants;
 
@@ -74,6 +116,7 @@ for j=1:length(seeds)
         par.shareAttenuation = 1;
         par.viewAttenuation = 1;
         par.uploadEvents = 1;
+        par.probabilityEquality = 0;
         par.viewAttenuationNew = 0;
         
         if (par.uploadEvents)

@@ -1,5 +1,4 @@
-filePattern = 'results/cdsim_29-Aug-2014*longSim*.mat';
-
+filePattern = 'results/cdsim_12-Nov-2014_seed_567*.mat';
 %% active videos snm
 files = dir(filePattern);
 
@@ -28,6 +27,7 @@ end
 %TODO plot cache hit rate for snm (different scenarios), li13
 
 %% plot views (log log)
+filePattern = 'results/cdsim_*-*.mat';
 files = dir(filePattern);
 
 for f=1:length(files)
@@ -36,25 +36,29 @@ for f=1:length(files)
     views = stats.views;%(stats.views~=0);
     views = sort(views, 'descend');
     
-    fi = figure(f);
+    fi = figure(f+1);
     %hold on
     
     ydata = log10(views+1)';
     xdata = log10(1:length(views))+1;
 
     %f=@(a,xdata)a(1).*xdata.^(-a(2));
-    flog=@(a,xdata)a(1)+xdata.*(-a(2));
+    %flog=@(a,xdata)a(1)+xdata.*(-a(2));
 
-    a = lsqcurvefit(flog,[4 2],xdata,ydata)
+    %a = lsqcurvefit(flog,[4 2],xdata,ydata)
     
     clf
     %loglog(views,'.')
     plot(xdata,ydata);
     hold all
     plot(xdata,ydata,'.');
-    plot(xdata,flog(a, xdata));
+    plot([1 6],5*[1 6].^-0.85);
+    %plot(xdata,flog(a, xdata));
     
-    axis([1 4.5 0 4.5]);
+    %plot([1e1 1e3],10e3*[1e1 1e3].^-0.6)
+    
+    %set(gca,'xscale','log','yscale','log')
+    axis([1 6 0 6]);
     title(files(f).name);
     xlabel('Video index (ranked by popularity)');
     ylabel('Number of requests');
@@ -179,6 +183,78 @@ for f=1:length(files)
     saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end
 
+%% lifespan verteilung
+files = dir(filePattern);
+color = gray(11);
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    %[b,idx] = sort(stats.views,'descend');
+  
+    lifespan = nan(1,par.nvids);
+    fi = figure(f)
+    clf;box on;hold all;
+    for i=1:par.nvids
+        a = stats.t(stats.watch == i);
+
+        if(~isempty(a))
+            lifespan(i) = max(a)-min(a);
+        else
+            lifespan(i) = 0;
+        end
+    end
+    
+    c = histc(lifespan,1:par.ticksPerDay:par.tmax);
+    plot(c,'.')
+    
+    title(files(f).name);
+    %x: 800
+    %y: 90
+    
+    saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
+end
+
+%% lifespan verteilung - meherere sims in einem plot
+files = dir(filePattern);
+color = gray(11);
+
+marker = {'.--','d-'};
+
+fi = figure(2)
+clf;box on;hold all;
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/', files(f).name));
+    
+    %[b,idx] = sort(stats.views,'descend');
+  
+    lifespan = nan(1,par.nvids);
+    %fi = figure(f)
+    %clf;box on;hold all;
+    for i=1:par.nvids
+        a = stats.t(stats.watch == i);
+
+        if(~isempty(a))
+            lifespan(i) = max(a)-min(a);
+        else
+            lifespan(i) = 0;
+        end
+    end
+    
+    c = histc(lifespan,1:par.ticksPerDay:par.tmax);
+    plot(c,marker{f})
+    
+    title(files(f).name);
+    %axis([0 35 0 250]);
+    %x: 800
+    %y: 90
+    
+    %saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
+end
+saveas(fi,['results/figs/temporalLocality_all.jpg'],'jpg');
+
 %% number request per time period
 %just for the x top most popular videos
 files = dir(filePattern);
@@ -205,3 +281,113 @@ for f=1:length(files)
     saveas(fi,['results/figs/temporalLocality_' files(f).name '.jpg'],'jpg');
 end
 
+%% cache hit ratio
+filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_234_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
+files = dir(filePattern);
+
+for f=1:length(files)
+    clear par stats;
+    load(strcat('results/cacheHit/', files(f).name));
+    
+    disp(files(f).name);
+    stats.cache_hit./stats.cache_access
+end
+
+%% plot cache hit ratio
+%filePattern = 'results/cacheHit/cdsim_12-Nov-2014_seed_234_demandModel_6_lifeSpanMode_1_cachesizeAS_*.mat';
+%filePattern = 'results/cacheHit/cdsim_12-Nov-2014_seed_567_demandModel_6_lifeSpanMode_1_cachesizeAS_*.mat';
+%filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_234_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
+%filePattern = 'results/cacheHit/cdsim_05-Nov-2014_seed_567_demandModel_8_lifeSpanMode_1_cachesizeAS_*.mat';
+
+
+constants;
+LI13LS = 9;
+LI13LSLRU = 10;
+seeds = [234];%, 567];
+demanModels = [ZIPF2, boxModel, LI13, LI13LS, LI13LSLRU];
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13 - LRU','ZIPF2','LI13Custom','BoxModel', 'LI13 - LS', 'LI13 - LS and LRU'};
+%mean ueber versch. seeds
+%1 plot with all box models
+%1 plot with all zipfs
+
+basePattern = 'results/cacheHit/cdsim_*';
+for d=1:length(demanModels)
+    pattern = [basePattern '_demandModel_' num2str(demanModels(d)) '*'];
+    files = dir(pattern);
+    cacheHitRatio = NaN(1, length(files));
+    cacheSize = NaN(1, length(files));
+    seed = NaN(1, length(files));
+    for f=1:length(files)
+        clear par stats;
+        load(strcat('results/cacheHit/', files(f).name));
+        
+        r = stats.cache_hit./stats.cache_access;
+    
+        cacheHitRatio(f) = r;
+        cacheSize(f) = par.cachesizeAS;
+        seed(f) = par.seed;
+    end
+    
+    figure(d)
+    plot(cacheSize, cacheHitRatio, '.');
+    title(['Demand Model: ' demandModel(demanModels(d))])
+    set(gca,'xscale','log')
+    xlabel('cache Size')
+    ylabel('cache Hit Ratio')
+
+    axis([0 1 0 1]);
+end
+
+%% plot cache hit ratio newer one
+
+constants;
+LI13LS = 9;
+LI13LSLRU = 10;
+demanModels = [ZIPF2, boxModel, LI13, LI13LS, LI13LSLRU];
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13 - LRU','ZIPF2','LI13Custom','BoxModel', 'LI13 - LS', 'LI13 - LS and LRU'};
+numberOfRunsPerModel = 7;
+
+cacheHit = NaN(length(demanModels),numberOfRunsPerModel);
+cacheSize = NaN(length(demanModels),numberOfRunsPerModel);
+
+basePattern = 'results/cacheHit/cdsim_*';
+for d=1:length(demanModels)
+    pattern = [basePattern '_demandModel_' num2str(demanModels(d)) '*'];
+    files = dir(pattern);
+    %cacheHitRatio = NaN(1, length(files));
+    %cacheSize = NaN(1, length(files));
+    for f=1:length(files)
+        clear par stats;
+        load(strcat('results/cacheHit/', files(f).name));
+        
+        r = stats.cache_hit./stats.cache_access;
+    
+        cacheHit(d,f) = r;
+        cacheSize(d,f) = par.cachesizeAS;
+    end
+    
+    figure(d)
+    plot(cacheSize(d,:), cacheHit(d,:), '.');
+    title(['Demand Model: ' demandModel(demanModels(d))])
+    set(gca,'xscale','log')
+    xlabel('cache Size')
+    ylabel('cache Hit Ratio')
+
+    axis([0 1 0 1]);
+end
+
+color = ['m', 'c', 'r', 'g', 'b', 'k', 'y'];
+%color = gray(length(demanModels));
+figure(d+1)
+hold all;
+for idx=1:size(cacheHit,1)
+    plot(cacheSize(idx,:), cacheHit(idx,:), '.', 'Color',color(idx));%color(idx,:));
+end
+
+title('all Demand Models')
+set(gca,'xscale','log')
+xlabel('cache Size')
+ylabel('cache Hit Ratio')
+legend(demandModel(demanModels))
+
+axis([0 1 0 1]);

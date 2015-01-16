@@ -17,10 +17,17 @@ if (eventType == WATCH)
     li13.v(video) = li13.v(video) + 1;
     
     li13.ev(video) = li13.e(video) + li13.v(video);
-    li13.p = li13.ev/sum(li13.ev);
+    
+    if (li13.probabilityEquality)
+        ev1 = log(li13.ev);
+    
+        li13.p = ev1/sum(ev1);
+    else
+        li13.p = li13.ev/sum(li13.ev);
+    end
 elseif (eventType == UPLOAD)
     li13.p(video) = 1/par.nvids;
-else
+else %SHARE
     li13.lastShare(video) = time;
     li13.e(video) = li13.e(video) + binornd(numberOfFriends, par.li13.ViR);
     

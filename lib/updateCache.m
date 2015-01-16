@@ -3,11 +3,7 @@ function cache = updateCache(cache, stats, t, ids, vid, par)
 % possible ideas to improve performance: sort cache.items? parfor cellarray
 % accumarray?
 
-LRU = 1;
-LFU = 2;
-LRUAS = 3;
-RANDOM = 4;
-SLWND = 5;
+constants;
 
 for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
     id = ids(ii);
@@ -29,6 +25,8 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 cache.score(id,repl) = t;
             end
             
+            
+            
 %             if cache.items(id,1) ~= vid
 %                 i = cache.items(id,:) == vid;
 %                 if any(i)
@@ -39,7 +37,45 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
 %                     cache.items(id,1) = vid;
 %                 end
 %             end
+       case LS
 
+            i = cache.items(id,:) == vid;
+            if any(i)
+                %cache.score(id,i) = sum(stats.numOfFriends(stats.share==vid));
+                cache.score(id,i) = stats.expViews(vid);
+            else
+                [~, last] = find(cache.items(id,:),1,'last');
+                if isempty(last); last = 0; end
+                repl = last + 1;
+                if (repl > cache.capacity(id));
+                    [~, repl] = min(cache.score(id,:));
+                end
+                cache.items(id,repl) = vid;
+                %cache.score(id,repl) = sum(stats.numOfFriends(stats.share==vid));
+                cache.score(id,repl) = stats.expViews(vid);
+            end
+       case LSLRU
+
+            i = cache.items(id,:) == vid;
+            if any(i)
+                cache.score(id,i) = stats.expViews(vid);
+                cache.score2(id,i) = t;
+            else
+                [~, last] = find(cache.items(id,:),1,'last');
+                if isempty(last); last = 0; end
+                repl = last + 1;
+                if (repl > cache.capacity(id));
+                    [res, repl] = min(cache.score(id,:));
+                    if (res == stats.expViews(vid))
+                        tmpIdx = find(cache.score == stats.expViews(vid));
+                        [~, idx] = min(cache.score2(id,tmpIdx));
+                        repl = tmpIdx(idx);
+                    end
+                end
+                cache.items(id,repl) = vid;
+                cache.score(id,repl) = stats.expViews(vid);
+                cache.score2(id,repl) = t;
+            end
             
         case LRUAS
             % cache to optimize availability in AS
