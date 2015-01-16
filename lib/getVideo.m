@@ -1,4 +1,4 @@
-function vid=getVideo(uid, nvids, par, t, H, wall, eventType, snm, li13, categories)
+function vid=getVideo(uid, nvids, par, t, id, stats, wall, eventType, snm, li13, categories)
 
 constants
     
@@ -7,6 +7,13 @@ constants
     % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
     % TODO recency
     switch par.demand_model
+        case MEME
+            score = 1*(stats.views(1:nvids)./(1+t-stats.tupload(1:nvids))).*exp(-0.00001*(t-stats.tupload(1:nvids)));
+            p = score/nansum(score);
+            %pind = ~isnan(p);
+            %p(pind) = p(pind);% + 0.1*stats.zipfp(pind)';
+            %p = p./nansum(p);
+            vid = find(cumsum(p)>rand(),1,'first');
         case WALL
             ind = min(geornd(0.25), size(wall,2));
             if (ind == 0 || isnan(wall(uid,ind)))
@@ -34,6 +41,8 @@ constants
             vid = getVideoLI13(li13, eventType, t);
         case LI13Custom
             vid = getVideoLI13Custom(li13, eventType, t);
+        case BOX
+            vid = par.viewid(id);
     end
     
 end

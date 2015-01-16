@@ -1,15 +1,59 @@
+%% Zipf-law
 [n,bin] = histc(stats.watch(~isnan(stats.watch)),1:par.nvids);
 
+[nviews, vid] = sort(n,'descend');
+
 figure(1);clf;box on;hold all;
-plot(sort(n),1-(1:length(n))/length(n));
+plot(nviews);
 
 xlabel('views k');
 ylabel('P(X > k)');
 set(gca,'xscale','log','yscale','log');
 %set(gca,'xscale','log');
 %printfig(gcf, 'views')
+%hold all;
+%plot(1:max(n),(1:max(n)).^(-1/par.alpha))
+
+%% validate Zipf-exponent
+[n,bin] = histc(stats.watch(~isnan(stats.watch)),1:par.nvids);
+
+figure(1);clf;box on;hold all;
+plot(sort(n),1-(1:length(n))/length(n));
+
+[nviews, vid] = sort(n,'descend');
+
+xlabel('views k');
+ylabel('P(X > k)');
+set(gca,'xscale','log','yscale','log');
+%set(gca,'xscale','log');
+%printfig(gcf, 'views')
+%hold all;
+%plot(1:max(n),(1:max(n)).^(-1/par.alpha))
+%% temporal locality
+figure(2); clf; box on;
+
 hold all;
-plot(1:max(n),(1:max(n)).^(-1/par.alpha))
+
+dt = par.tmax/10;
+t = 1:dt:par.tmax;
+views = zeros(5,length(t));
+
+for i=1:10
+
+[n,bin] = histc(stats.t(stats.watch == vid(i)),t);
+
+views(i,:) = n;
+
+end
+
+bar(t,views')
+
+xlabel('views k');
+ylabel('P(X > k)');
+%set(gca,'xscale','log','yscale','log');
+%set(gca,'xscale','log');
+%printfig(gcf, 'views')
+
 %%
 figure(11);clf;box on;hold all;
 [cn,bin] = histc(n,1:(max(n)+1));

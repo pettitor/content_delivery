@@ -38,6 +38,10 @@ par.cachingstrategy = [LRU LRU];
 
 par.nvids = 10000;
 
+par.uploadrate = 1;
+
+par.downloadrate = 10;
+
 %for ll=[1 5 10 20 40 80]
 %    par.maxitemsAS = ll;
 for l=[3]

@@ -21,7 +21,10 @@ nvids = par.nvids;
 H  = NaN(nusers, par.historysize); % videos watched
 wall = NaN(nusers, par.wallsize); % videos displayed on wall (based on friends shares and video interest)
 
-stats.views = zeros(nvids,1);
+stats.views = ones(nvids,1);
+stats.tupload = nan(nvids,1);
+stats.zipfp = diff(par.zipfcdf);
+stats.zipfp = stats.zipfp(randperm(nvids));
 
 % draw video categories according to probability in par.category
 category.video = randsample(length(par.categories),nvids,true,par.categories);
@@ -104,6 +107,11 @@ events.vid=[];
 if (par.demand_model == LI13Custom && par.uploadEvents)
     %make sure UPLOAD is first in queue (otherwise no video acitve)
     events = addEvent(events, 0, par.tmax, UPLOAD, floor(rand()*nusers), 1, 1);
+elseif (par.demand_model == MEME)
+    %make sure UPLOAD is first in queue (otherwise no video acitve)
+    events = addEvent(events, 0, par.tmax, UPLOAD, floor(rand()*nusers), 1, 1);
+    u = floor(rand()*nusers);
+    events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
 else
     %for i=1:maxID
     u = floor(rand()*nusers);
@@ -121,6 +129,7 @@ stats.t = nan(1,3000000);
 stats.snm.numActiveVids = [];
 stats.snm.time = [];
 
+warmup = 1;
 t2 = 0;
 while ~isempty(events.t) && events.t(1) < par.tmax
     t = events.t(1); events.t(1)=[];
@@ -132,7 +141,21 @@ while ~isempty(events.t) && events.t(1) < par.tmax
     t1 = floor(t);
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
-        disp(['Progress: ' num2str(100*(t1/par.tmax)) '% '  num2str(length(events.t))])
+        disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
+    end
+    
+    if (warmup && t>par.twarmup)
+        warmup = 0;
+        stats.watch = nan(1,par.tmax);
+        stats.uid = nan(1,par.tmax);
+%        stats.share = nan(1,par.tmax);
+        stats.t = nan(1,par.tmax);
+        stats.cache_access = zeros(length(cache.capacity),1);
+        stats.cache_hit = stats.cache_access;
+        stats.cache_serve = stats.cache_access;
+        stats.AS_access = zeros(par.ASn,1);
+        stats.AS_hit = zeros(par.ASn,1);
+        %stats.views = ones(nvids,1);
     end
     
     switch type
@@ -140,13 +163,14 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             %add video to set of active videos
             li13 = updateLI13(vid, UPLOAD, par, li13, t);
             u = floor(rand() * nusers); %pick a random user
-            maxID = maxID + 1;
-            events = addEvent(events, t, par.tmax, WATCH, user, maxID, vid);
+            %maxID = maxID + 1;
+            %events = addEvent(events, t, par.tmax, WATCH, user, maxID, vid);
             deltaT = exprnd(par.tmax/par.nvids);
             %deltaT = random(par.ia_video_rnd, par.tmax/par.nvids);
             maxID = maxID + 1;
             events = addEvent(events, t+deltaT, par.tmax, UPLOAD, floor(rand()*nusers), maxID, vid+1);
             
+            stats.tupload(vid) = t;
             stats.t(id) = t;
             stats.upload(id) = vid;
             stats.uid(id) = user;
@@ -164,7 +188,7 @@ while ~isempty(events.t) && events.t(1) < par.tmax
             end
             
             if isnan(vid)
-                vid = getVideo(uid, nvids, par, t, H, wall, WATCH, snm, li13); %, categories); % consider GV
+                vid = getVideo(uid, nvids, par, t, stats, wall, WATCH, snm, li13); %, categories); % consider GV
                 if (par.demand_model == SNM)
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
@@ -202,7 +226,7 @@ while ~isempty(events.t) && events.t(1) < par.tmax
 
             %TODO update only caches which were accessed
             % update user cache
-            cache = updateCache(cache, stats, t, access, vid, par);
+            %cache = updateCache(cache, stats, t, access, vid, par);
             % update local isp cache if video is popular
             %cache = updateCache(cache, stats, 1:par.ASn, vid, par.ISPcachingstrategy, par);
             
