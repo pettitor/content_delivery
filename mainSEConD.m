@@ -89,7 +89,7 @@ par.nrequests = (par.twarmup+par.tmax)./par.ia_demand_par;
 %%%% Parameter Study
 uploadrate_psecond = [-1 1/2./(2.^(0:3))] % unlimited bw, one item per (5,10,20,40) seconds
 Y = NaN(length(uploadrate_psecond), 3);
-for i=2:length(uploadrate_psecond)
+for i=1:length(uploadrate_psecond)
 
 % items per second
 par.uploadrate_psecond = uploadrate_psecond(i);%-1;%1/60/5;
