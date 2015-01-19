@@ -1,4 +1,4 @@
-function vid=getVideo(uid, nvids, par, t, id, stats, wall, eventType, snm, li13, categories)
+function vid=getVideo(uid, nvids, par, t, id, stats, wall, eventType, categories)
 
 constants
     
@@ -31,16 +31,6 @@ constants
             vid=find(par.zipfcdf>rand(),1,'first')-1;
         case YTSTATS
             % George you can implement your model here
-        case SNM    
-            %http://www.sigcomm.org/sites/default/files/ccr/papers/2013/October/2541468-2541470.pdf
-            vid = getVideoSNM(par, snm, t, eventType);
-                        
-            % note: don't try to model popularity cascades (observed in
-            % geographically distributed user base)
-        case LI13
-            vid = getVideoLI13(li13, eventType, t);
-        case LI13Custom
-            vid = getVideoLI13Custom(li13, eventType, t);
         case BOX
             vid = par.viewid(id);
     end

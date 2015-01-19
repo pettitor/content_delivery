@@ -29,7 +29,7 @@ cachesizeAS = [0 0.1 0.2];
 cachesizeAS = 0.1;
 
 cachesizeUSER = [1 2 4 8]% 16 32 64 128];
-cachesizeUSER = 5
+cachesizeUSER = 2
 
 pcacheUSER = [0 0.1 0.2 0.4 0.8 1];
 par.pcacheUSER = [0.01];
