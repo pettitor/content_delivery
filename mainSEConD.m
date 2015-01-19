@@ -104,7 +104,9 @@ Y(i,1) = sum(stats.cache_serve(par.ASn+1:end))/sum(stats.views);
 
 end
 %%
-%Y = NaN(3,3);
-
 
 bar(Y,'stacked')
+%%
+ylabel('contribution')
+xlabel('home router upload bandwidth [items]')
+set(gca,'xticklabel',{'unlimited', '1/2s', '1/4s', '1/8s', '1/16s'})
