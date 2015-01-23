@@ -245,7 +245,7 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                  if (cache.type(cid)==2 && par.uploadrate > 0) % TODO
                      cache.occupied(cid) = cache.occupied(cid) + 1;
                      if (cache.occupied(cid)>1)
-                     event = adjustServiceTimes(event, cid, t, tmax, ...
+                     events = adjustServiceTimes(events, cid, t, tmax, ...
                         cache.occupied(cid)/(cache.occupied(cid)-1));
                      end
                      if rand()<par.pHD; serviceTime=par.serviceTimeHD; else serviceTime = 1; end
