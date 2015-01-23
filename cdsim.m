@@ -63,7 +63,7 @@ cache.capacity = [par.cachesizeAS par.cachesizeUSER*ones(1,nAScacheUSER)]';
 
 cache.items = cell(length(cache.capacity),1);
 
-cache.occupied = false(length(cache.capacity),1);
+cache.occupied = zeros(length(cache.capacity),1);
 
 nitems = max(cache.capacity);
 % for i=1:length(cache.capacity)
@@ -242,25 +242,18 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par, iAScacheUSER);
             if (cid)
                  stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
-                 maxID = maxID+1;
-                 events = addEvent(events, t+1/par.uploadrate, par.tmax, SERVE, cid, maxID, vid);
-                 if (cache.type(cid)==2 & par.uploadrate > 0) % TODO
-                     cache.occupied(cid) = true;
+                 if (cache.type(cid)==2 && par.uploadrate > 0) % TODO
+                     cache.occupied(cid) = cache.occupied(cid) + 1;
+                     if (cache.occupied(cid)>1)
+                     event = adjustServiceTimes(event, cid, t, tmax, ...
+                        cache.occupied(cid)/(cache.occupied(cid)-1));
+                     end
+                     if rand()<par.pHD; serviceTime=par.serviceTimeHD; else serviceTime = 1; end
+                    maxID = maxID+1;
+                    events = addEvent(events, t+serviceTime*cache.occupied(cid)/par.uploadrate, par.tmax, SERVE, cid, maxID, vid);
                  end
             end   
             
-                        stats.views(vid) = stats.views(vid) + 1;
-            
-            stats.t(id) = t;
-            stats.watch(id) = vid;
-            stats.uid(id) = uid;
-            %cid = cacheid von der das video geladen wird; 
-            [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par, iAScacheUSER);
-            %cid muss != 0 sein
-             if (cid)
-                 stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
-             end
-             
              % update hit cache
              update = cid;
              % leave copy down
@@ -356,7 +349,11 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             stats.t(id) = t;
         case SERVE
             %uid is used as cid
-            cache.occupied(user) = false;
+            cache.occupied(user) = cache.occupied(user) - 1;
+            if (cache.occupied(user) > 0)
+            events = adjustServiceTimes(events, user, t, tmax, ...
+                cache.occupied(user)/(cache.occupied(user)+1));
+            end
 
     end  
 end

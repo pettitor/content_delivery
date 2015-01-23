@@ -86,8 +86,13 @@ par.ncategories = 4;
 par.twarmup = par.tmax/5;
 par.nrequests = (par.twarmup+par.tmax)./par.ia_demand_par;
 
+par.bw_threshold = 1/1; % items per second; only download from UNaDa if bw > threshold 
+
+par.pHD = 0.0;
+par.serviceTimeHD = 10;
+
 %%%% Parameter Study
-uploadrate_psecond = [-1 1/2./(2.^(0:3))] % unlimited bw, one item per (5,10,20,40) seconds
+uploadrate_psecond = [-1 1./(2.^(0:4))] % unlimited bw, one item per (5,10,20,40) seconds
 Y = NaN(length(uploadrate_psecond), 3);
 for i=1:length(uploadrate_psecond)
 
@@ -109,4 +114,4 @@ bar(Y,'stacked')
 %%
 ylabel('contribution')
 xlabel('home router upload bandwidth [items]')
-set(gca,'xticklabel',{'unlimited', '1/2s', '1/4s', '1/8s', '1/16s'})
+set(gca,'xticklabel',{'unlimited', '1/1s' ,'1/2s', '1/4s', '1/8s', '1/16s'})

@@ -19,6 +19,7 @@ cid = []; % if no local cache can serve the request
             user = (cache.type == 2) & ~personal;
 %            items = cell2mat(cache.items);
             hit = any(cache.items == vid, 2);
+            bw = (cache.occupied < 1/par.bw_threshold);
 %             hit = false(size(cache.items,1),1);
 %             parfor i=1:length(hit)
 %                 hit(i) = any(cache.items{i} == vid);
@@ -29,7 +30,7 @@ cid = []; % if no local cache can serve the request
            stats.cache_access(personal) = stats.cache_access(personal) + 1; 
            if any(hit & personal)
                 stats.cache_hit(hit & personal) = stats.cache_hit(hit & personal) + 1;
-                cid = find(hit & personal & ~cache.occupied);
+                cid = find(hit & personal & bw);
            end
            if (isempty(cid))
                stats.cache_access(local & user) = stats.cache_access(local & user) + 1;
@@ -40,7 +41,7 @@ cid = []; % if no local cache can serve the request
                 stats.cache_hit(local & hit & user) = stats.cache_hit(local & hit & user) + 1;
 
                 % pic random cache to serve
-                cid = find(local & hit & user & ~cache.occupied);
+                cid = find(local & hit & user & bw);
                 if (cid)
                     cid = cid(randi(length(cid)));
                 end
