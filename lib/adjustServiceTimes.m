@@ -1,8 +1,8 @@
-function event = adjustServiceTimes(events, cid, now, tmax, factor)
-    
-    ind = (events.type == 6 && events.user == cid);
+function events = adjustServiceTimes(events, cid, now, tmax, factor)
 
-    et = event.t(ind);
+    ind = (events.type == 6 & events.user == cid);
+    
+    et = events.t(ind);
     euser = events.user(ind);
     eid = events.id(ind);
     evid = events.vid(ind);
@@ -15,7 +15,7 @@ function event = adjustServiceTimes(events, cid, now, tmax, factor)
     events.id(ind) = [];
     events.vid(ind) = [];
     
-    for i=1:length(eid)
-       events = addEvent(events, et(i), tmax, 6, euser, eid, evid);
+    for i=1:length(et)
+       events = addEvent(events, et(i), tmax, 6, euser(i), eid(i), evid(i));
     end
 end

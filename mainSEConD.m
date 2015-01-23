@@ -92,7 +92,7 @@ par.pHD = 0.0;
 par.serviceTimeHD = 10;
 
 %%%% Parameter Study
-uploadrate_psecond = [-1 1./(2.^(0:4))] % unlimited bw, one item per (5,10,20,40) seconds
+uploadrate_psecond = [1./(2.^(0:4))] % unlimited bw, one item per (5,10,20,40) seconds
 Y = NaN(length(uploadrate_psecond), 3);
 for i=1:length(uploadrate_psecond)
 

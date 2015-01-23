@@ -245,7 +245,7 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                  if (cache.type(cid)==2 && par.uploadrate > 0) % TODO
                      cache.occupied(cid) = cache.occupied(cid) + 1;
                      if (cache.occupied(cid)>1)
-                     events = adjustServiceTimes(events, cid, t, tmax, ...
+                     events = adjustServiceTimes(events, cid, t, par.tmax, ...
                         cache.occupied(cid)/(cache.occupied(cid)-1));
                      end
                      if rand()<par.pHD; serviceTime=par.serviceTimeHD; else serviceTime = 1; end
@@ -280,7 +280,7 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             % add watch event
             dt = exprnd(par.ia_demand_par(hourIndex));
             %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
-            
+                
             if (par.demand_model ~= BOX)
                 maxID = maxID+1;
                 events = addEvent(events, t+dt, par.tmax, WATCH, NaN, maxID, NaN);
@@ -292,7 +292,7 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                     box.idx = box.idx + 1;
                 end
             end
-            
+
             switch par.sharing_model
                 case WALL
                     r = rand();
@@ -351,8 +351,8 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             %uid is used as cid
             cache.occupied(user) = cache.occupied(user) - 1;
             if (cache.occupied(user) > 0)
-            events = adjustServiceTimes(events, user, t, tmax, ...
-                cache.occupied(user)/(cache.occupied(user)+1));
+                events = adjustServiceTimes(events, user, t, par.tmax, ...
+                    cache.occupied(user)/(cache.occupied(user)+1));
             end
 
     end  
