@@ -30,7 +30,7 @@ cid = []; % if no local cache can serve the request
            stats.cache_access(personal) = stats.cache_access(personal) + 1; 
            if any(hit & personal)
                 stats.cache_hit(hit & personal) = stats.cache_hit(hit & personal) + 1;
-                cid = find(hit & personal & bw);
+                cid = find(hit & personal); %no check on bw, since no upload
            end
            if (isempty(cid))
                stats.cache_access(local & user) = stats.cache_access(local & user) + 1;
@@ -51,10 +51,10 @@ cid = []; % if no local cache can serve the request
            end
            % if not available look in isp cache
            if (isempty(cid))
-               access = access | (local & ~user);
-               stats.cache_access(local & ~user) = stats.cache_access(local & ~user) + 1;
-               if any(local & hit & ~user)
-                cid = find(local & hit & ~user);
+               access = access | (local & ~user & ~personal);
+               stats.cache_access(local & ~user & ~personal) = stats.cache_access(local & ~user & ~personal) + 1;
+               if any(local & hit & ~user & ~personal)
+                cid = find(local & hit & ~user & ~personal);
                 cid = cid(randi(length(cid)));
                 %cid = cid(random('unid',1,length(cid)));
 

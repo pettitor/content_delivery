@@ -248,11 +248,11 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                      events = adjustServiceTimes(events, cid, t, par.tmax, ...
                         cache.occupied(cid)/(cache.occupied(cid)-1));
                      end
-                     if rand()<par.pHD; serviceTime=par.serviceTimeHD; else serviceTime = 1; end
+                     if rand()<par.pHD; bitrate=par.bitrateHD; else bitrate = par.bitrate; end
                     maxID = maxID+1;
-                    events = addEvent(events, t+serviceTime*cache.occupied(cid)/par.uploadrate, par.tmax, SERVE, cid, maxID, vid);
+                    events = addEvent(events, t+bitrate*cache.occupied(cid)/par.uploadrate, par.tmax, SERVE, cid, maxID, vid);
                  end
-            end   
+            end
             
              % update hit cache
              update = cid;
