@@ -86,22 +86,37 @@ par.ncategories = 4;
 par.twarmup = par.tmax/5;
 par.nrequests = (par.twarmup+par.tmax)./par.ia_demand_par;
 
-par.bw_threshold = 1/1; % items per second; only download from UNaDa if bw > threshold 
+% 3 choices of UL/DL bandwidth - probabities of each choice
+%first choice
+%par.bw=struct('DL',768,'UL',128,'dstr',21.4); 
+
+%second choice
+%par.bw(2).DL=1536;
+%par.bw(2).UL=384;
+%par.bw(2).dstr=23.3;
+
+%third choice
+%par.bw(3).DL=3072;
+%par.bw(3).UL=768;
+%par.bw(3).dstr=55.3;
+
+par.BWthresh = 200; % kbps per second; only download from UNaDa if bw > threshold 
+par.BWthreshHD = 1000; % kbps per second; only download from UNaDa if bw > threshold 
+
+par.duration = 10; % seconds
 
 par.pHD = 0.0;
-par.bitrate = 10; %
-par.bitrateHD = 40;
+par.bitrate = 200; % kbps
+par.bitrateHD = 1000; % kbps
 
 %%%% Parameter Study
-uploadrate_psecond = [-1 1./(5*2.^(1:5))] % unlimited bw, one item per (5,10,20,40) seconds
+uploadrate = [(200*2.^(0:5)) -1] % unlimited bw, one item per (5,10,20,40) seconds
 %uploadrate_psecond = 1./(5*2^5)
-Y = NaN(length(uploadrate_psecond), 3);
-for i=1:length(uploadrate_psecond)
+Y = NaN(length(uploadrate), 3);
+for i=1:length(uploadrate)
 
-% items per second
-par.uploadrate_psecond = uploadrate_psecond(i);%-1;%1/60/5;
-% items per tick
-par.uploadrate = par.uploadrate_psecond / par.ticksPerSecond;
+% kbps
+par.uploadrate = uploadrate(i);%-1;%1/60/5;
 
 stats = cdsim(par);
 

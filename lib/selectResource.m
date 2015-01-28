@@ -19,7 +19,7 @@ cid = []; % if no local cache can serve the request
             user = (cache.type == 2) & ~personal;
 %            items = cell2mat(cache.items);
             hit = any(cache.items == vid, 2);
-            bw = (cache.occupied < 1/par.bw_threshold);
+            bw = (cache.bw./(cache.occupied+1) >= par.BWthresh);
 %             hit = false(size(cache.items,1),1);
 %             parfor i=1:length(hit)
 %                 hit(i) = any(cache.items{i} == vid);

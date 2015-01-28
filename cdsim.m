@@ -63,6 +63,8 @@ cache.capacity = [par.cachesizeAS par.cachesizeUSER*ones(1,nAScacheUSER)]';
 
 cache.items = cell(length(cache.capacity),1);
 
+cache.bw = [Inf*ones(1,par.ASn) par.uploadrate*ones(1,nAScacheUSER)]';
+
 cache.occupied = zeros(length(cache.capacity),1);
 
 nitems = max(cache.capacity);
@@ -250,7 +252,9 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                      end
                      if rand()<par.pHD; bitrate=par.bitrateHD; else bitrate = par.bitrate; end
                     maxID = maxID+1;
-                    events = addEvent(events, t+bitrate*cache.occupied(cid)/par.uploadrate, par.tmax, SERVE, cid, maxID, vid);
+                    events = addEvent(events,...
+                        t+realtosim(par,par.duration*bitrate/(cache.bw(cid)/cache.occupied(cid))),...
+                        par.tmax, SERVE, cid, maxID, vid);
                  end
             end
             
