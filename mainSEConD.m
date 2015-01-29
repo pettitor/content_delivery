@@ -29,7 +29,7 @@ par.cachesizeAS = 2000*ones(1,par.ASn); % items
 par.cachesizeUSER = 2; % items
 
 % probability that a user shares his UNaDa
-par.pcacheUSER = 0.1;
+par.pcacheUSER = 0.05;
 
 % descending by tier, i.e. tier 1, tier 2, ...
 % SPSS: LRU, UNaDas: LRU
@@ -103,14 +103,14 @@ par.nrequests = (par.twarmup+par.tmax)./par.ia_demand_par;
 par.BWthresh = 200; % kbps per second; only download from UNaDa if bw > threshold 
 par.BWthreshHD = 1000; % kbps per second; only download from UNaDa if bw > threshold 
 
-par.duration = 10; % seconds
+par.duration = 5*60; % seconds
 
 par.pHD = 0.0;
-par.bitrate = 200; % kbps
+par.bitrate = 250; % kbps
 par.bitrateHD = 1000; % kbps
 
 %%%% Parameter Study
-uploadrate = [(200*2.^(0:5)) -1] % unlimited bw, one item per (5,10,20,40) seconds
+uploadrate = [200 400 600 800 1000 Inf] % unlimited bw, one item per (5,10,20,40) seconds
 %uploadrate_psecond = 1./(5*2^5)
 Y = NaN(length(uploadrate), 3);
 for i=1:length(uploadrate)
