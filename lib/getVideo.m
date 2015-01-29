@@ -21,12 +21,12 @@ constants
             else
                 vid = wall(uid,ind);
             end
-        case ZIPF
-            vid = nvids + 1;
-            while vid > nvids
-                % TODO check correct value for alpha
-                vid = randraw('zeta', par.alpha, 1);
-            end
+%         case ZIPF
+%             vid = nvids + 1;
+%             while vid > nvids
+%                 % TODO check correct value for alpha
+%                 vid = randraw('zeta', par.alpha, 1);
+%             end
         case ZIPF2
             vid=find(par.zipfcdf>rand(),1,'first')-1;
         case YTSTATS
