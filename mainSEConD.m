@@ -130,5 +130,5 @@ figure(11)
 bar(Y,'stacked')
 %%
 ylabel('contribution')
-xlabel('home router upload bandwidth [items]')
-set(gca,'xticklabel',{'unlimited', '1/10s' ,'1/20s', '1/40s', '1/80s', '1/160s'})
+xlabel('home router upload bandwidth [kbps]')
+set(gca,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
