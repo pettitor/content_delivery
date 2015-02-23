@@ -1,4 +1,4 @@
-function [events eid] = adjustServiceTimes(events, cid, now, tmax, factor)
+function [events, eid, evid] = adjustServiceTimes(events, cid, now, tmax, factor)
 
     ind = (events.type == 6 & events.user == cid);
     

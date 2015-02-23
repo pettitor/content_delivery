@@ -178,7 +178,7 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
         disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
-        disp(['UNaDas occupied: ' num2str(100*sum(cache.occupied)/nAScacheUSER) '%'])
+        %disp(['UNaDas occupied: ' num2str(100*sum(cache.occupied)/nAScacheUSER) '%'])
     end
     
     if (warmup && t>par.twarmup)
@@ -237,7 +237,6 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                 if isnan(stats.bitrate(vid))
                     stats.bitrate(vid) = (find(rand()<cdf_bitrate, 1, 'first'));
                 end
-                stats.goodqoe(id) = true;
                 if (par.demand_model == SNM)
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
@@ -262,17 +261,17 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                  if (cache.type(cid)==2 && par.uploadrate > 0) % TODO
                      cache.occupied(cid) = cache.occupied(cid) + 1;
                      if (cache.occupied(cid)>1)
-                     [events, ids] = adjustServiceTimes(events, cid, t, par.tmax, ...
+                     [events, ids, vids] = adjustServiceTimes(events, cid, t, par.tmax, ...
                         cache.occupied(cid)/(cache.occupied(cid)-1));
+                        stats.goodqoe(ids) = cache.bw(cid)./(cache.occupied(cid)) > 2*stats.bitrate(vids);
                      end
-                     stats.goodqoe(ids) = cache.bw(cid)./(cache.occupied(cid)) > 2*stats.bitrate(stats.watch(ids));
                      if rand()<par.pHD; bitrate=par.bitrateHD; else bitrate = par.bitrate; end
                     maxID = maxID+1;
                     events = addEvent(events,...
                         t+realtosim(par,par.duration*bitrate/(cache.bw(cid)/cache.occupied(cid))),...
                         par.tmax, SERVE, cid, maxID, vid);
+                    stats.goodqoe(maxID) = cache.bw(cid)./(cache.occupied(cid)) > 2*stats.bitrate(vid);
                  end
-               stats.goodqoe(id) = cache.bw(cid)./(cache.occupied(cid)) > 2*stats.bitrate(vid);
             end
             end
             
@@ -316,11 +315,6 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             %access enthält hr-caches oder isp-cache, die das video
             %besitzen sonst leer
             cache = updateCache(cache, stats, t, update, vid, par);
-            
-            % from paper characteristics of mobile youtube traffic
-            if (bandwidth(i,j,k)) > 2*x_bitrate(find(rand()<cdf_bitrate, 1, 'first'));
-                stats.goodqoe(i,j,k) = true;
-            end
             
             % add watch event
             if isfield(par, 'tickPerDay')

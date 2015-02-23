@@ -36,6 +36,8 @@ par.pcacheUSER = 0.05;
 % SPSS: LRU, UNaDas: LRU
 par.cachingstrategy = [LRU LRU];
 
+par.Cstrat = LCD;
+
 % resource selection strategy
 par.resourceselection = LOCAL;
 
@@ -114,6 +116,9 @@ par.bitrateHD = 1000; % kbps
 uploadrate = [200 400 600 800 1000 Inf] % unlimited bw, one item per (5,10,20,40) seconds
 %uploadrate_psecond = 1./(5*2^5)
 Y = NaN(length(uploadrate), 3);
+
+QoE = NaN(length(uploadrate), 1);
+
 for i=1:length(uploadrate)
 
 % kbps
@@ -125,6 +130,7 @@ Y(i,3) = 1-(sum(stats.cache_serve))/sum(stats.views);
 Y(i,2) = sum(stats.cache_serve(1:par.ASn))/sum(stats.views);
 Y(i,1) = sum(stats.cache_serve(par.ASn+1:end))/sum(stats.views);
 
+QoE(i) = sum(stats.goodqoe == true) / sum(~isnan(stats.goodqoe));
 end
 %%
 figure(11)
