@@ -20,3 +20,10 @@ mainD24.m
 nodes.txt
 content_placement/
 content_placement_LS/
+data/20150101.as-links.csv
+data/20150101.as-links.graphml
+data/20150101.as-rel.txt
+data/20150101.ppdc-ases.txt
+data/csv2graphml.pl
+data/parseASLinks.pl
+
