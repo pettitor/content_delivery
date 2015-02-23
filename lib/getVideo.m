@@ -1,4 +1,4 @@
-function vid=getVideo(uid, nvids, par, t, id, stats, wall, eventType, categories)
+function vid=getVideo(uid, nvids, par, t, id, stats, wall)
 
 constants
     

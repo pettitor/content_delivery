@@ -17,8 +17,8 @@ RandStream.setDefaultStream(s);
 nusers = par.nuser;
 GV = sparse(par.nvids); % graph with video interest
 nvids = par.nvids;
-if isfield(par, 'historysize'); H  = NaN(nusers, par.historysize); end% videos watched
-if isfield(par, 'wallsize'); wall = NaN(nusers, par.wallsize); end% videos displayed on wall (based on friends shares and video interest)
+if isfield(par, 'historysize'); H  = NaN(nusers, par.historysize); else H = []; end% videos watched
+if isfield(par, 'wallsize'); wall = NaN(nusers, par.wallsize); else wall = []; end% videos displayed on wall (based on friends shares and video interest)
 
 stats.views = ones(nvids,1);
 stats.tupload = nan(nvids,1);
@@ -26,13 +26,14 @@ stats.zipfp = diff(par.zipfcdf);
 stats.zipfp = stats.zipfp(randperm(nvids));
 
 % draw video categories according to probability in par.category
+if isfield(par, 'categories')
 category.video = randsample(length(par.categories),nvids,true,par.categories);
-
 category.user = NaN(nusers, par.ncategories);
 %TODO remove dublicate categories / use randsample?
 for i=1:par.ncategories
     category.user(:,i) = sum(~(ones(length(par.categories),1)*rand(1,nusers)...
     <cumsum(par.categories)'*ones(1,nusers)))+1;
+end
 end
 
 if isfield(par, 'preshare'); preshare = par.preshare; end
@@ -59,7 +60,7 @@ cache.type = [ones(1,par.ASn) 2*ones(1,nAScacheUSER)]';
 %     cache.strategy(cache.type == i) = par.cachingstrategy(i);
 % end
 
-cache.capacity = [par.cachesizeAS par.cachesizeUSER*ones(1,nAScacheUSER)]';
+cache.capacity = [par.cachesizeAS*ones(1,par.ASn) par.cachesizeUSER*ones(1,nAScacheUSER)]';
 
 cache.items = cell(length(cache.capacity),1);
 
@@ -82,6 +83,15 @@ cache.score2 = sparse(length(cache.capacity), nitems);
 if (any(par.cachingstrategy == SLWND))
     cache.wnd = sparse(length(cache.capacity), par.k);
 end
+
+% from paper characteristics of mobile youtube traffic
+
+x_samp = [47 100 150 170 200 210 220 225 230 240 250 255 275 350];
+    
+y_samp = [0 0.03 0.09 0.1 0.14 0.16 0.2 0.5 0.7 0.8 0.88 0.94 0.97 1];
+
+x_bitrate = [47:0.5:350];
+cdf_bitrate = interp1(x_samp,y_samp,x_bitrate);
 
 stats.cache_access = zeros(length(cache.capacity),1);
 stats.cache_hit = stats.cache_access;
@@ -146,6 +156,9 @@ stats.watch = nan(1,6000000);
 stats.uid = nan(1,6000000);
 stats.share = nan(1,6000000);
 stats.t = nan(1,6000000);
+stats.goodqoe = nan(1,6000000);
+stats.bitrate = nan(1,par.nvids);
+
 stats.numOfFriends = nan(1,6000000);
 stats.expViews = zeros(1,par.nvids);
 stats.snm.numActiveVids = [];
@@ -220,18 +233,18 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             
             
             if isnan(vid)
-                vid = getVideo(uid, nvids, par, t, stats, wall, WATCH, snm, li13); %, categories); % consider GV
+                vid = getVideo(uid, nvids, par, t, id, stats, wall); %, categories); % consider GV
+                if isnan(stats.bitrate(vid))
+                    stats.bitrate(vid) = (find(rand()<cdf_bitrate, 1, 'first'));
+                end
+                stats.goodqoe(id) = true;
                 if (par.demand_model == SNM)
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
                     stats.snm.time = [stats.snm.time t];
                 end
             end
-            
-            
-            if (vid > length(stats.views))
-               stats.views(vid) = 0;
-            end
+                     
             stats.views(vid) = stats.views(vid) + 1;
             
             stats.t(id) = t;
@@ -242,24 +255,30 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             GV = updateGV(GV, vid);
             
             [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par, iAScacheUSER);
+            
+            if isfield(par, 'bitrate')
             if (cid)
                  stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
                  if (cache.type(cid)==2 && par.uploadrate > 0) % TODO
                      cache.occupied(cid) = cache.occupied(cid) + 1;
                      if (cache.occupied(cid)>1)
-                     events = adjustServiceTimes(events, cid, t, par.tmax, ...
+                     [events, ids] = adjustServiceTimes(events, cid, t, par.tmax, ...
                         cache.occupied(cid)/(cache.occupied(cid)-1));
                      end
+                     stats.goodqoe(ids) = cache.bw(cid)./(cache.occupied(cid)) > 2*stats.bitrate(stats.watch(ids));
                      if rand()<par.pHD; bitrate=par.bitrateHD; else bitrate = par.bitrate; end
                     maxID = maxID+1;
                     events = addEvent(events,...
                         t+realtosim(par,par.duration*bitrate/(cache.bw(cid)/cache.occupied(cid))),...
                         par.tmax, SERVE, cid, maxID, vid);
                  end
+               stats.goodqoe(id) = cache.bw(cid)./(cache.occupied(cid)) > 2*stats.bitrate(vid);
+            end
             end
             
-             % update hit cache
-             update = cid;
+            update = cid;
+             if par.Cstrat == LCD
+             
              % leave copy down
              if (isempty(cid)) % update local ISP cache
                  update = find(cache.AS == AS(uid) & cache.type == 1);
@@ -275,14 +294,41 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                  end
              end % update hit local cache
              
+             elseif par.Cstrat == LCE
+             
+             % leave copy everywhere
+             if (isempty(cid)) % update local ISP cache
+                 update = find(cache.AS == AS(uid) & cache.type == 1);
+             %elseif (cache.type(cid) == 1) % update personal or random local hr
+                 if (iAScacheUSER(uid)) % if personal cache
+                    pid = find(find(iAScacheUSER) == uid,1,'first') + par.ASn;
+                    update = union(update, pid);
+                 else % else random local hr
+                     local = find(cache.AS == AS(uid) & cache.type == 2);
+                     if (any(local))
+                         update = union(update, local(randi(length(local))));
+                     end
+                 end
+             end % update hit local cache
+             
+             end
+             
             %access enthält hr-caches oder isp-cache, die das video
             %besitzen sonst leer
             cache = updateCache(cache, stats, t, update, vid, par);
             
-            hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
+            % from paper characteristics of mobile youtube traffic
+            if (bandwidth(i,j,k)) > 2*x_bitrate(find(rand()<cdf_bitrate, 1, 'first'));
+                stats.goodqoe(i,j,k) = true;
+            end
             
             % add watch event
+            if isfield(par, 'tickPerDay')
+            hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
             dt = exprnd(par.ia_demand_par(hourIndex));
+            else
+                dt = 1;
+            end
             %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
                 
             if (par.demand_model ~= BOX)
