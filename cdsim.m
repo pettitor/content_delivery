@@ -64,7 +64,8 @@ cache.capacity = [par.cachesizeAS*ones(1,par.ASn) par.cachesizeUSER*ones(1,nASca
 
 cache.items = cell(length(cache.capacity),1);
 
-cache.bw = [Inf*ones(1,par.ASn) par.uploadrate*ones(1,nAScacheUSER)]';
+cache.bwmean = [Inf*ones(1,par.ASn) par.uploadrate*ones(1,nAScacheUSER)]';
+cache.bw = cache.bwmean;
 
 cache.occupied = zeros(length(cache.capacity),1);
 
@@ -102,7 +103,7 @@ stats.AS_hit = zeros(par.ASn,1);
 % progress bar
 %wait = waitbar(0,'Simulating... 0%');
 
-maxID=nusers;
+maxID=1;
 % qfid = fopen('q.txt', 'wt');
 
 %snm specific data
@@ -149,25 +150,32 @@ end
 
 %profile on
 
+if isfield(par, 'ticksPerDay')
+dt = mean(par.ia_demand_par);
+else
+    dt = 1;
+end
+nrequests = par.tmax / dt;
+
 % queue.active = [];
 
-stats.upload = nan(1,6000000);
-stats.watch = nan(1,6000000);
-stats.uid = nan(1,6000000);
-stats.share = nan(1,6000000);
-stats.t = nan(1,6000000);
-stats.goodqoe = nan(1,6000000);
+stats.upload = nan(1,2*nrequests);
+stats.watch = nan(1,2*nrequests);
+stats.uid = nan(1,2*nrequests);
+stats.share = nan(1,2*nrequests);
+stats.t = nan(1,2*nrequests);
+stats.goodqoe = nan(1,2*nrequests);
 stats.bitrate = nan(1,par.nvids);
 
-stats.numOfFriends = nan(1,6000000);
-stats.expViews = zeros(1,par.nvids);
-stats.snm.numActiveVids = [];
-stats.snm.time = [];
+% stats.numOfFriends = nan(1,6000000);
+% stats.expViews = zeros(1,par.nvids);
+% stats.snm.numActiveVids = [];
+% stats.snm.time = [];
 
 warmup = 1;
 
 t2 = 0;
-while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
+while ~isempty(events.t) && events.t(1) < (par.tmax)
     t = events.t(1); events.t(1)=[];
     type = events.type(1); events.type(1)=[];
     user = events.user(1); events.user(1)=[];
@@ -183,10 +191,17 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
     
     if (warmup && t>par.twarmup)
         warmup = 0;
-        stats.watch = nan(1,par.tmax);
-        stats.uid = nan(1,par.tmax);
-%        stats.share = nan(1,par.tmax);
-        stats.t = nan(1,par.tmax);
+        stats.upload = nan(1,2*nrequests);
+        stats.watch = nan(1,2*nrequests);
+        stats.uid = nan(1,2*nrequests);
+        stats.share = nan(1,2*nrequests);
+        stats.t = nan(1,2*nrequests);
+        stats.goodqoe = nan(1,2*nrequests);
+        %stats.bitrate = nan(1,par.nvids);
+        
+        %events.id = events.id-min(events.id)+1;
+        %maxID = max(events.id);
+        
         stats.cache_access = zeros(length(cache.capacity),1);
         stats.cache_hit = stats.cache_access;
         stats.cache_serve = stats.cache_access;
@@ -220,9 +235,6 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
                 user = randi(nusers);
             end
             uid = user;
-            if (uid == 0)
-                uid = 1;
-            end
             
             %http://www.sigcomm.org/sites/default/files/ccr/papers/2013/October/2541468-2541470.pdf
             %vid = getVideoSNM(par, snm, t, eventType);
@@ -234,14 +246,14 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             
             if isnan(vid)
                 vid = getVideo(uid, nvids, par, t, id, stats, wall); %, categories); % consider GV
-                if isnan(stats.bitrate(vid))
-                    stats.bitrate(vid) = (find(rand()<cdf_bitrate, 1, 'first'));
-                end
                 if (par.demand_model == SNM)
                     snm = updateSNM(vid, snm, t);
                     stats.snm.numActiveVids = [stats.snm.numActiveVids length(snm.active)];
                     stats.snm.time = [stats.snm.time t];
                 end
+            end
+            if isnan(stats.bitrate(vid))
+                stats.bitrate(vid) = (find(rand()<cdf_bitrate, 1, 'first'));
             end
                      
             stats.views(vid) = stats.views(vid) + 1;
@@ -253,26 +265,32 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             %TODO
             GV = updateGV(GV, vid);
             
+            cache.bw(~isinf(cache.bwmean)) = normrnd(cache.bwmean(~isinf(cache.bwmean)), 100);
+            
             [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par, iAScacheUSER);
             
-            if isfield(par, 'bitrate')
             if (cid)
-                 stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
+                stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
+            end
+            
+            if ~isempty(cid) && isfield(par, 'bitrate')
                  if (cache.type(cid)==2 && par.uploadrate > 0) % TODO
                      cache.occupied(cid) = cache.occupied(cid) + 1;
+                     stats.goodqoe(id) = cache.bw(cid)/(cache.occupied(cid)) > 2*stats.bitrate(vid);
                      if (cache.occupied(cid)>1)
                      [events, ids, vids] = adjustServiceTimes(events, cid, t, par.tmax, ...
                         cache.occupied(cid)/(cache.occupied(cid)-1));
-                        stats.goodqoe(ids) = cache.bw(cid)./(cache.occupied(cid)) > 2*stats.bitrate(vids);
+                        stats.goodqoe(ids) = cache.bw(cid)/(cache.occupied(cid)) > 2*stats.bitrate(vids);
                      end
-                     if rand()<par.pHD; bitrate=par.bitrateHD; else bitrate = par.bitrate; end
+                     if rand()<par.pHD; bitrate=par.bitrateHD; else bitrate = stats.bitrate(vid); end
                     maxID = maxID+1;
                     events = addEvent(events,...
                         t+realtosim(par,par.duration*bitrate/(cache.bw(cid)/cache.occupied(cid))),...
                         par.tmax, SERVE, cid, maxID, vid);
-                    stats.goodqoe(maxID) = cache.bw(cid)./(cache.occupied(cid)) > 2*stats.bitrate(vid);
                  end
-            end
+                 if (cache.type(cid)==1)
+                     stats.goodqoe(id) = true;
+                 end
             end
             
             update = cid;
@@ -295,21 +313,24 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
              
              elseif par.Cstrat == LCE
              
+             if par.resourceselection == TREE
+                 update = access;
+             else
              % leave copy everywhere
              if (isempty(cid)) % update local ISP cache
                  update = find(cache.AS == AS(uid) & cache.type == 1);
-             %elseif (cache.type(cid) == 1) % update personal or random local hr
-                 if (iAScacheUSER(uid)) % if personal cache
-                    pid = find(find(iAScacheUSER) == uid,1,'first') + par.ASn;
-                    update = union(update, pid);
-                 else % else random local hr
-                     local = find(cache.AS == AS(uid) & cache.type == 2);
-                     if (any(local))
-                         update = union(update, local(randi(length(local))));
-                     end
+             end
+             % update personal or random local hr
+             if (isempty(cid) && iAScacheUSER(uid)) % if personal cache
+                 pid = find(find(iAScacheUSER) == uid,1,'first') + par.ASn;
+                 update = union(update, pid);
+             else % else random local hr
+                 local = find(cache.AS == AS(uid) & cache.type == 2);
+                 if (any(local))
+                     update = union(update, local(randi(length(local))));
                  end
              end % update hit local cache
-             
+             end
              end
              
             %access enthält hr-caches oder isp-cache, die das video
@@ -317,7 +338,7 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             cache = updateCache(cache, stats, t, update, vid, par);
             
             % add watch event
-            if isfield(par, 'tickPerDay')
+            if isfield(par, 'ticksPerDay')
             hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
             dt = exprnd(par.ia_demand_par(hourIndex));
             else
@@ -395,6 +416,9 @@ while ~isempty(events.t) && events.t(1) < (par.twarmup + par.tmax)
             %uid is used as cid
             cache.occupied(user) = cache.occupied(user) - 1;
             if (cache.occupied(user) > 0)
+             if isempty(find(events.user == user,1))
+                 disp 'bla'
+             end
                 events = adjustServiceTimes(events, user, t, par.tmax, ...
                     cache.occupied(user)/(cache.occupied(user)+1));
             end

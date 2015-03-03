@@ -30,7 +30,7 @@ par.cachesizeAS = 2000*ones(1,par.ASn); % items
 par.cachesizeUSER = 2; % items
 
 % probability that a user shares his UNaDa
-par.pcacheUSER = 0.05;
+par.pcacheUSER = 0.01;
 
 % descending by tier, i.e. tier 1, tier 2, ...
 % SPSS: LRU, UNaDas: LRU
@@ -42,16 +42,15 @@ par.Cstrat = LCD;
 par.resourceselection = LOCAL;
 
 % number of users
-par.nuser = 1000;
+par.nuser = 10000;
 
-par.alpha = 0.85; % global Zipf law popularity
+par.alpha = 0.8; % global Zipf law popularity
 
 a=exp(-par.alpha .* log(1:par.nvids));
 zipfcdf = cumsum([0 a]);
 par.zipfcdf = zipfcdf/zipfcdf(end);
 
 %%% Simulation Parameters
-par.tmax = 1e4;
 
 %distribution of video arrivals
 par.demand_model = BOX;
@@ -71,7 +70,7 @@ par.seed = 13;
 
 %currently: one tick of t = 1/96 day -> 15 min
 par.ticksPerDay = 96;
-par.ticksPerDay = 96*15;
+par.ticksPerDay = 24*60;
 par.ticksPerSecond = par.ticksPerDay/24/60/60;
 
 % timelag between demands
@@ -86,8 +85,9 @@ par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.01
 par.ncategories = 4;
 
 % warmup phase and sim time
-par.twarmup = par.tmax/5;
-par.nrequests = (par.twarmup+par.tmax)./par.ia_demand_par;
+par.twarmup = 0.25e4;
+par.tmax = 1e4 + par.twarmup;
+par.nrequests = (par.tmax)./par.ia_demand_par;
 
 % 3 choices of UL/DL bandwidth - probabities of each choice
 %first choice
@@ -119,6 +119,9 @@ Y = NaN(length(uploadrate), 3);
 
 QoE = NaN(length(uploadrate), 1);
 
+BWthresh = [0 250 500 750];
+for j=1:length(BWthresh)
+par.BWthresh = BWthresh(j);
 for i=1:length(uploadrate)
 
 % kbps
@@ -132,10 +135,32 @@ Y(i,1) = sum(stats.cache_serve(par.ASn+1:end))/sum(stats.views);
 
 QoE(i) = sum(stats.goodqoe == true) / sum(~isnan(stats.goodqoe));
 end
+save(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'], 'Y', 'QoE')
+end
 %%
-figure(11)
+figure(111);hold all;
 bar(Y,'stacked')
 %%
 ylabel('contribution')
 xlabel('home router upload bandwidth [kbps]')
-set(gca,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
+set(gca,'xtick',1:6,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
+%%
+figure(12);clf;box on;hold all;
+par.alpha = 0.8;
+BWthresh = [0 250 500 750];
+for j=1:length(BWthresh)
+    load(['results/SEConD_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'])
+plot(1:6,QoE,':x')
+end
+%%
+figure(13);clf;box on;hold all;
+par.alpha = 0.8;
+BWthresh = [0 250 500 750];
+for j=1:length(BWthresh)
+    load(['results/SEConD_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'])
+plot(1:6,(Y(:,2))./(Y(:,1)+(Y(:,2))),':x')
+end
+%%
+xlabel('home router upload bandwidth [kbps]')
+set(gca,'xtick',1:6,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
+legend(BWthresh)

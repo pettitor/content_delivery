@@ -72,12 +72,17 @@ cid = []; % if no local cache can serve the request
                 pid = find(find(iCacheUser) == uid,1,'first') + par.ASn;
                 %pid = uid + par.ASn;
                 personal(pid) = true;
+            elseif any(iCacheUser)%if no personal cache use next (random) local cache
+                cuser = find(iCacheUser);
+                nuid = cuser(randi(length(cuser),1));
+                pid = find(find(iCacheUser) == nuid,1,'first') + par.ASn;
+                personal(pid) = true;
             end
             local = cache.AS == AS(uid);
             user = (cache.type == 2);
 %            items = cell2mat(cache.items);
             hit = any(cache.items == vid, 2);
-            bw = (cache.bw./(cache.occupied+1) >= par.BWthresh);
+%            bw = (cache.bw./(cache.occupied+1) >= par.BWthresh);
 %             hit = false(size(cache.items,1),1);
 %             parfor i=1:length(hit)
 %                 hit(i) = any(cache.items{i} == vid);
