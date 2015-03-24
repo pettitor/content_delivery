@@ -20,6 +20,7 @@ lifespan = nan(1,par.nvids);
 switch par.box.lifeSpanMode
     case proofOfConcept
         lifespan = lognrnd(par.box.lifespan.mu, par.box.lifespan.sigma, 1, par.nvids);
+        lifespan = lifespan*par.ticksPerDay;
     case SNM_Like
         percCumSum = cumsum(par.box.lifespan.percentage);
         percSum = sum(par.box.lifespan.percentage);

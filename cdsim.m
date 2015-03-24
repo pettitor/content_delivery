@@ -62,7 +62,7 @@ cache.type = [ones(1,par.ASn) 2*ones(1,nAScacheUSER)]';
 
 cache.capacity = [par.cachesizeAS*ones(1,par.ASn) par.cachesizeUSER*ones(1,nAScacheUSER)]';
 
-cache.items = cell(length(cache.capacity),1);
+%cache.items = cell(length(cache.capacity),1);
 
 cache.bwmean = [Inf*ones(1,par.ASn) par.uploadrate*ones(1,nAScacheUSER)]';
 cache.bw = cache.bwmean;
@@ -79,6 +79,7 @@ for i=1:length(cache.capacity)
     cache.items(i,1:cache.capacity(i)) = perm(1:cache.capacity(i));
 end
 cache.score = sparse(length(cache.capacity), nitems);
+cache.score(cache.items > 0) = -1;
 cache.score2 = sparse(length(cache.capacity), nitems);
 
 if (any(par.cachingstrategy == SLWND))
@@ -132,18 +133,18 @@ if (par.demand_model == LI13Custom && par.uploadEvents)
 elseif (par.demand_model == MEME)
     %make sure UPLOAD is first in queue (otherwise no video acitve)
     events = addEvent(events, 0, par.tmax, UPLOAD, floor(rand()*nusers), 1, 1);
-    u = floor(rand()*nusers);
+    u = randi(nusers);
     events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
 elseif (par.demand_model == BOX)
     maxID = 1;
-    u = floor(rand()*nusers);
+    u = randi(nusers);
     
     events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
     
     box.idx = box.idx + 1;
 else
     %for i=1:maxID
-    u = floor(rand()*nusers);
+    u = randi(nusers);
     events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
     %end
 end
@@ -185,7 +186,7 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
     t1 = floor(t);
     if (t1>t2 && mod(t1, round(par.tmax/100))==0)
         t2 = t1;
-        disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
+        %disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
         %disp(['UNaDas occupied: ' num2str(100*sum(cache.occupied)/nAScacheUSER) '%'])
     end
     
@@ -266,6 +267,7 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
             GV = updateGV(GV, vid);
             
             cache.bw(~isinf(cache.bwmean)) = normrnd(cache.bwmean(~isinf(cache.bwmean)), 100);
+            cache.bw(cache.bw < 1) = 1;
             
             [cid, access, stats] = selectResource(cache, stats, AS, uid, vid, par, iAScacheUSER);
             
@@ -316,20 +318,20 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
              if par.resourceselection == TREE
                  update = access;
              else
-             % leave copy everywhere
-             if (isempty(cid)) % update local ISP cache
-                 update = find(cache.AS == AS(uid) & cache.type == 1);
-             end
-             % update personal or random local hr
-             if (isempty(cid) && iAScacheUSER(uid)) % if personal cache
-                 pid = find(find(iAScacheUSER) == uid,1,'first') + par.ASn;
-                 update = union(update, pid);
-             else % else random local hr
-                 local = find(cache.AS == AS(uid) & cache.type == 2);
-                 if (any(local))
-                     update = union(update, local(randi(length(local))));
+                 % leave copy everywhere
+                 if (isempty(cid)) % update local ISP cache
+                     update = find(cache.AS == AS(uid) & cache.type == 1);
                  end
-             end % update hit local cache
+                 % update personal or random local hr
+                 if (isempty(cid) && iAScacheUSER(uid)) % if personal cache
+                     pid = find(find(iAScacheUSER) == uid,1,'first') + par.ASn;
+                     update = union(update, pid);
+                 else % else random local hr
+                     local = find(cache.AS == AS(uid) & cache.type == 2);
+                     if (any(local))
+                         update = union(update, local(randi(length(local))));
+                     end
+                 end % update hit local cache
              end
              end
              
@@ -338,7 +340,7 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
             cache = updateCache(cache, stats, t, update, vid, par);
             
             % add watch event
-            if isfield(par, 'ticksPerDay')
+            if (isfield(par, 'ticksPerDay') && par.demand_model ~= BOX)
             hourIndex = floor(mod(t,par.ticksPerDay)/(par.ticksPerDay/24))+1;
             dt = exprnd(par.ia_demand_par(hourIndex));
             else

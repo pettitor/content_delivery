@@ -19,7 +19,7 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 if isempty(last); last = 0; end
                 repl = last + 1;
                 if (repl > cache.capacity(id));
-                    [~, repl] = min(cache.score(id,:));
+                    [~, repl] = min(cache.score(id,1:cache.capacity(id)));
                 end
                 cache.items(id,repl) = vid;
                 cache.score(id,repl) = t;

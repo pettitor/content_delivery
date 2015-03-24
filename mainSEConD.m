@@ -60,6 +60,7 @@ par.sharing_model = BOX;
 par.box.lifespan.percentage = [3.6 5.3 3.3 5.3 82.4];
 par.box.lifespan.lifespan = [0,2;2,5;5,8;8,13;13,38];
 %par.box.lifeSpanMode = SNM_Like;
+%mean 10.60 days,  std 3.6614
 par.box.lifeSpanMode = proofOfConcept;
 %parameters for box model, lifespanMode: proofOfConcept
 par.box.lifespan.mu = 7.3136;
@@ -142,25 +143,36 @@ figure(111);hold all;
 bar(Y,'stacked')
 %%
 ylabel('contribution')
-xlabel('home router upload bandwidth [kbps]')
+xlabel('mean home router upload bandwidth [kbps]')
 set(gca,'xtick',1:6,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
+legend('\theta = 0 kbps', '\theta = 250 kbps', '\theta = 500 kbps', '\theta = 750 kbps')
 %%
 figure(12);clf;box on;hold all;
 par.alpha = 0.8;
 BWthresh = [0 250 500 750];
+color = copper(4);
+symbol = {':o',':x',':d',':s'};
 for j=1:length(BWthresh)
-    load(['results/SEConD_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'])
-plot(1:6,QoE,':x')
+    load(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'])
+plot(1:6,QoE,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
 end
+%%
+ylabel('amount of good QoE video sessions')
+xlabel('mean home router upload bandwidth [kbps]')
+set(gca,'xtick',1:6,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
+legend('\theta = 0 kbps', '\theta = 250 kbps', '\theta = 500 kbps', '\theta = 750 kbps')
 %%
 figure(13);clf;box on;hold all;
 par.alpha = 0.8;
 BWthresh = [0 250 500 750];
+color = copper(4);
+symbol = {':o',':x',':d',':s'};
 for j=1:length(BWthresh)
-    load(['results/SEConD_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'])
-plot(1:6,(Y(:,2))./(Y(:,1)+(Y(:,2))),':x')
+    load(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'])
+plot(1:6,(Y(:,2))./(Y(:,1)+(Y(:,2))+(Y(:,3))),symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
 end
 %%
-xlabel('home router upload bandwidth [kbps]')
+ylabel('ISP cache contribution')
+xlabel('mean home router upload bandwidth [kbps]')
 set(gca,'xtick',1:6,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
-legend(BWthresh)
+legend('\theta = 0 kbps', '\theta = 250 kbps', '\theta = 500 kbps', '\theta = 750 kbps')
