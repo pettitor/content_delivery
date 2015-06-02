@@ -36,6 +36,8 @@ par.pcacheUSER = 0.01;
 % SPSS: LRU, UNaDas: LRU
 par.cachingstrategy = [LRU LRU];
 
+par.cachenuser = 0;
+
 par.Cstrat = LCD;
 
 % resource selection strategy
@@ -86,8 +88,8 @@ par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.01
 par.ncategories = 4;
 
 % warmup phase and sim time
-par.twarmup = 0.25e4;
-par.tmax = 1e4 + par.twarmup;
+par.twarmup = 0.25e5;
+par.tmax = 1e5 + par.twarmup;
 par.nrequests = (par.tmax)./par.ia_demand_par;
 
 % 3 choices of UL/DL bandwidth - probabities of each choice
@@ -121,6 +123,11 @@ Y = NaN(length(uploadrate), 3);
 QoE = NaN(length(uploadrate), 1);
 
 BWthresh = [0 250 500 750];
+for run=2:10;
+    
+    par.seed = 13+run;
+    par.box.box = prepareBoxModel(par);
+
 for j=1:length(BWthresh)
 par.BWthresh = BWthresh(j);
 for i=1:length(uploadrate)
@@ -136,7 +143,8 @@ Y(i,1) = sum(stats.cache_serve(par.ASn+1:end))/sum(stats.views);
 
 QoE(i) = sum(stats.goodqoe == true) / sum(~isnan(stats.goodqoe));
 end
-save(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'], 'Y', 'QoE')
+save(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run) '.mat'], 'Y', 'QoE')
+end
 end
 %%
 figure(111);hold all;
@@ -153,8 +161,19 @@ BWthresh = [0 250 500 750];
 color = copper(4);
 symbol = {':o',':x',':d',':s'};
 for j=1:length(BWthresh)
-    load(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'])
-plot(1:6,QoE,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+    qoe = nan(6,10);
+    for run=1:10
+    load(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run) '.mat'])
+    qoe(:,run) = QoE;
+    end
+    qoeci = nan(6,1);
+    for k=1:6;
+    [h, p, ci] = ttest(qoe(k,:),mean(qoe(k,:)));
+    qoeci(k) = ci(2) - mean(qoe(k,:));
+    end
+%plot(1:6,QoE,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+%plot(1:6,mean(qoe,2),symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+errorbar(1:6,mean(qoe,2),-qoeci,+qoeci,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
 end
 %%
 ylabel('amount of good QoE video sessions')
@@ -168,8 +187,19 @@ BWthresh = [0 250 500 750];
 color = copper(4);
 symbol = {':o',':x',':d',':s'};
 for j=1:length(BWthresh)
-    load(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '.mat'])
-plot(1:6,(Y(:,2))./(Y(:,1)+(Y(:,2))+(Y(:,3))),symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+    c = zeros(6,10);
+    for run=1:10
+    load(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run)  '.mat'])
+    c(:,run) = (Y(:,2))./(Y(:,1)+(Y(:,2))+(Y(:,3)));
+    end
+    cci = nan(6,1);
+    for k=1:6;
+    [h, p, ci] = ttest(c(k,:),mean(c(k,:)));
+    cci(k) = ci(2) - mean(c(k,:));
+    end
+%plot(1:6,sumc/10,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+%plot(1:6,(Y(:,2))./(Y(:,1)+(Y(:,2))+(Y(:,3))),symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+errorbar(1:6,mean(c,2),-cci,+cci,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
 end
 %%
 ylabel('ISP cache contribution')

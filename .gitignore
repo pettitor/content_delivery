@@ -27,3 +27,4 @@ data/20150101.ppdc-ases.txt
 data/csv2graphml.pl
 data/parseASLinks.pl
 
+lib/matlab_bgl/
