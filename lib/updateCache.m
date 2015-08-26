@@ -1,7 +1,7 @@
 function cache = updateCache(cache, stats, t, ids, vid, par)
 
 % possible ideas to improve performance: sort cache.items? parfor cellarray
-% accumarray?
+% accuarray?
 
 constants;
 
@@ -119,7 +119,8 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
 %                     end
 %                 end
 %             end
-            
+        case OPT
+            % do nothing, content is placed optimally
         case LRUSG % score gated
             ranking
             

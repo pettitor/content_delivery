@@ -140,14 +140,16 @@ end
 errorbar(pcache,mean(data,2),cialle(:,1)-mean(data,2),cialle(:,1)-mean(data,2)...
     ,'-bd','Color','black','LineWidth', 2, 'MarkerSize', 8);
 %%
-%tc = squeeze(traffic(end-2,:,:));
+tc = squeeze(traffic(end-2,:,:));
 
 figure(77);clf
 bar(squeeze(mean(tc,2)))
 %%
-set(gca,'XtickLabel',{'personal','local','peer','customer','provider'})
+set(gca,'XtickLabel',{'personal','local','peering','customer','provider'})
+xlabel('network       AS          AS          AS          AS    ')
+%xlabel('network      ISP         ISP         ISP         ISP    ')
 ylabel('share of requests served')
-legend({'C_{ISP}=0.01','C_{ISP}=0.001','C_{ISP=0}'})
+legend({'C_{ISP}=0.01','C_{ISP}=0.001','C_{ISP}=0'})
 %% cis
 hold all;
 clear cialle

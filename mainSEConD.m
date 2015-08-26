@@ -25,7 +25,7 @@ par.ASp(end) = 1-sum(par.ASp(1:end-1));
 
 par.nvids = 10000; % video catalog
 
-par.cachesizeAS = 2000*ones(1,par.ASn); % items
+par.cachesizeAS = 1000*ones(1,par.ASn); % items
 
 par.cachesizeUSER = 2; % items
 
@@ -46,7 +46,7 @@ par.resourceselection = LOCAL;
 % number of users
 par.nuser = 10000;
 
-par.alpha = 0.8; % global Zipf law popularity
+par.alpha = 0.99; % global Zipf law popularity
 
 a=exp(-par.alpha .* log(1:par.nvids));
 zipfcdf = cumsum([0 a]);
@@ -55,8 +55,8 @@ par.zipfcdf = zipfcdf/zipfcdf(end);
 %%% Simulation Parameters
 
 %distribution of video arrivals
-par.demand_model = BOX;
-par.sharing_model = BOX;
+par.demand_model = ZIPF2;
+par.sharing_model = ZIPF2;
 
 %parameters for box model, lifespanMode: SNM_Like
 par.box.lifespan.percentage = [3.6 5.3 3.3 5.3 82.4];
@@ -88,8 +88,8 @@ par.categories=[0.253 0.247 0.086 0.086 0.085 0.075 0.035 0.032 0.023 0.016 0.01
 par.ncategories = 4;
 
 % warmup phase and sim time
-par.twarmup = 0.25e5;
-par.tmax = 1e5 + par.twarmup;
+par.twarmup = 1e4;
+par.tmax = 1e4 + par.twarmup;
 par.nrequests = (par.tmax)./par.ia_demand_par;
 
 % 3 choices of UL/DL bandwidth - probabities of each choice
@@ -117,16 +117,21 @@ par.bitrateHD = 1000; % kbps
 
 %%%% Parameter Study
 uploadrate = [200 400 600 800 1000 Inf] % unlimited bw, one item per (5,10,20,40) seconds
+%uploadrate = 400
 %uploadrate_psecond = 1./(5*2^5)
 Y = NaN(length(uploadrate), 3);
 
 QoE = NaN(length(uploadrate), 1);
 
 BWthresh = [0 250 500 750];
-for run=2:10;
+%BWthresh = [500];
+for run=1:10;
     
     par.seed = 13+run;
-    par.box.box = prepareBoxModel(par);
+    
+    if (par.demand_model == BOX)
+        par.box.box = prepareBoxModel(par);
+    end
 
 for j=1:length(BWthresh)
 par.BWthresh = BWthresh(j);
@@ -137,13 +142,13 @@ par.uploadrate = uploadrate(i);%-1;%1/60/5;
 
 stats = cdsim(par);
 
-Y(i,3) = 1-(sum(stats.cache_serve))/sum(stats.views);
-Y(i,2) = sum(stats.cache_serve(1:par.ASn))/sum(stats.views);
-Y(i,1) = sum(stats.cache_serve(par.ASn+1:end))/sum(stats.views);
+Y(i,3) = 1-(sum(stats.cache_serve))/sum(~isnan(stats.watch));
+Y(i,2) = sum(stats.cache_serve(1:par.ASn))/sum(~isnan(stats.watch));
+Y(i,1) = sum(stats.cache_serve(par.ASn+1:end))/sum(~isnan(stats.watch));
 
 QoE(i) = sum(stats.goodqoe == true) / sum(~isnan(stats.goodqoe));
 end
-save(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run) '.mat'], 'Y', 'QoE')
+save(['results/SEConD2_ZIPF_n1e4_stdd100_cHR2_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run) '.mat'], 'Y', 'QoE')
 end
 end
 %%
@@ -160,10 +165,11 @@ par.alpha = 0.8;
 BWthresh = [0 250 500 750];
 color = copper(4);
 symbol = {':o',':x',':d',':s'};
+runs = 10;
 for j=1:length(BWthresh)
-    qoe = nan(6,10);
-    for run=1:10
-    load(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run) '.mat'])
+    qoe = nan(6,runs);
+    for run=1:runs
+    load(['results/SEConD2_ZIPF_n1e4_stdd100_cHR2_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run) '.mat'])
     qoe(:,run) = QoE;
     end
     qoeci = nan(6,1);
@@ -176,20 +182,21 @@ for j=1:length(BWthresh)
 errorbar(1:6,mean(qoe,2),-qoeci,+qoeci,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
 end
 %%
-ylabel('amount of good QoE video sessions')
+ylabel('share of good QoE video sessions')
 xlabel('mean home router upload bandwidth [kbps]')
 set(gca,'xtick',1:6,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
 legend('\theta = 0 kbps', '\theta = 250 kbps', '\theta = 500 kbps', '\theta = 750 kbps')
 %%
-figure(13);clf;box on;hold all;
+figure(14);clf;box on;hold all;
 par.alpha = 0.8;
 BWthresh = [0 250 500 750];
 color = copper(4);
 symbol = {':o',':x',':d',':s'};
+runs = 10;
 for j=1:length(BWthresh)
-    c = zeros(6,10);
-    for run=1:10
-    load(['results/SEConD2_BOX_n1e4_stdd100_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run)  '.mat'])
+    c = zeros(6,runs);
+    for run=1:runs
+    load(['results/SEConD2_ZIPF_n1e4_stdd100_cHR2_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run)  '.mat'])
     c(:,run) = (Y(:,2))./(Y(:,1)+(Y(:,2))+(Y(:,3)));
     end
     cci = nan(6,1);
@@ -205,4 +212,38 @@ end
 ylabel('ISP cache contribution')
 xlabel('mean home router upload bandwidth [kbps]')
 set(gca,'xtick',1:6,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
+legend('\theta = 0 kbps', '\theta = 250 kbps', '\theta = 500 kbps', '\theta = 750 kbps')
+%%
+%figure(15);clf;box on;hold all;
+par.alpha = 0.8;
+BWthresh = [0 250 500 750];
+color = copper(4);
+symbol = {'o','x','d','s'};
+runs = 10;
+for j=1:length(BWthresh)
+    c = zeros(6,runs);
+    for run=1:runs
+    load(['results/SEConD2_ZIPF_n1e4_stdd100_cHR2_cAS' num2str(par.cachesizeAS) '_alpha' num2str(par.alpha) '_BWthresh' num2str(BWthresh(j)) '_run' num2str(run)  '.mat'])
+    c(:,run) = QoE.*(Y(:,2))./(Y(:,1)+(Y(:,2))+(Y(:,3)));
+    qoe(:,run) = QoE;
+    %plot(qoe(:,run),c(:,run),'o', 'MarkerSize', 10, 'Color', color(j,:))
+    end
+    cci = nan(6,1);
+    for k=1:6;
+    [h, p, ci] = ttest(c(k,:),mean(c(k,:)));
+    cci(k) = ci(2) - mean(c(k,:));
+    end
+%plot(1:6,sumc/10,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+%plot(1:6,(Y(:,2))./(Y(:,1)+(Y(:,2))+(Y(:,3))),symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+%plot(1-mean(qoe,2),mean(c,2),symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+color = copper(size(qoe,1));
+for i=2:size(qoe,1)
+    plot(1-mean(qoe(i,:)),mean(c(i,:)),symbol{j},'LineWidth',2,'Color',color(i,:),'MarkerSize',10)
+end
+%errorbar(1:6,mean(c,2),-cci,+cci,symbol{j},'LineWidth',2,'Color',color(j,:),'MarkerSize',10)
+end
+%%
+xlabel('share of bad QoE video sessions')
+ylabel('ISP cache contribution')
+%set(gca,'xtick',1:6,'xticklabel',{'200' ,'400', '600', '800', '1000', 'unlimited'})
 legend('\theta = 0 kbps', '\theta = 250 kbps', '\theta = 500 kbps', '\theta = 750 kbps')

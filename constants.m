@@ -7,6 +7,7 @@ ZIPF2 = 6;
 LI13Custom = 7;
 MEME = 8;
 BOX = 9;
+OPT = 10;
 
 demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom','Meme','BoxModel'};
 

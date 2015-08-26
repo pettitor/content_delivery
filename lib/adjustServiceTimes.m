@@ -14,7 +14,7 @@ function [events, eid, evid] = adjustServiceTimes(events, cid, now, tmax, factor
     eid = events.id(ind);
     evid = events.vid(ind);
    
-    etn = now+(et-now)*factor;
+    etn = now+max(0,(et-now)*factor);
     
     events.t(ind) = etn;
 %     

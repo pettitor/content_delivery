@@ -105,6 +105,25 @@ cache.score = sparse(length(cache.capacity), nitems);
 cache.score(cache.items > 0) = -1;
 cache.score2 = sparse(length(cache.capacity), nitems);
 
+if par.cachingstrategy(2) == OPT
+    if (isfield(par, 'ia_demand_par'))
+        ia = mean(par.ia_demand_par);
+    else
+        ia = 1;
+    end
+    if isfield(par, 'factor')
+        [row,col] = find(hotwarmcold(diff(par.zipfcdf), par.cachesizeUSER*ones(1,sum(cache.type==2)),1/ia,...
+        (par.uploadrate/par.bitrate/par.duration), par.factor)');
+        for i=2:length(cache.capacity)
+            items = col(row==(i-1));
+            cache.items(i,1:length(items)) = items;
+        end
+    else
+    cache.items(:,2:end) = hotwarmcold(diff(par.zipfcdf), par.cachesizeUSER*ones(1,sum(cache.type==2)),1/ia,...
+        (par.uploadrate/par.bitrate/par.duration))';
+    end
+end
+
 if (any(par.cachingstrategy == SLWND))
     cache.wnd = sparse(length(cache.capacity), par.k);
 end
@@ -339,11 +358,17 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
                      stats.goodqoe(id) = true;
                  end
             end
-            
-            % Don't update others people caches
-              if (~isempty(cid) && (cache.type(cid) == 1 || cache.user(cid) == uid))
-                  update = cid;
-              end
+            update = [];
+            % IMPORTANT CONSIDER!!! Don't update others people caches
+            if isfield(par, 'manipulate') && par.manipulate
+                if (~isempty(cid))
+                    update = cid;
+                end
+            else
+                if (~isempty(cid) && (cache.type(cid) == 1 || cache.user(cid) == uid))
+                    update = cid;
+                end
+            end
              if par.Cstrat == LCD
              
              % leave copy down
@@ -366,7 +391,7 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
              if par.resourceselection == TREE
                  update = access;
              else
-                 update = [];
+                 %update = cid;
                  % leave copy everywhere
                  if (isempty(cid)) % update local ISP cache
                      update = find(cache.AS == AS(uid) & cache.type == 1);
