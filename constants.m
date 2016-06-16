@@ -8,8 +8,9 @@ LI13Custom = 7;
 MEME = 8;
 BOX = 9;
 OPT = 10;
+TRACE = 11;
 
-demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom','Meme','BoxModel'};
+demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom','Meme','BoxModel','OPT','TRACE'};
 
 resourceSel = {'LOCAL','RANDOM','RBHORST','RANDOM2'};
 
@@ -24,7 +25,9 @@ LRUAS = 3;
 LS = 4;
 LSLRU = 5;
 
-SLWND = 5;
+SLWND = 6;
+KLRU = 7;
+QLRU = 8;
 
 LOCAL = 1;
 RANDOM = 2;

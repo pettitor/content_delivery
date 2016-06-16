@@ -1,6 +1,6 @@
 function events = addEvent(events, t, tmax, type, user, id, vid)
 
-if (t <= tmax)
+if (t <= tmax || type == 6) % do not drop serve events
     index = find(events.t > t, 1, 'first'); if (isempty(index)) index = length(events.t)+1; end
 
     events.t = [events.t(1:(index-1)) t events.t(index:end)];

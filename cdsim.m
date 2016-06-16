@@ -1,4 +1,6 @@
-function [stats] = cdsim(par)
+function [stats] = cdsim(par, seed)
+
+if nargin > 1, par.seed = seed; end
 
 disp(par)
 
@@ -22,8 +24,10 @@ if isfield(par, 'wallsize'); wall = NaN(nusers, par.wallsize); else wall = []; e
 
 stats.views = ones(nvids,1);
 stats.tupload = nan(nvids,1);
-stats.zipfp = diff(par.zipfcdf);
-stats.zipfp = stats.zipfp(randperm(nvids));
+if par.demand_model ~= TRACE
+    stats.zipfp = diff(par.zipfcdf);
+    stats.zipfp = stats.zipfp(randperm(nvids));
+end
 
 % draw video categories according to probability in par.category
 if isfield(par, 'categories')
@@ -104,6 +108,11 @@ end
 cache.score = sparse(length(cache.capacity), nitems);
 cache.score(cache.items > 0) = -1;
 cache.score2 = sparse(length(cache.capacity), nitems);
+
+if par.cachingstrategy == KLRU
+    cache.items2 = cache.items;
+    cache.score2 = cache.score;
+end
 
 if par.cachingstrategy(2) == OPT
     if (isfield(par, 'ia_demand_par'))
@@ -188,6 +197,13 @@ elseif (par.demand_model == BOX)
     events = addEvent(events, box.viewt(box.idx), par.tmax, WATCH, u, maxID, box.viewid(box.idx));
     
     box.idx = box.idx + 1;
+elseif (par.demand_model == TRACE)
+    maxID = 1;
+    u = par.trace(1,1);
+    t = par.trace(1,2);
+    viewid = par.trace(1,3);
+    
+    events = addEvent(events, t, par.tmax, WATCH, u, maxID, viewid);
 else
     %for i=1:maxID
     u = randi(nusers);
@@ -203,6 +219,9 @@ else
     dt = 1;
 end
 nrequests = par.tmax / dt;
+if(par.demand_model == TRACE)
+    nrequests = size(par.trace,1);
+end
 
 % queue.active = [];
 
@@ -214,6 +233,8 @@ stats.t = nan(1,2*nrequests);
 stats.traffic = nan(1,2*nrequests);
 stats.goodqoe = nan(1,2*nrequests);
 stats.bitrate = nan(1,par.nvids);
+cntoffer = zeros(1,par.nvids);
+toffer = zeros(1,par.nvids);
 
 % stats.numOfFriends = nan(1,6000000);
 % stats.expViews = zeros(1,par.nvids);
@@ -231,12 +252,12 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
     vid = events.vid(1); events.vid(1)=[];
     
     t1 = floor(t);
-    if (t1>t2 && mod(t1, round(par.tmax/100))==0)
+    if (t1>t2 && mod(t1, round(par.tmax/10))==0)
         t2 = t1;
         disp(['Progress: ' num2str(100*(t1/par.tmax)) '%'])
         %disp(['UNaDas occupied: ' num2str(100*sum(cache.occupied)/nAScacheUSER) '%'])
     end
-    
+       
     if (warmup && t>par.twarmup)
         warmup = 0;
         stats.upload = nan(1,2*nrequests);
@@ -323,6 +344,7 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
                 stats.cache_serve(cid) = stats.cache_serve(cid) + 1;
             end
             
+            if isfield(par, 'peer')
             if (cid)
                 if cid == find(find(iAScacheUSER) == uid,1,'first') + par.nAScache;
                     stats.traffic(id) = 0;
@@ -337,6 +359,7 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
                end
             else % content provider
                 stats.traffic(id) = 4;
+            end
             end
             
             if ~isempty(cid) && isfield(par, 'bitrate')
@@ -424,9 +447,12 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
             end
             %dt = random(par.ia_demand_rnd, par.ia_demand_par(hourIndex));
                 
-            if (par.demand_model ~= BOX)
+            if (par.demand_model ~= BOX && par.demand_model ~= TRACE)
                 maxID = maxID+1;
                 events = addEvent(events, t+dt, par.tmax, WATCH, NaN, maxID, NaN);
+            elseif (par.demand_model == TRACE)
+                maxID = maxID+1;
+                events = addEvent(events, par.trace(maxID,2), par.tmax, WATCH, par.trace(maxID,1), maxID, par.trace(maxID,3));
             else
                 if (box.idx <= length(box.viewt))
                     maxID = maxID + 1;

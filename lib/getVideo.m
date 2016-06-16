@@ -33,6 +33,10 @@ constants
             % George you can implement your model here
         case BOX
             vid = par.viewid(id);
+        case TRACE
+            vid = par.viewid(id);
+        case SNM
+            %TODO
     end
     
 end

@@ -41,9 +41,16 @@ vidimport = cumsum(exprnd(par.tmax/par.nvids, 1, par.nvids));
 
 box.viewt = [];
 box.viewid = [];
-for i=1:length(nrequests)
-    box.viewt = [box.viewt vidimport(i)+cumsum(exprnd(lifespan(i)/nrequests(i), 1, nrequests(i)))];
-    box.viewid = [box.viewid i*ones(1,nrequests(i))];
+if ~isfield(par,'boxbetap')
+    for i=1:length(nrequests)
+        box.viewt = [box.viewt vidimport(i)+cumsum(exprnd(lifespan(i)/nrequests(i), 1, nrequests(i)))];
+        box.viewid = [box.viewid i*ones(1,nrequests(i))];
+    end
+else
+    for i=1:length(nrequests)
+        box.viewt = [box.viewt vidimport(i)+betainv(rand(1,nrequests(i)),par.boxbetap,par.boxbetaq)*lifespan(i)];
+        box.viewid = [box.viewid i*ones(1,nrequests(i))];
+    end
 end
 
 [box.viewt, idx] = sort(box.viewt);

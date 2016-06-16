@@ -25,8 +25,6 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 cache.score(id,repl) = t;
             end
             
-            
-            
 %             if cache.items(id,1) ~= vid
 %                 i = cache.items(id,:) == vid;
 %                 if any(i)
@@ -37,6 +35,57 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
 %                     cache.items(id,1) = vid;
 %                 end
 %             end
+        case QLRU
+
+            i = cache.items(id,:) == vid;
+            if any(i)
+                cache.score(id,i) = t;
+            else
+                if rand()<par.q
+                    [~, last] = find(cache.items(id,:),1,'last');
+                    if isempty(last); last = 0; end
+                    repl = last + 1;
+                    if (repl > cache.capacity(id));
+                        [~, repl] = min(cache.score(id,1:cache.capacity(id)));
+                    end
+                    cache.items(id,repl) = vid;
+                    cache.score(id,repl) = t;
+                end
+            end
+        case KLRU
+
+            i = cache.items(id,:) == vid;
+            if any(i)
+                cache.score(id,i) = t;
+            else
+                [~, last] = find(cache.items(id,:),1,'last');
+                if isempty(last); last = 0; end
+                repl = last + 1;
+                if (repl > cache.capacity(id));
+                    [~, repl] = min(cache.score(id,1:cache.capacity(id)));
+                end
+                i = cache.items2(id,:) == vid;
+                if any(i)
+                    cache.items(id,repl) = vid;
+                    cache.score(id,repl) = t;
+                end
+            end
+            
+            i = cache.items2(id,:) == vid;
+            if any(i)
+                cache.score2(id,i) = t;
+            else
+                [~, last] = find(cache.items2(id,:),1,'last');
+                if isempty(last); last = 0; end
+                repl = last + 1;
+                if (repl > cache.capacity(id));
+                    [~, repl] = min(cache.score2(id,1:cache.capacity(id)));
+                end
+                cache.items2(id,repl) = vid;
+                cache.score2(id,repl) = t;
+            end
+            
+
        case LS
 
             i = cache.items(id,:) == vid;
@@ -150,7 +199,7 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                     [~, repl] = min(cache.score(id,:));
                 end
                 cache.items(id,repl) = vid;
-                cache.score(id,repl) = t;
+                cache.score(id,repl) = 1;
             end
         case SLWND
             cache.wnd(id, 2:par.k) = cache.wnd(id,1:(par.k-1));
