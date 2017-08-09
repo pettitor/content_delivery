@@ -194,17 +194,17 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
             % do nothing, content is placed optimally
         case PPP
             % do nothing, content is placed periodically
-        case LRUSG % score gated
-            ranking
-            
-            i = cache.items(id,:) == vid;
-            if any(i) && cache.items(id,1) ~= vid
-                cache.items(id,2:cache.capacity(id)) = cache.items(setdiff(1:cache.capacity(id),i));
-                cache.items(id,1) = vid;
-            else
-                cache.items(id,2:cache.capacity(id)) = cache.items(id,1:cache.capacity(id)-1);
-                cache.items(id,1) = vid;
-            end
+%         case LRUSG % score gated
+%             ranking
+%             
+%             i = cache.items(id,:) == vid;
+%             if any(i) && cache.items(id,1) ~= vid
+%                 cache.items(id,2:cache.capacity(id)) = cache.items(setdiff(1:cache.capacity(id),i));
+%                 cache.items(id,1) = vid;
+%             else
+%                 cache.items(id,2:cache.capacity(id)) = cache.items(id,1:cache.capacity(id)-1);
+%                 cache.items(id,1) = vid;
+%             end
         case LFU
             %TODO global?
 %             [n,bin] = histc(stats.watch(~isnan(stats.watch)),1:max(stats.watch)+1);
@@ -225,23 +225,23 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
                 cache.items(id,repl) = vid;
                 cache.score(id,repl) = 1;
             end
-        case SLWND
-            cache.wnd(id, 2:par.k) = cache.wnd(id,1:(par.k-1));
-            cache.wnd(id, 1) = vid;
-            %TODO here we continue
-            scoreM = cache.wnd*ones(1,cache.capacity(id));
-            i = cache.items(id,:) == vid;
-            if ~any(i)
-                cache.score
-                [~, repl] = min(cache.score(id,:));
-                cache.items(id,repl) = vid;
-                cache.score(id,repl) = 1;
-            end
-        case GEOFD
-            par.k
-            par.rho
-            ranking = stats.t
-            %TBD
+%         case SLWND
+%             cache.wnd(id, 2:par.k) = cache.wnd(id,1:(par.k-1));
+%             cache.wnd(id, 1) = vid;
+%             %TODO here we continue
+%             scoreM = cache.wnd*ones(1,cache.capacity(id));
+%             i = cache.items(id,:) == vid;
+%             if ~any(i)
+%                 cache.score
+%                 [~, repl] = min(cache.score(id,:));
+%                 cache.items(id,repl) = vid;
+%                 cache.score(id,repl) = 1;
+%             end
+%         case GEOFD
+%             par.k
+%             par.rho
+%             ranking = stats.t
+%             %TBD
         case THRESH1
             %TBD
         case THRESH2
