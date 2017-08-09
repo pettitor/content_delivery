@@ -1,13 +1,13 @@
 function events = addEvent(events, t, tmax, type, user, id, vid)
 
 if (t <= tmax || type == 6) % do not drop serve events
-    index = find(events.t > t, 1, 'first'); if (isempty(index)) index = length(events.t)+1; end
+    index = events.t > t;
 
-    events.t = [events.t(1:(index-1)) t events.t(index:end)];
-    events.type = [events.type(1:(index-1)) type events.type(index:end)];
-    events.user = [events.user(1:(index-1)) user events.user(index:end)];
-    events.id = [events.id(1:(index-1)) id events.id(index:end)];
-    events.vid = [events.vid(1:(index-1)) vid events.vid(index:end)];
+    events.t = [events.t(~index) t events.t(index)];
+    events.type = [events.type(~index) type events.type(index)];
+    events.user = [events.user(~index) user events.user(index)];
+    events.id = [events.id(~index) id events.id(index)];
+    events.vid = [events.vid(~index) vid events.vid(index)];
 end
 
 end

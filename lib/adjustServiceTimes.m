@@ -41,11 +41,7 @@ function [events, eid, evid] = adjustServiceTimes(events, cid, now, tmax, factor
 %         if isempty(iend); iend = length(events.t)-ind(end)+1; end
 %         index = ind(i):ind(end)+iend-1;
 %         
-        [events.t, idx] = sort(events.t);
-        events.type = events.type(idx);
-        events.user = events.user(idx);
-        events.id = events.id(idx);
-        events.vid = events.vid(idx);
+
 % 
 %     end
 
@@ -71,14 +67,20 @@ function [events, eid, evid] = adjustServiceTimes(events, cid, now, tmax, factor
 %             
 %             ind = ind + length(index);
 %     end
+
+%         [events.t, idx] = sort(events.t);
+%         events.type = events.type(idx);
+%         events.user = events.user(idx);
+%         events.id = events.id(idx);
+%         events.vid = events.vid(idx);
+
+    events.t(ind) = [];
+    events.type(ind) = [];
+    events.user(ind) = [];
+    events.id(ind) = [];
+    events.vid(ind) = [];
     
-%     events.t(ind) = [];
-%     events.type(ind) = [];
-%     events.user(ind) = [];
-%     events.id(ind) = [];
-%     events.vid(ind) = [];
-%     
-%      for i=1:length(ind)
-%         events = addEvent(events, etn(i), tmax, 6, euser(i), eid(i), evid(i));
-%      end
+     for i=1:length(ind)
+        events = addEvent(events, etn(i), tmax, 6, euser(i), eid(i), evid(i));
+     end
 end

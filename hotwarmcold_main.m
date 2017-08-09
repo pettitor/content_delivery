@@ -31,15 +31,15 @@ par.ASp = [1];
 
 %par.pcacheUSER = pcache;%0.0001; 
 
-par.cachingstrategy = [LRU OPT];
-par.q = 0.25;
+par.cachingstrategy = [LRU LRL];
+par.q = 0.01;
 par.manipulate = 0;
 
 par.factor = 1;
 
 par.Cstrat = LCE;
 
-par.uploadrate = Inf;
+par.uploadrate = 800;
 par.BWthresh = 200;
 
 % Thresholds: prefetching, rarest/demanded, popular/niche
@@ -67,7 +67,7 @@ par.zipfcdf = zipfcdf/zipfcdf(end);
 
 % timelag between demands
 par.ia_demand_rnd = 'exp';
-
+par.ia_demand_par = ones(1,24);
 % propagation size dependent on clustering coefficient ~ 150*exp(-5*x)
 
 %%% Simulation Parameters
@@ -79,7 +79,7 @@ par.ticksPerSecond = 1;
 %distribution of video arrivals
 par.ia_video_rnd = 'exp';
 
-par.BWthresh = 200; % kbps per second; only download from UNaDa if bw > threshold 
+par.BWthresh = 799; % kbps per second; only download from UNaDa if bw > threshold 
 par.BWthreshHD = 1000; % kbps per second; only download from UNaDa if bw > threshold 
 
 par.duration = 5*60; % seconds
@@ -91,10 +91,12 @@ par.bitrateHD = 1000; % kbps
 %%%% Parameter Study
 uploadrate = [200 400 600 800 1000 Inf] % unlimited bw, one item per (5,10,20,40) seconds
 
+par.push = 0.1;
+
 %cachenuser = [50 100 200 Inf];
 %cisp = [0.001 0.01];
-pcache = 10.^(-4.5:0.5:-1);
-pcache = 10^-3;
+pcache = 10.^(-3.5:0.5:-1.5);
+%pcache = 10^-3;
 
 run = 1;
 l = 1;
@@ -105,20 +107,24 @@ l = 1;
         %clear stats
 par.uploadrate = 800;
 
+%par.slwk = 50;
+%par.updaterate = 0.01;
+
 par.rand_stream = 'mt19937ar';
 par.seed = 13+l;
 
         for k=1:length(pcache);           
-        
+        tic
             par.pcacheUSER = pcache(k);
             par.nHR = par.pcacheUSER*par.nuser;
             stats(k) = cdsim(par);
-
+        toc
         end
 %    save(['results/RBHOVERLAY_ZIPF_cnuser' num2str(cachenuseri) '_cisp' num2str(cispj) '_run' num2str(l) '.mat'], 'stats')    
 %end
 
 %%
+hitrate = nan(size(pcache));
 for k=1:length(pcache);           
     hitrate(k) = sum(stats(k).cache_serve)/sum(~isnan(stats(k).watch));
     hitrate1(k) = sum(stats(k).cache_hit)/sum(stats(k).cache_access);
@@ -168,12 +174,12 @@ par.seed = 13;
             end
         end
         %%
-        par.uploadrate = 1600;
-        par.BWthresh = 1599;
-        lambda = 1;
+        par.uploadrate = 800;
+        par.BWthresh = 799;
+        lambda = 100;
         pcache = 10.^(-4:0.5:-1.5);
         par.cachesizeUSER = 8;
-        par.cachesizeAS = 0;
+        par.cachesizeAS = 100;
         for k=1:length(pcache);
             par.pcacheUSER = pcache(k);
             par.nHR = par.pcacheUSER*par.nuser;
@@ -185,6 +191,10 @@ par.seed = 13;
         end
         %%
         ciplot(pcache*nuser, hr10, 1, [0 0 0], 'x')
+        %%
+        hrC = hitrateLRU(a,par.cachesizeAS,1e-3);
+        %ciplot(pcache*nuser, (hr10-hrC)/hrC,'--')
+        ciplot(pcache*nuser, (hr10-hrC)./hrC, 1, [0 0 0], 'x')
         %%
         figure(1);clf;box on;hold all;
         plot(pcache(1:end-1),mean(hrOPT'),'--','Color','black','LineWidth',2); 

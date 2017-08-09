@@ -1,5 +1,8 @@
-function cache = updateCache(cache, stats, t, ids, vid, par)
+function cache = updateCache(cache, stats, t, ids, vid, par, strat)
 
+if nargin < 7
+    strat = 0;
+end
 % possible ideas to improve performance: sort cache.items? parfor cellarray
 % accuarray?
 
@@ -8,7 +11,12 @@ constants;
 for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
     id = ids(ii);
     if (cache.capacity(id) > 0)
-    switch par.cachingstrategy(cache.type(id))
+        if strat
+            strategy = strat;
+        else
+            strategy = par.cachingstrategy(cache.type(id));
+        end
+    switch strategy
         case LRU
 
             i = cache.items(id,:) == vid;
@@ -168,8 +176,24 @@ for ii=1:length(ids) %TODO go through ids in random order!!! (c.f. LRUAS)
 %                     end
 %                 end
 %             end
+        case LRL
+            i = cache.items(id,:) == vid;
+            if any(i)
+                cache.score(id,i) = t;
+            else
+                [~, last] = find(cache.items(id,:),1,'last');
+                if isempty(last); last = 0; end
+                repl = last + 1;
+                if (repl > cache.capacity(id));
+                    [~, repl] = min(cache.score(id,1:cache.capacity(id)));
+                end
+                cache.items(id,repl) = vid;
+                cache.score(id,repl) = t;
+            end
         case OPT
             % do nothing, content is placed optimally
+        case PPP
+            % do nothing, content is placed periodically
         case LRUSG % score gated
             ranking
             

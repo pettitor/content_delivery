@@ -107,11 +107,15 @@ for i=1:length(cache.capacity)
 end
 cache.score = sparse(length(cache.capacity), nitems);
 cache.score(cache.items > 0) = -1;
-cache.score2 = sparse(length(cache.capacity), nitems);
+%cache.score2 = sparse(length(cache.capacity), nitems);
 
 if par.cachingstrategy == KLRU
     cache.items2 = cache.items;
     cache.score2 = cache.score;
+end
+
+if any(par.cachingstrategy == LRL)
+    cache2 = cache;
 end
 
 if par.cachingstrategy(2) == OPT
@@ -132,6 +136,22 @@ if par.cachingstrategy(2) == OPT
         (par.uploadrate/par.bitrate/par.duration))';
     end
 end
+
+% if par.cachingstrategy(2) == PPP
+%     % throw one slot of cache to content i with prob ai p*lambda/(n*mu) = p*lambda/(n*(ur/br*d))
+%     a = (diff(par.zipfcdf)/mean(par.ia_demand_par))/(sum(cache.type==2)*par.uploadrate/par.bitrate/par.duration);
+%     cp = cumsum(a(cumsum(a)<1*4));
+%     cp = cp/cp(end);
+%     for i=2:length(cache.capacity)
+%         items = ones(1,cache.capacity(i));
+%         while length(unique(items)) < cache.capacity(i)
+%         for j=1:cache.capacity(i)
+%             items(j) = find(rand()<cp,1,'first');
+%         end
+%         end
+%         cache.items(i,1:cache.capacity(i)) = items;
+%     end
+% end
 
 if (any(par.cachingstrategy == SLWND))
     cache.wnd = sparse(length(cache.capacity), par.k);
@@ -205,9 +225,13 @@ elseif (par.demand_model == TRACE)
     
     events = addEvent(events, t, par.tmax, WATCH, u, maxID, viewid);
 else
-    %for i=1:maxID
+    maxID = 1;
     u = randi(nusers);
-    events = addEvent(events, 0, par.tmax, WATCH, u, 1, NaN);
+    events = addEvent(events, 0, par.tmax, WATCH, u, maxID, NaN);
+    if (isfield(par,'updaterate'))
+    maxID = maxID+1;
+    events = addEvent(events, 0+1/par.updaterate, par.tmax, CACHE, NaN, maxID, NaN);
+    end
     %end
 end
 
@@ -224,6 +248,7 @@ if(par.demand_model == TRACE)
 end
 
 % queue.active = [];
+nrequests = ceil(nrequests);
 
 stats.upload = nan(1,2*nrequests);
 stats.watch = nan(1,2*nrequests);
@@ -233,8 +258,13 @@ stats.t = nan(1,2*nrequests);
 stats.traffic = nan(1,2*nrequests);
 stats.goodqoe = nan(1,2*nrequests);
 stats.bitrate = nan(1,par.nvids);
-cntoffer = zeros(1,par.nvids);
-toffer = zeros(1,par.nvids);
+stats.loss = zeros(1,par.nvids);
+
+if isfield(par, 'slwk')
+    slwnd = randi(par.nvids,1,par.slwk);
+    slwcnt = histc(slwnd,1:par.nvids);
+    [~, slwrank] = sort(slwcnt,'descend');
+end
 
 % stats.numOfFriends = nan(1,6000000);
 % stats.expViews = zeros(1,par.nvids);
@@ -332,6 +362,19 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
             stats.watch(id) = vid;
             stats.uid(id) = uid;
        
+            if isfield(par, 'slwk')
+                slwcnt(vid) = slwcnt(vid) + 1;
+                slwcnt(slwnd(end)) = slwcnt(slwnd(end)) - 1;
+                vididx = slwrank == vid;
+                gtidx = slwcnt(slwrank) > slwcnt(vid);
+                slwrank = [slwrank(gtidx) vid slwrank(~(gtidx | vididx))];
+                endidx = slwrank == slwnd(end);
+                gtidx = slwcnt(slwrank) > slwcnt(slwnd(end));
+                slwrank = [slwrank(gtidx) slwnd(end) slwrank(~(gtidx | endidx))];
+                slwnd(2:end) = slwnd(1:end-1);
+                slwnd(1) = vid;
+            end
+            
             %TODO
             GV = updateGV(GV, vid);
             
@@ -394,48 +437,71 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
             end
              if par.Cstrat == LCD
              
-             % leave copy down
-             if (isempty(cid)) % update local ISP cache
-                 update = find(cache.AS == AS(uid) & cache.type == 1);
-             elseif (cache.type(cid) == 1) % update personal or random local hr
-                 if (iAScacheUSER(uid)) % if personal cache
-                    pid = find(find(iAScacheUSER) == uid,1,'first') + par.nAScache;
-                    update = union(update, pid);
-                 else % else random local hr
-                     local = find(cache.AS == AS(uid) & cache.type == 2);
-                     if (any(local))
-                         update = union(update, local(randi(length(local))));
+                 % leave copy down
+                 if (isempty(cid)) % update local ISP cache
+                     update = find(cache.AS == AS(uid) & cache.type == 1);
+                 elseif (cache.type(cid) == 1) % update personal or random local hr
+                     if (iAScacheUSER(uid)) % if personal cache
+                        pid = find(find(iAScacheUSER) == uid,1,'first') + par.nAScache;
+                        update = union(update, pid);
+                     else % else random local hr
+                         local = find(cache.AS == AS(uid) & cache.type == 2);
+                         if (any(local))
+                             update = union(update, local(randi(length(local))));
+                         end
                      end
-                 end
-             end % update hit local cache
+                 end % update hit local cache
              
              elseif par.Cstrat == LCE
              
-             if par.resourceselection == TREE
-                 update = access;
-             else
-                 %update = cid;
-                 % leave copy everywhere
-                 if (isempty(cid)) % update local ISP cache
-                     update = find(cache.AS == AS(uid) & cache.type == 1);
-                 end
-                 % update personal or random local hr
-                 if (isempty(cid) && iAScacheUSER(uid)) % if personal cache
-                     pid = find(find(iAScacheUSER) == uid,1,'first') + par.nAScache;
-                     update = union(update, pid);
-                 else % else random local hr
-                     local = find(cache.AS == AS(uid) & cache.type == 2);
-                     if (any(local))
-                         update = union(update, local(randi(length(local))));
+                 if par.resourceselection == TREE
+                     update = access;
+                 else
+                     %update = cid;
+                     % leave copy everywhere
+                     if (isempty(cid)) % update local ISP cache
+                         update = find(cache.AS == AS(uid) & cache.type == 1);
                      end
-                 end % update hit local cache
+                     % update personal or random local hr
+                     if (isempty(cid) && iAScacheUSER(uid)) % if personal cache
+                         pid = find(find(iAScacheUSER) == uid,1,'first') + par.nAScache;
+                         update = union(update, pid);
+                     else % else random local hr
+                         local = find(cache.AS == AS(uid) & cache.type == 2);
+                         if (any(local))
+                             update = union(update, local(randi(length(local))));
+                         end
+                     end % update hit local cache
+                 end
              end
-             end
-            
+             
+            % TODO consider only caches for eviction that do not contain video
+            if (par.cachingstrategy(2) == LRL)
+                update(cache.type(update)==2) = [];
+                if (isempty(cid) || cache.type(cid) == 1)
+                    stats.loss(vid) = t;
+                    [~,updatel] = min(min(stats.loss(cache.items(2:end,1:par.cachesizeUSER)),[],2));
+                    updatel = updatel + 1;
+                    %update = min(stats.)
+                    cache.score(updatel,1:cache.capacity(updatel)) = stats.loss(cache.items(updatel,1:cache.capacity(updatel)));
+                    
+                end
+                if (rand() < par.q)
+                %if any(cache2.items(id,:) == vid)
+                    update(end+1) = updatel;
+                end
+                %cache2 = updateCache(cache2, stats, t, updatel, vid, par);
+            end
+             
             %access enthält hr-caches oder isp-cache, die das video
             %besitzen sonst leer
+            
             if ~isempty(update)
                 cache = updateCache(cache, stats, t, update, vid, par);
+%                 for i=1:length(update)
+%                     maxID = maxID+1;
+%                     events = addEvent(events, t, par.tmax, CACHE, update(i), maxID, vid);
+%                 end
             end
             
             % add watch event
@@ -492,6 +558,17 @@ while ~isempty(events.t) && events.t(1) < (par.tmax)
                     %TODO after lunch
             end
         
+            
+        case CACHE
+            %cache = updateCache(cache, stats, t, user, vid, par);
+            [row,col] = find(hotwarmcold(slwcnt/sum(slwcnt), par.cachesizeUSER*ones(1,sum(cache.type==2)),...
+                1/mean(par.ia_demand_par), (par.uploadrate/par.bitrate/par.duration), par.factor)');
+            for i=2:length(cache.capacity)
+                items = col(row==(i-1));
+                cache.items(i,1:length(items)) = items;
+            end
+            maxID = maxID+1;
+            events = addEvent(events, t+1/par.updaterate, par.tmax, CACHE, NaN, maxID, NaN);
         case SHARE
             % update wall of friends
             % share random video according to interest

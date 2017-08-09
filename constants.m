@@ -9,6 +9,7 @@ MEME = 8;
 BOX = 9;
 OPT = 10;
 TRACE = 11;
+PPP = 12;
 
 demandModel = {'ZIPF','WALL','YTSTATS','SNM','LI13','ZIPF2','LI13Custom','Meme','BoxModel','OPT','TRACE'};
 
@@ -28,6 +29,7 @@ LSLRU = 5;
 SLWND = 6;
 KLRU = 7;
 QLRU = 8;
+LRL = 9;
 
 LOCAL = 1;
 RANDOM = 2;
